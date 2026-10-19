@@ -98,6 +98,14 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      const now = Date.now();
+      const prevPeer = radarStore.get(peerId);
+      const tenMinExpiry = body.tenMinActive
+        ? now + (Number(body.tenMinRemaining) > 0 ? Number(body.tenMinRemaining) * 1000 : 600_000)
+        : prevPeer?.tenMinExpiry && now < prevPeer.tenMinExpiry
+          ? prevPeer.tenMinExpiry
+          : undefined;
+
       radarStore.set(peerId, {
         peerId,
         friendCode: friendCode || undefined,
@@ -107,7 +115,8 @@ export async function POST(req: NextRequest) {
         osSkin: String(body.osSkin || "WebRTC P2P").slice(0, 48),
         modelName: String(body.modelName || "Toestel").slice(0, 60),
         ipHash,
-        lastSeen: Date.now(),
+        lastSeen: now,
+        tenMinExpiry,
       });
     }
 

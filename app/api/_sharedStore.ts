@@ -10,6 +10,7 @@ export type RadarPeer = {
   modelName: string;
   ipHash: string;
   lastSeen: number;
+  tenMinExpiry?: number;
 };
 
 export type DropItem = {
@@ -69,7 +70,12 @@ export function getClientIpHash(req: NextRequest): string {
 export function pruneRadarStore(store: Map<string, RadarPeer>) {
   const now = Date.now();
   for (const [id, peer] of store.entries()) {
-    if (now - peer.lastSeen > 14_000) {
+    // If 10-minute visibility mode is active, keep visible until expiry even in background/YouTube!
+    if (peer.tenMinExpiry && now < peer.tenMinExpiry) {
+      continue;
+    }
+    // Baseline grace period extended to 60s for background/minimized mobile devices
+    if (now - peer.lastSeen > 60_000) {
       store.delete(id);
     }
   }

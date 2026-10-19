@@ -952,15 +952,46 @@ export default function ZytronSharePage() {
 
   // Toggle 10-minute visibility mode (Native AirDrop/Quick Share background discovery)
   const toggleTenMinDiscovery = () => {
+    const dev = deviceRef.current;
+    const myPeerId = stableClientIdRef.current;
     if (tenMinActive) {
       setTenMinActive(false);
       setTenMinRemaining(0);
       showToast("Zichtbaarheid (10 min) uitgeschakeld");
+      if (myPeerId) {
+        fetch("/api/radar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            peerId: myPeerId,
+            tenMinActive: false,
+            tenMinRemaining: 0,
+          }),
+        }).catch(() => {});
+      }
     } else {
       setTenMinActive(true);
       setTenMinRemaining(600); // 10 minutes = 600 seconds
       enableBackgroundAndNotifications();
       showToast("Toestel is nu 10 minuten zichtbaar voor iedereen in de buurt!");
+
+      if (myPeerId) {
+        fetch("/api/radar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            peerId: myPeerId,
+            friendCode: myFriendCodeRef.current || myFriendCode,
+            name: customNameRef.current || dev?.modelName || "Toestel",
+            brand: dev?.brand || "android",
+            brandLabel: dev?.brandLabel || "Toestel",
+            osSkin: dev?.osSkin || "WebRTC P2P",
+            modelName: dev?.modelName || "Toestel",
+            tenMinActive: true,
+            tenMinRemaining: 600,
+          }),
+        }).catch(() => {});
+      }
     }
   };
 
@@ -2313,6 +2344,8 @@ export default function ZytronSharePage() {
             brandLabel: dev?.brandLabel || "Toestel",
             osSkin: dev?.osSkin || "WebRTC P2P",
             modelName: dev?.modelName || "Toestel",
+            tenMinActive,
+            tenMinRemaining,
           }),
         });
         const data = await res.json();
