@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: #020308;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #020308;
+  color: #f5f5f7;
+  font-feature-settings: "ss01", "cv11";
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.9);
+  color: #020308;
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  70% { transform: scale(1.65); opacity: 0; }
+  100% { transform: scale(1.65); opacity: 0; }
+}
+
+.radar-sweep {
+  animation: radar-sweep 5.5s linear infinite;
+}
+
+.pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* ─── Ultra-High Velocity Pure Laser Beam (120FPS GPU Accelerated, Zero Lag on Mobile) ─── */
+@keyframes laser-stream-up {
+  0% {
+    transform: translate3d(0, 110vh, 0);
+  }
+  100% {
+    transform: translate3d(0, -110vh, 0);
+  }
+}
+
+@keyframes laser-stream-down {
+  0% {
+    transform: translate3d(0, -110vh, 0);
+  }
+  100% {
+    transform: translate3d(0, 110vh, 0);
+  }
+}
+
+@keyframes beam-pulse {
+  0%, 100% {
+    opacity: 0.92;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.15);
+  }
+}
+
+@keyframes laser-flare {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.real-beam-up {
+  animation: laser-stream-up 0.45s linear infinite;
+  will-change: transform;
+}
+
+.real-beam-down {
+  animation: laser-stream-down 0.45s linear infinite;
+  will-change: transform;
+}
+
+.beam-pulse {
+  animation: beam-pulse 0.18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.laser-flare {
+  animation: laser-flare 0.25s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ─── Luxury Glow-Up Design System (Apple VisionOS / Linear Tactile Buttons) ─── */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.luxury-glass-card {
+  background: linear-gradient(180deg, rgba(16, 20, 38, 0.78) 0%, rgba(8, 10, 20, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    0 24px 60px -15px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(28px);
+}
+
+.btn-luxury-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 50%, #34d399 100%);
+  color: #02040a;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.65),
+    0 10px 30px -6px rgba(56, 189, 248, 0.55),
+    0 0 0 1px rgba(56, 189, 248, 0.4);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-luxury-primary:hover {
+  transform: translateY(-1.5px) scale(1.015);
+  box-shadow:
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.8),
+    0 14px 38px -6px rgba(56, 189, 248, 0.75),
+    0 0 0 1px rgba(125, 211, 252, 0.6);
+  filter: brightness(1.06);
+}
+
+.btn-luxury-primary:active {
+  transform: translateY(0.5px) scale(0.985);
+}
+
+.btn-luxury-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    0 8px 20px -6px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-luxury-glass:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(56, 189, 248, 0.08) 100%);
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+    0 12px 26px -6px rgba(56, 189, 248, 0.25);
+}
+
+.btn-luxury-glass:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+.btn-luxury-white {
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  color: #02040a;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1.5px 0 0 #ffffff,
+    0 8px 24px -4px rgba(255, 255, 255, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-luxury-white:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #bae6fd 100%);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:
+    inset 0 1.5px 0 0 #ffffff,
+    0 12px 28px -4px rgba(56, 189, 248, 0.5);
+}
+
+.btn-luxury-white:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+

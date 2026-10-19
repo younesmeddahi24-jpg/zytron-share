@@ -1,0 +1,22 @@
+{
+  "appId": "com.zytron.share",
+  "appName": "Zytron Share",
+  "webDir": "public",
+  "server": {
+    "url": "https://zytron-share.vercel.app",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "BluetoothLe": {
+      "displayStrings": {
+        "scanning": "Scannen naar telefoons in de buurt...",
+        "cancel": "Annuleren",
+        "availableDevices": "Apparaten in de buurt",
+        "noDeviceFound": "Geen apparaten gevonden"
+      }
+    }
+  }
+}
