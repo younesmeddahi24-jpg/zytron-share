@@ -111,24 +111,17 @@ export function getIncomingDropsForPeer(
     if (d.textContent?.includes("test") && d.textContent?.includes("Kamehameha")) return false;
     if (d.fileName === "test.png") return false;
 
-    // Direct match by permanent Friend Code (e.g. ZY-8609, works school <-> home)
-    if (cleanCode && d.targetFriendCode && d.targetFriendCode.trim().toUpperCase() === cleanCode) {
-      return true;
-    }
-    // Direct match by target Peer ID
+    // Direct match by target Peer ID (sender explicitly chose this device)
     if (d.targetPeerId && peerId && d.targetPeerId === peerId) {
       return true;
     }
-    // Same local Wi-Fi / IP hash
-    if (d.senderIpHash === ipHash) {
-      return true;
-    }
-    // Universal 3-minute broadcast: Any fresh drop with no conflicting target or within 3 minutes
-    // will be delivered to any active listening peer so nothing is ever missed!
-    if (now - d.createdAt < 180_000) {
+
+    // Direct match by permanent Friend Code (sender explicitly chose this friend)
+    if (cleanCode && d.targetFriendCode && d.targetFriendCode.trim().toUpperCase() === cleanCode) {
       return true;
     }
 
+    // Never auto-blast files to unselected devices!
     return false;
   });
 }

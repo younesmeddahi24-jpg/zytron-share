@@ -6,17 +6,17 @@ const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans", dis
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Zytron Drop — Universal P2P AirDrop (iOS · Xiaomi · Samsung · Huawei)",
+  title: "Zytron Share — Universal P2P AirDrop & Quick Share",
   description:
-    "Deel foto's, video's en bestanden razendsnel P2P tussen iPhone, Xiaomi, Samsung, Huawei en PC. Slechts op één toestel nodig.",
+    "Deel foto's, video's en bestanden razendsnel P2P tussen iPhone, Samsung, Xiaomi en PC.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Zytron Drop",
+    title: "Zytron Share",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
   },
 };
 

@@ -798,7 +798,7 @@ export default function ZytronSharePage() {
   const [sendFx, setSendFx] = useState<SendFx | null>(null);
   const [receiveFx, setReceiveFx] = useState<ReceiveFx | null>(null);
   const [incomingOffer, setIncomingOffer] = useState<IncomingOffer | null>(null);
-  const [autoAcceptDrops, setAutoAcceptDrops] = useState<boolean>(true);
+  const [autoAcceptDrops, setAutoAcceptDrops] = useState<boolean>(false);
   const [activeDropPin, setActiveDropPin] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState<string>("");
 
@@ -872,7 +872,7 @@ export default function ZytronSharePage() {
   const peerLastPongRef = useRef<Map<string, number>>(new Map());
   const pendingOfferResolveRef = useRef<Map<string, (accepted: boolean) => void>>(new Map());
   const seenDropIdsRef = useRef<Set<string>>(new Set());
-  const autoAcceptRef = useRef<boolean>(true);
+  const autoAcceptRef = useRef<boolean>(false);
   const incomingBuffersRef = useRef<
     Map<
       string,
@@ -3460,7 +3460,19 @@ export default function ZytronSharePage() {
   };
 
   const installZytronDropPwa = async () => {
-    // 1. Direct native Android APK download (zero GitHub, zero external apps)
+    const isIos = typeof navigator !== "undefined" && (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    );
+
+    // iPhone / iPad: Apple doesn't run APKs; open direct Add to Home Screen guide
+    if (isIos) {
+      setShowShareSheetGuide(true);
+      showToast("Op iPhone: tik op Delen [⎋] en kies 'Zet op beginscherm'!");
+      return;
+    }
+
+    // Android: Direct native APK download
     try {
       const a = document.createElement("a");
       a.href = "/api/download-apk";
@@ -4635,19 +4647,31 @@ export default function ZytronSharePage() {
               className="w-full max-w-md rounded-3xl border border-white/15 bg-[#090a12] p-6 shadow-2xl"
             >
               <h3 className="text-lg font-bold text-white">
-                Installeer AirDrop &amp; Quick Share op je Toestel
+                Installeer Zytron Share op je Toestel
               </h3>
               <ol className="mt-4 flex flex-col gap-3 text-xs leading-relaxed text-white/80">
-                <li className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                  <strong>1. Android / Samsung / Xiaomi / PC:</strong> Klik rechtsboven in Chrome/Edge op <strong>&ldquo;App installeren&rdquo;</strong>.
+                <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+                  <p className="font-bold text-white text-sm">🍎 iPhone / iPad:</p>
+                  <p className="mt-1.5 text-white/75 leading-relaxed">
+                    1. Tik onderaan in Safari op het <strong>Deel-icoon</strong> (vierkantje met pijl omhoog [⎋]).<br />
+                    2. Scroll iets naar beneden en tik op <strong>&ldquo;Zet op beginscherm&rdquo;</strong>.<br />
+                    3. Tik rechtsboven op <strong>&ldquo;Voeg toe&rdquo;</strong>.<br />
+                  </p>
+                  <p className="mt-2 text-[11px] text-emerald-300 font-bold">
+                    ✓ Zytron Share staat nu direct tussen de apps op je iPhone!
+                  </p>
                 </li>
-                <li className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                  <strong>2. iPhone (iOS):</strong> Tik in Safari onderaan op <strong>Deel</strong> en kies <strong>&ldquo;Zet op beginscherm&rdquo;</strong>, of download het native profiel:
+                <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+                  <p className="font-bold text-white text-sm">🤖 Samsung / Android:</p>
+                  <p className="mt-1 text-white/75">
+                    Download de officiële native APK direct naar je telefoon:
+                  </p>
                   <a
-                    href="/api/ios-app"
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-400 py-2 font-bold text-black"
+                    href="/api/download-apk"
+                    download="zytron-share.apk"
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-sky-400 py-2.5 font-extrabold text-black hover:bg-sky-300 transition"
                   >
-                    🍎 Download iOS App Profiel
+                    📲 Download Android APK (8.3 MB)
                   </a>
                 </li>
               </ol>
