@@ -3427,16 +3427,31 @@ export default function ZytronSharePage() {
   };
 
   const installZytronDropPwa = async () => {
+    // 1. Direct native Android APK download (zero GitHub, zero external apps)
+    try {
+      const a = document.createElement("a");
+      a.href = "/api/download-apk";
+      a.download = "zytron-share.apk";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Download gestart! Open zytron-share.apk via je meldingen en kies Installeren.");
+    } catch {
+      window.location.href = "/install";
+    }
+
+    // 2. Also prompt PWA add to home screen if browser supports it
     if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === String.fromCharCode(97,99,99,101,112,116,101,100)) {
-        setIsInstalledPwa(true);
-        setDeferredPrompt(null);
-        showToast(String.fromCharCode(90,121,116,114,111,110,32,68,114,111,112,32,103,101,195,175,110,115,116,97,108,108,101,101,114,100,33));
+      try {
+        await deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === "accepted") {
+          setIsInstalledPwa(true);
+          setDeferredPrompt(null);
+        }
+      } catch {
+        // Ignore
       }
-    } else {
-      setShowShareSheetGuide(true);
     }
   };
 
