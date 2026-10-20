@@ -26,13 +26,13 @@ export async function GET() {
       <key>IsRemovable</key>
       <true/>
       <key>Label</key>
-      <string>Zytron Drop</string>
+      <string>Zytron Share</string>
       <key>PayloadDescription</key>
-      <string>Installeert de native Zytron Drop AirDrop &amp; P2P App op je iPhone of iPad</string>
+      <string>Installeert Zytron Share P2P AirDrop op je iPhone of iPad</string>
       <key>PayloadDisplayName</key>
-      <string>Zytron Drop Native App</string>
+      <string>Zytron Share</string>
       <key>PayloadIdentifier</key>
-      <string>app.zytron.drop.webclip</string>
+      <string>app.zytron.share.webclip</string>
       <key>PayloadType</key>
       <string>com.apple.webClip.managed</string>
       <key>PayloadUUID</key>
@@ -52,11 +52,11 @@ export async function GET() {
     </dict>
   </array>
   <key>PayloadDescription</key>
-  <string>Installeert Zytron Drop als echte native full-screen app op iOS / iPadOS.</string>
+  <string>Installeert Zytron Share als echte full-screen app op iOS / iPadOS zonder App Store.</string>
   <key>PayloadDisplayName</key>
-  <string>Zytron Drop — Native iOS App</string>
+  <string>Zytron Share</string>
   <key>PayloadIdentifier</key>
-  <string>app.zytron.drop.profile</string>
+  <string>app.zytron.share.profile</string>
   <key>PayloadOrganization</key>
   <string>Zytron</string>
   <key>PayloadRemovalDisallowed</key>
@@ -74,7 +74,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "application/x-apple-aspen-config; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="Zytron-Drop.mobileconfig"',
+      "Content-Disposition": 'inline; filename="zytron-share.mobileconfig"',
       "Cache-Control": "no-store",
     },
   });

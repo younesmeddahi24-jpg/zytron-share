@@ -4711,7 +4711,7 @@ export default function ZytronSharePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
             onClick={() => setShowShareSheetGuide(false)}
           >
             <motion.div
@@ -4719,44 +4719,138 @@ export default function ZytronSharePage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="w-full max-w-md rounded-3xl border border-white/15 bg-[#090a12] p-6 shadow-2xl"
+              className="w-full max-w-md rounded-3xl border border-white/15 bg-[#090a16] p-6 shadow-2xl text-left"
             >
-              <h3 className="text-lg font-bold text-white">
-                Installeer Zytron Share op je Toestel
-              </h3>
-              <ol className="mt-4 flex flex-col gap-3 text-xs leading-relaxed text-white/80">
-                <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
-                  <p className="font-bold text-white text-sm">🍎 iPhone / iPad:</p>
-                  <p className="mt-1.5 text-white/75 leading-relaxed">
-                    1. Tik onderaan in Safari op het <strong>Deel-icoon</strong> (vierkantje met pijl omhoog [⎋]).<br />
-                    2. Scroll iets naar beneden en tik op <strong>&ldquo;Zet op beginscherm&rdquo;</strong>.<br />
-                    3. Tik rechtsboven op <strong>&ldquo;Voeg toe&rdquo;</strong>.<br />
-                  </p>
-                  <p className="mt-2 text-[11px] text-emerald-300 font-bold">
-                    ✓ Zytron Share staat nu direct tussen de apps op je iPhone!
-                  </p>
-                </li>
-                <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
-                  <p className="font-bold text-white text-sm">🤖 Samsung / Android:</p>
-                  <p className="mt-1 text-white/75">
-                    Download de officiële native APK direct naar je telefoon:
-                  </p>
-                  <a
-                    href="/api/download-apk"
-                    download="zytron-share.apk"
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-sky-400 py-2.5 font-extrabold text-black hover:bg-sky-300 transition"
-                  >
-                    📲 Download Android APK (8.3 MB)
-                  </a>
-                </li>
-              </ol>
-              <button
-                type="button"
-                onClick={() => setShowShareSheetGuide(false)}
-                className="mt-5 w-full rounded-xl bg-white py-2.5 text-xs font-bold text-black"
-              >
-                Sluiten
-              </button>
+              {(() => {
+                const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+                const isIpadModal =
+                  /iPad/i.test(ua) ||
+                  (typeof navigator !== "undefined" && navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+                const isAppleModal = isIpadModal || /iPhone|iPod/.test(ua);
+                const isNonSafariModal =
+                  isAppleModal &&
+                  (/CriOS/i.test(ua) ||
+                    /FBAN|FBAV|Instagram|WhatsApp|Line/i.test(ua) ||
+                    !/Version\/.*Safari/i.test(ua));
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center p-[2px]">
+                          <img src="/apple-touch-icon.png" alt="Icon" className="w-7 h-7 object-contain rounded-lg" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-extrabold text-white">
+                            Zytron Share Installeren
+                          </h3>
+                          <p className="text-[11px] font-mono text-sky-300">
+                            {isAppleModal
+                              ? isIpadModal
+                                ? "Voor Apple iPad (iPadOS)"
+                                : "Voor Apple iPhone (iOS)"
+                              : "Voor Android & PC"}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowShareSheetGuide(false)}
+                        className="rounded-full bg-white/10 p-1.5 text-white/60 hover:text-white"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {isAppleModal ? (
+                      <div className="mt-4 space-y-3 text-xs">
+                        {isNonSafariModal && (
+                          <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-200 text-left">
+                            <p className="font-extrabold text-xs text-amber-300">⚠️ Let op: Open Safari</p>
+                            <p className="text-[11px] mt-0.5 leading-relaxed">
+                              Apple staat web-apps installeren <strong>ALLEEN</strong> toe via Safari. Open <code>zytron-share.vercel.app</code> in Safari!
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-400/25">
+                          <p className="font-extrabold text-white text-xs">
+                            {isIpadModal
+                              ? "📍 Deelknop zit RECHTSBOVEN naast de adresbalk"
+                              : "📍 Deelknop zit ONDERAAN in het midden van Safari"}
+                          </p>
+                          <p className="text-[11px] text-white/70 mt-1">
+                            Geen App Store nodig. In 3 tikken staat hij tussen al je apps:
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                            <span className="w-5 h-5 rounded-full bg-sky-400 text-black font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                            <div>
+                              <p className="font-bold text-white">Tik op het Deel-icoon [⎋]</p>
+                              <p className="text-[11px] text-white/60">
+                                {isIpadModal ? "Rechtsboven in Safari [⎋]" : "Onderaan in Safari [⎋]"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                            <span className="w-5 h-5 rounded-full bg-sky-400 text-black font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                            <div>
+                              <p className="font-bold text-white">Tik op &ldquo;Zet op beginscherm&rdquo;</p>
+                              <p className="text-[11px] text-white/60">
+                                Scroll een klein stukje naar beneden in het menu.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/5">
+                            <span className="w-5 h-5 rounded-full bg-emerald-400 text-black font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                            <div>
+                              <p className="font-bold text-white">Tik rechtsboven op &ldquo;Voeg toe&rdquo;</p>
+                              <p className="text-[11px] text-emerald-300 font-medium">
+                                ✓ De app staat nu tussen je apps op je {isIpadModal ? "iPad" : "iPhone"}!
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 flex flex-col gap-2">
+                          <a
+                            href="/install"
+                            className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/10 transition"
+                          >
+                            ⚙️ Meer installatie-opties &amp; Profiel downloaden
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 space-y-3 text-xs">
+                        <p className="text-white/80">
+                          Installeer de officiële native Android APK direct op je telefoon:
+                        </p>
+                        <a
+                          href="/api/download-apk"
+                          download="zytron-share.apk"
+                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-400 py-3 font-extrabold text-black hover:bg-sky-300 transition shadow-lg shadow-sky-500/20"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Download Android APK (8.3 MB)</span>
+                        </a>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setShowShareSheetGuide(false)}
+                      className="mt-4 w-full rounded-xl bg-white py-2.5 text-xs font-bold text-black hover:bg-white/90 transition"
+                    >
+                      Begrepen
+                    </button>
+                  </>
+                );
+              })()}
             </motion.div>
           </motion.div>
         )}

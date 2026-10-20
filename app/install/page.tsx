@@ -1,19 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Share, PlusSquare, Smartphone, CheckCircle2, ArrowRight, Radio } from "lucide-react";
+import {
+  Download,
+  Share,
+  PlusSquare,
+  CheckCircle2,
+  ArrowRight,
+  Radio,
+  Copy,
+  Check,
+  AlertTriangle,
+  Tablet,
+  Smartphone,
+  ExternalLink,
+} from "lucide-react";
 
 export default function InstallPage() {
   const [platform, setPlatform] = useState<"ios" | "android">("android");
   const [isIpad, setIsIpad] = useState(false);
+  const [isNonSafari, setIsNonSafari] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
+  const [activeIosTab, setActiveIosTab] = useState<"homescreen" | "profile">("homescreen");
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
-      const ipad = /iPad/i.test(navigator.userAgent) ||
+      const ua = navigator.userAgent;
+      const ipad =
+        /iPad/i.test(ua) ||
         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      const isApple = ipad || /iPhone|iPod/.test(navigator.userAgent);
+      const isApple = ipad || /iPhone|iPod/.test(ua);
       setIsIpad(ipad);
+
+      // Check if browsing in Chrome on iOS, or Instagram / WhatsApp in-app browser
+      const isChromeIos = /CriOS/i.test(ua);
+      const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|musical_ly|BytedanceWebview/i.test(ua);
+      const isSafari = /Version\/.*Safari/i.test(ua) && !isChromeIos && !isInApp;
+
+      if (isApple && !isSafari) {
+        setIsNonSafari(true);
+      }
+
       if (isApple) {
         setPlatform("ios");
       } else {
@@ -21,6 +49,12 @@ export default function InstallPage() {
       }
     }
   }, []);
+
+  const handleCopyLink = () => {
+    navigator.clipboard?.writeText(window.location.origin);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   const handleAndroidDownload = () => {
     setDownloadStarted(true);
@@ -30,6 +64,10 @@ export default function InstallPage() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleIosProfileDownload = () => {
+    window.location.href = "/api/ios-app";
   };
 
   return (
@@ -69,7 +107,7 @@ export default function InstallPage() {
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <span>🍎 iPhone / iPad</span>
+            <span>🍎 Apple (iPad / iPhone)</span>
           </button>
           <button
             type="button"
@@ -80,7 +118,7 @@ export default function InstallPage() {
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <span>🤖 Samsung / Android</span>
+            <span>🤖 Android / Samsung</span>
           </button>
         </div>
 
@@ -89,13 +127,15 @@ export default function InstallPage() {
           <div className="relative inline-flex items-center justify-center mx-auto mb-4">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-600 p-[2px] shadow-2xl shadow-sky-500/30">
               <div className="w-full h-full rounded-[20px] bg-[#090d16] flex items-center justify-center overflow-hidden">
-                <img src="/icon-192.png" alt="Zytron Share Icon" className="w-14 h-14 object-contain" />
+                <img src="/apple-touch-icon.png" alt="Zytron Share Icon" className="w-14 h-14 object-contain" />
               </div>
             </div>
-            <span className={`absolute -bottom-1 -right-1 text-black text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md ${
-              platform === "ios" ? "bg-white" : "bg-emerald-400"
-            }`}>
-              {platform === "ios" ? "iOS" : "APK"}
+            <span
+              className={`absolute -bottom-1 -right-1 text-black text-[9.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md ${
+                platform === "ios" ? "bg-white" : "bg-emerald-400"
+              }`}
+            >
+              {platform === "ios" ? (isIpad ? "iPad" : "iOS") : "APK"}
             </span>
           </div>
 
@@ -103,67 +143,171 @@ export default function InstallPage() {
             Zytron Share {platform === "ios" ? (isIpad ? "voor iPad" : "voor iPhone") : "voor Android"}
           </h1>
           <p className="text-xs font-mono text-sky-300 mt-1 uppercase tracking-widest font-bold">
-            {platform === "ios" ? (isIpad ? "Zet in je iPad Dock / Beginscherm" : "Zet direct op je beginscherm") : "Officiële Native Android App"}
+            {platform === "ios"
+              ? isIpad
+                ? "Echte app in je iPad Dock & Apps"
+                : "Echte app op je Beginscherm & Apps"
+              : "Officiële Native Android App"}
           </p>
 
           {/* IPHONE / IPAD / IOS INSTRUCTIONS */}
           {platform === "ios" ? (
             <div className="mt-6 text-left space-y-4">
-              <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-400/25 text-left">
-                <p className="text-xs font-extrabold text-sky-200">
-                  💡 {isIpad ? "Op iPad installeer je via Safari rechtsboven:" : "Op iPhone installeer je in 2 tikken via Safari:"}
-                </p>
-                <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
-                  Apple staat geen APK toe, maar met <strong>&ldquo;Zet op beginscherm&rdquo;</strong> krijg je de echte full-screen app op je {isIpad ? "iPad" : "iPhone"} zonder Safari balk!
-                </p>
+              {/* NON-SAFARI WARNING (e.g. Chrome / WhatsApp) */}
+              {isNonSafari && (
+                <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-left space-y-2">
+                  <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>Open in Safari vereist</span>
+                  </div>
+                  <p className="text-[11.5px] text-white/80 leading-relaxed">
+                    Je zit nu in Chrome of een in-app browser. <strong>Apple staat web-apps installeren ALLEEN toe in Safari!</strong>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="w-full py-2 px-3 rounded-xl bg-amber-400 text-black font-extrabold text-xs flex items-center justify-center gap-1.5 transition hover:bg-amber-300"
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedLink ? "Link Gekopieerd! Open nu Safari" : "Kopieer Link en open Safari"}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Sub-Tabs: Beginscherm (Aanbevolen) vs Profiel */}
+              <div className="flex rounded-xl bg-white/[0.04] p-1 border border-white/10 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setActiveIosTab("homescreen")}
+                  className={`flex-1 py-1.5 rounded-lg transition ${
+                    activeIosTab === "homescreen"
+                      ? "bg-white/15 text-white shadow-sm"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  ⚡ Methode 1: Safari (Aanbevolen)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveIosTab("profile")}
+                  className={`flex-1 py-1.5 rounded-lg transition ${
+                    activeIosTab === "profile"
+                      ? "bg-white/15 text-white shadow-sm"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  ⚙️ Methode 2: WebClip Profiel
+                </button>
               </div>
 
-              <div className="space-y-2.5 text-xs">
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
-                    <Share className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">Stap 1: Tik op het Deel-icoon</p>
-                    <p className="text-[11.5px] text-white/60 mt-0.5">
-                      {isIpad
-                        ? "Tik rechtsboven in Safari op het Deel-icoon [⎋] (naast de adresbalk)."
-                        : "Tik onderaan in Safari op het vierkantje met de pijl omhoog (het blauwe deel-icoon [⎋])."}
+              {activeIosTab === "homescreen" ? (
+                /* METHOD 1: SAFARI ADD TO HOME SCREEN */
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-400/25 text-left">
+                    <p className="text-xs font-extrabold text-sky-200 flex items-center gap-1.5">
+                      {isIpad ? <Tablet className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+                      <span>
+                        {isIpad
+                          ? "Op iPad: Deelknop zit RECHTSBOVEN naast de zoekbalk"
+                          : "Op iPhone: Deelknop zit ONDERAAN in het midden"}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
+                      Zodra je dit doet, krijgt Zytron Share een eigen icoon tussen je apps en start hij zonder Safari-balk!
                     </p>
                   </div>
-                </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
-                    <PlusSquare className="w-4 h-4" />
+                  <div className="space-y-2.5 text-xs">
+                    {/* Step 1 */}
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                        <Share className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">Stap 1: Tik op het Deel-icoon [⎋]</p>
+                        <p className="text-[11.5px] text-white/60 mt-0.5">
+                          {isIpad
+                            ? "Kijk rechtsboven in Safari (naast de adresbalk) en tik op het vierkantje met de pijl omhoog [⎋]."
+                            : "Kijk onderaan in Safari en tik op het vierkantje met de pijl omhoog [⎋]."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                        <PlusSquare className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">Stap 2: Tik op &ldquo;Zet op beginscherm&rdquo;</p>
+                        <p className="text-[11.5px] text-white/60 mt-0.5">
+                          Scroll een klein stukje omlaag in het menu en tik op <strong>&ldquo;Zet op beginscherm&rdquo;</strong> (Add to Home Screen).
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                      <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">Stap 3: Tik rechtsboven op &ldquo;Voeg toe&rdquo;</p>
+                        <p className="text-[11.5px] text-white/60 mt-0.5">
+                          Klaar! Zytron Share staat nu direct met het echte logo tussen je apps op je {isIpad ? "iPad" : "iPhone"}.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-white">Stap 2: &ldquo;Zet op beginscherm&rdquo;</p>
-                    <p className="text-[11.5px] text-white/60 mt-0.5">
-                      Scroll een klein stukje naar beneden en tik op <strong>&ldquo;Zet op beginscherm&rdquo;</strong> (Add to Home Screen).
+
+                  <a
+                    href="/"
+                    className="w-full mt-3 py-3.5 px-6 rounded-2xl bg-white text-black font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-white/10 hover:bg-white/90 transition cursor-pointer"
+                  >
+                    <span>👉 Open Zytron Share &amp; Voeg Toe</span>
+                  </a>
+                </div>
+              ) : (
+                /* METHOD 2: 1-TAP WEBCLIP PROFILE */
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/25 text-left">
+                    <p className="text-xs font-extrabold text-indigo-200">
+                      ⚙️ Direct Apple WebClip Profiel Installeren:
+                    </p>
+                    <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
+                      Download het officiële Apple configuratiebestand. iOS zet Zytron Share dan direct op je beginscherm via Instellingen.
                     </p>
                   </div>
-                </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">Stap 3: Tik op &ldquo;Voeg toe&rdquo;</p>
-                    <p className="text-[11.5px] text-white/60 mt-0.5">
-                      Tik rechtsboven op <strong>Voeg toe</strong>. Zytron Share staat nu direct tussen de apps op je {isIpad ? "iPad" : "iPhone"}!
-                    </p>
+                  <button
+                    type="button"
+                    onClick={handleIosProfileDownload}
+                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 text-black font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-sky-500/25 hover:scale-[1.01] transition cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>📲 Download iOS App Profiel</span>
+                  </button>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <span className="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                      <span className="text-white/80">Tik op de knop hierboven en kies <strong>&ldquo;Sta toe&rdquo;</strong> in Safari.</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <span className="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                      <span className="text-white/80">Open de app <strong>Instellingen</strong> op je iPad/iPhone.</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <span className="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                      <span className="text-white/80">Tik helemaal bovenaan op <strong>&ldquo;Profiel gedownload&rdquo;</strong>.</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                      <span className="text-white/80">Tik rechtsboven op <strong>Installeer</strong>. De app verschijnt nu direct op je scherm!</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <a
-                href="/"
-                className="w-full mt-4 py-3.5 px-6 rounded-2xl bg-white text-black font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-white/10 hover:bg-white/90 transition cursor-pointer"
-              >
-                <span>👉 Ga naar Zytron Share &amp; Voeg Toe</span>
-              </a>
+              )}
             </div>
           ) : (
             /* ANDROID INSTRUCTIONS */
