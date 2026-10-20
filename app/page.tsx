@@ -3997,6 +3997,17 @@ export default function ZytronSharePage() {
             )}
           </div>
 
+          {quickText.trim() && /(deadshot|1v1|krunker|roblox|\.io|\.gg|https?:\/\/)/i.test(quickText) && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative z-10 mt-2.5 flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 p-3 text-xs font-bold text-emerald-200"
+            >
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>🎮 Game Invite Link klaar! Tik op je bro hieronder op de radar om hem direct in je party te knallen!</span>
+            </motion.div>
+          )}
+
           {/* 3 ZERO-APP DIRECT TRANSFER MODES (Samsung ↔ iPhone Direct) */}
           <div className="relative z-10 mt-6 rounded-2xl border border-sky-400/20 bg-gradient-to-r from-sky-500/[0.07] via-cyan-500/[0.04] to-indigo-500/[0.07] p-4 backdrop-blur-md">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -4646,28 +4657,69 @@ export default function ZytronSharePage() {
 
               {/* Action Buttons (Direct Native Tap) */}
               <div className="mt-5 flex flex-col gap-2.5">
-                {receiveFx.blobUrl ? (
-                  <a
-                    href={receiveFx.blobUrl}
-                    download={receiveFx.fileName || "Bestand"}
-                    onClick={() => {
-                      showToast("Bestand gedownload!");
-                    }}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400 py-3.5 text-xs font-extrabold text-black shadow-[0_0_25px_rgba(56,189,248,0.55)] active:scale-95 transition hover:brightness-110 cursor-pointer"
-                  >
-                    <Download className="h-4 w-4" />
-                    📥 Download &amp; Open Bestand
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/10 py-3.5 text-xs font-semibold text-white/50"
-                  >
-                    <Loader2 className="h-4 w-4 animate-spin text-sky-400" />
-                    Overdracht afronden…
-                  </button>
-                )}
+                {(() => {
+                  const rawText = receiveFx.textPreview || "";
+                  const urlMatch = rawText.match(/https?:\/\/[^\s]+/) || (/(?:[a-zA-Z0-9-]+\.)+(?:io|com|net|gg|org|app)[^\s]*/i.test(rawText) ? [rawText.trim()] : null);
+                  const gameOrWebUrl = urlMatch ? (urlMatch[0].startsWith("http") ? urlMatch[0] : `https://${urlMatch[0]}`) : null;
+
+                  if (gameOrWebUrl) {
+                    return (
+                      <>
+                        <a
+                          href={gameOrWebUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => {
+                            showToast("🎮 Game wordt geopend!");
+                            setReceiveFx(null);
+                          }}
+                          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 py-3.5 text-xs font-black text-black shadow-[0_0_25px_rgba(52,211,153,0.7)] active:scale-95 transition hover:brightness-110 cursor-pointer"
+                        >
+                          <Zap className="h-4 w-4 fill-black" />
+                          <span>🎮 Open Game &amp; Join Direct!</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard?.writeText(gameOrWebUrl);
+                            showToast("Game invite link gekopieerd!");
+                          }}
+                          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sky-400/40 bg-sky-500/15 py-2.5 text-xs font-extrabold text-sky-200 hover:bg-sky-500/25 transition"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>📋 Kopieer Game Link</span>
+                        </button>
+                      </>
+                    );
+                  }
+
+                  if (receiveFx.blobUrl) {
+                    return (
+                      <a
+                        href={receiveFx.blobUrl}
+                        download={receiveFx.fileName || "Bestand"}
+                        onClick={() => {
+                          showToast("Bestand gedownload!");
+                        }}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400 py-3.5 text-xs font-extrabold text-black shadow-[0_0_25px_rgba(56,189,248,0.55)] active:scale-95 transition hover:brightness-110 cursor-pointer"
+                      >
+                        <Download className="h-4 w-4" />
+                        📥 Download &amp; Open Bestand
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <button
+                      type="button"
+                      disabled
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/10 py-3.5 text-xs font-semibold text-white/50"
+                    >
+                      <Loader2 className="h-4 w-4 animate-spin text-sky-400" />
+                      Overdracht afronden…
+                    </button>
+                  );
+                })()}
 
                 <button
                   type="button"
