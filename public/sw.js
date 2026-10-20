@@ -37,8 +37,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Intercept Native OS Share Sheet ("Zytron Drop") POST payload
-  if (event.request.method === "POST" && url.searchParams.has("shared")) {
+  // Intercept Native OS Share Sheet ("Zytron Share") POST payload (App-rij op iPad / iPhone / Android)
+  if (event.request.method === "POST" && (url.pathname.includes("share-target") || url.searchParams.has("shared"))) {
     event.respondWith(
       (async () => {
         try {

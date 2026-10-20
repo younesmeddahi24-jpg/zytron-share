@@ -48,6 +48,7 @@ import {
   Smartphone,
   Sparkles,
   Star,
+  Tablet,
   Trash2,
   Upload,
   UserCheck,
@@ -327,9 +328,18 @@ function detectRealAppleDevice(ua: string): string {
   const isIpad =
     /iPad/i.test(ua) || (typeof navigator !== "undefined" && navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const osMatch = ua.match(/OS (\d+)[._](\d+)/i);
-  const osVer = osMatch ? `iOS ${osMatch[1]}.${osMatch[2]}` : "iOS";
-  if (isIpad) {
-    return osVer ? `Apple iPad (${osVer.replace("iOS", "iPadOS")})` : "Apple iPad";
+  const osVer = osMatch ? `iPadOS ${osMatch[1]}.${osMatch[2]}` : "iPadOS";
+
+  if (isIpad && typeof window !== "undefined") {
+    const w = Math.min(window.screen?.width || 0, window.screen?.height || 0);
+    const h = Math.max(window.screen?.width || 0, window.screen?.height || 0);
+    if (w >= 1024 && h >= 1366) return `iPad Pro 12.9" / 13" (${osVer})`;
+    if (w >= 834 && h >= 1194) return `iPad Pro 11" (${osVer})`;
+    if (w >= 820 && h >= 1180) return `iPad Air (${osVer})`;
+    if (w >= 744 && h >= 1133) return `iPad mini (${osVer})`;
+    return `Apple iPad (${osVer})`;
+  } else if (isIpad) {
+    return `Apple iPad (${osVer})`;
   }
 
   // Precise hardware screen & DPR mapping for genuine iPhone models
@@ -860,6 +870,7 @@ export default function ZytronSharePage() {
   const [toast, setToast] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -1404,8 +1415,37 @@ export default function ZytronSharePage() {
       }, 400);
     }
 
-    // Check if opened via Native OS Share Sheet ("Zytron Drop")
+    // Check if opened via Native OS Share Sheet ("Zytron Share" app-rij)
     if (params.get("incoming_share") === "1") {
+      const shareDropId = params.get("dropId");
+      if (shareDropId) {
+        fetch(`/api/drop?dropId=${encodeURIComponent(shareDropId)}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data?.ok && data.drop) {
+              const d = data.drop;
+              if (d.base64Data && d.fileName) {
+                const blob = base64ToBlob(d.base64Data, d.fileType || "application/octet-stream");
+                const file = new File([blob], d.fileName, { type: d.fileType || "application/octet-stream" });
+                const added: QueuedFile = {
+                  id: `shared-${Date.now()}`,
+                  file,
+                  name: d.fileName,
+                  size: d.fileSize || blob.size,
+                  type: d.fileType || "application/octet-stream",
+                  source: "share_sheet",
+                };
+                setQueuedFiles((prev) => [added, ...prev]);
+                showToast(`Bestand '${d.fileName}' geladen vanuit de app-rij!`);
+              }
+              if (d.textContent) {
+                setQuickText(d.textContent);
+              }
+            }
+          })
+          .catch(() => {});
+      }
+
       consumeSharedFilesFromSw().then(({ files, text }) => {
         if (files.length > 0) {
           const added: QueuedFile[] = files.map((f) => ({
@@ -1417,7 +1457,7 @@ export default function ZytronSharePage() {
             source: "share_sheet",
           }));
           setQueuedFiles((prev) => [...added, ...prev]);
-          showToast(`${files.length} bestand(en) geladen vanuit Zytron Drop deel-menu!`);
+          showToast(`${files.length} bestand(en) geladen vanuit deel-menu!`);
         }
         if (text) {
           setQuickText(text);
@@ -3608,10 +3648,17 @@ export default function ZytronSharePage() {
         {/* Sleek Unified Device Identity Bar */}
         <section className="luxury-glass-card mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 sm:px-6">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3 py-1.5 font-mono text-xs font-bold text-sky-200">
-              <Smartphone className="h-3.5 w-3.5 text-sky-300" />
-              Dit Toestel:
-            </span>
+            {(() => {
+              const isCurrentIpad = device?.modelName?.toLowerCase().includes("ipad");
+              const isCurrentDesktop = device?.brand === "desktop";
+              const CurrentDeviceIcon = isCurrentDesktop ? Laptop : isCurrentIpad ? Tablet : Smartphone;
+              return (
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3 py-1.5 font-mono text-xs font-bold text-sky-200">
+                  <CurrentDeviceIcon className="h-3.5 w-3.5 text-sky-300" />
+                  Dit Toestel:
+                </span>
+              );
+            })()}
             <input
               type="text"
               value={customDeviceName}
@@ -3621,7 +3668,7 @@ export default function ZytronSharePage() {
               placeholder="Typ je toestelnaam…"
             />
             <div className="hidden items-center gap-1.5 sm:flex">
-              {["iPhone 16 Pro", "Samsung S24", "Mijn PC"].map((preset) => (
+              {["iPad Pro", "iPhone 16 Pro", "Samsung S24", "Mijn PC"].map((preset) => (
                 <button
                   key={preset}
                   type="button"
@@ -3762,42 +3809,57 @@ export default function ZytronSharePage() {
             </div>
           </div>
 
-          {/* 4 TACTILE STUDIO POWER BUTTONS: Bestanden, Camera Snap, Klembord, Spraakmemo */}
-          <div className="relative z-10 mt-7 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-            {/* 1. Bestanden Kiezen */}
+          {/* 5 TACTILE STUDIO POWER BUTTONS: Foto's & Video's, Bestanden, Camera Snap, Klembord, Spraakmemo */}
+          <div className="relative z-10 mt-7 grid grid-cols-2 gap-3.5 sm:grid-cols-5">
+            {/* 1. Foto's & Video's (Direct iPad & iPhone Camera Roll Picker) */}
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              className="btn-luxury-glass group flex items-center gap-3.5 rounded-2xl p-4 text-left transition hover:scale-[1.02]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-pink-400/35 bg-gradient-to-br from-pink-400/25 to-pink-600/10 text-pink-300 shadow-[0_0_20px_rgba(244,114,182,0.25)] transition group-hover:scale-105">
+                <FileImage className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold text-white sm:text-sm">Foto&apos;s &amp; Video</p>
+                <p className="truncate font-mono text-[10.5px] text-white/55">Camera roll</p>
+              </div>
+            </button>
+
+            {/* 2. Bestanden & Documenten (iCloud / Drive / PDF) */}
             <label
               htmlFor="primary-file-input"
-              className="btn-luxury-glass group cursor-pointer flex items-center gap-3.5 rounded-2xl p-4 text-left"
+              className="btn-luxury-glass group cursor-pointer flex items-center gap-3.5 rounded-2xl p-4 text-left transition hover:scale-[1.02]"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-sky-400/35 bg-gradient-to-br from-sky-400/25 to-sky-600/10 text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.2)] transition group-hover:scale-105">
                 <Upload className="h-5 w-5" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-extrabold text-white sm:text-sm">Bestanden</p>
-                <p className="truncate font-mono text-[10.5px] text-white/55">Foto&apos;s &amp; video</p>
+                <p className="truncate font-mono text-[10.5px] text-white/55">iCloud &amp; PDF</p>
               </div>
             </label>
 
-            {/* 2. Directe Camera Snap */}
+            {/* 3. Directe Camera Snap */}
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="btn-luxury-glass group flex items-center gap-3.5 rounded-2xl p-4 text-left"
+              className="btn-luxury-glass group flex items-center gap-3.5 rounded-2xl p-4 text-left transition hover:scale-[1.02]"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/35 bg-gradient-to-br from-cyan-400/25 to-cyan-600/10 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.2)] transition group-hover:scale-105">
                 <Camera className="h-5 w-5" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-extrabold text-white sm:text-sm">Camera Snap</p>
-                <p className="truncate font-mono text-[10.5px] text-white/55">Maak direct foto</p>
+                <p className="truncate font-mono text-[10.5px] text-white/55">Maak live foto</p>
               </div>
             </button>
 
-            {/* 3. Klembord Plakken */}
+            {/* 4. Klembord Plakken */}
             <button
               type="button"
               onClick={handleClipboardPaste}
-              className="btn-luxury-glass group flex items-center gap-3.5 rounded-2xl p-4 text-left"
+              className="btn-luxury-glass group flex items-center gap-3.5 rounded-2xl p-4 text-left transition hover:scale-[1.02]"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/35 bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.2)] transition group-hover:scale-105">
                 <Clipboard className="h-5 w-5" />
@@ -3808,11 +3870,11 @@ export default function ZytronSharePage() {
               </div>
             </button>
 
-            {/* 4. Spraakmemo Recorder */}
+            {/* 5. Spraakmemo Recorder */}
             <button
               type="button"
               onClick={isRecordingAudio ? stopAudioRecording : startAudioRecording}
-              className={`group flex items-center gap-3.5 rounded-2xl p-4 text-left transition ${
+              className={`group flex items-center gap-3.5 rounded-2xl p-4 text-left transition hover:scale-[1.02] ${
                 isRecordingAudio
                   ? "border border-rose-400 bg-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.45)] animate-pulse"
                   : "btn-luxury-glass"
@@ -3841,6 +3903,15 @@ export default function ZytronSharePage() {
             id="primary-file-input"
             ref={fileInputRef}
             type="file"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <input
+            id="photo-library-input"
+            ref={photoInputRef}
+            type="file"
+            accept="image/*,video/*"
             multiple
             onChange={handleFileChange}
             className="hidden"
@@ -4047,7 +4118,11 @@ export default function ZytronSharePage() {
                   const isSelected = selectedTargetIds.includes(peer.peerId);
                   const isFriend = savedFriends.some((f) => f.friendCode === peer.friendCode);
                   const actionLabel = getShareActionLabel(peer.brand, true);
-                  const DeviceIcon = peer.brand === "desktop" ? Laptop : Smartphone;
+                  const isIpadPeer =
+                    peer.modelName?.toLowerCase().includes("ipad") ||
+                    peer.name?.toLowerCase().includes("ipad") ||
+                    peer.brand === "ipad";
+                  const DeviceIcon = peer.brand === "desktop" ? Laptop : isIpadPeer ? Tablet : Smartphone;
 
                   return (
                     <motion.div

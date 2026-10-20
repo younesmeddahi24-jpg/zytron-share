@@ -3,14 +3,14 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Zytron Drop — Universal P2P AirDrop",
-    short_name: "Zytron Drop",
+    name: "Zytron Share — Universal P2P AirDrop & Quick Share",
+    short_name: "Zytron Share",
     description:
-      "Universele P2P AirDrop tussen iPhone (iOS), Samsung, Xiaomi (HyperOS), Huawei en PC. Deel direct vanuit je Share-menu of via QR/Radar zonder installatie op het tweede toestel.",
+      "Universele P2P AirDrop tussen iPad, iPhone, Samsung, Xiaomi en PC. Deel direct vanuit de app-rij of via de radar.",
     start_url: "/?source=pwa",
     scope: "/",
     display: "standalone",
-    orientation: "portrait",
+    orientation: "any",
     background_color: "#030306",
     theme_color: "#030306",
     categories: ["utilities", "productivity", "social"],
@@ -41,7 +41,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     share_target: {
-      action: "/?shared=1",
+      action: "/share-target",
       method: "POST",
       enctype: "multipart/form-data",
       params: {

@@ -5,12 +5,15 @@ import { Download, Share, PlusSquare, Smartphone, CheckCircle2, ArrowRight, Radi
 
 export default function InstallPage() {
   const [platform, setPlatform] = useState<"ios" | "android">("android");
+  const [isIpad, setIsIpad] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
-      const isApple = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      const ipad = /iPad/i.test(navigator.userAgent) ||
         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isApple = ipad || /iPhone|iPod/.test(navigator.userAgent);
+      setIsIpad(ipad);
       if (isApple) {
         setPlatform("ios");
       } else {
@@ -97,21 +100,21 @@ export default function InstallPage() {
           </div>
 
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Zytron Share {platform === "ios" ? "voor iPhone" : "voor Android"}
+            Zytron Share {platform === "ios" ? (isIpad ? "voor iPad" : "voor iPhone") : "voor Android"}
           </h1>
           <p className="text-xs font-mono text-sky-300 mt-1 uppercase tracking-widest font-bold">
-            {platform === "ios" ? "Zet direct op je beginscherm" : "Officiële Native Android App"}
+            {platform === "ios" ? (isIpad ? "Zet in je iPad Dock / Beginscherm" : "Zet direct op je beginscherm") : "Officiële Native Android App"}
           </p>
 
-          {/* IPHONE / IOS INSTRUCTIONS */}
+          {/* IPHONE / IPAD / IOS INSTRUCTIONS */}
           {platform === "ios" ? (
             <div className="mt-6 text-left space-y-4">
               <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-400/25 text-left">
                 <p className="text-xs font-extrabold text-sky-200">
-                  💡 Op iPhone installeer je in 2 tikken via Safari:
+                  💡 {isIpad ? "Op iPad installeer je via Safari rechtsboven:" : "Op iPhone installeer je in 2 tikken via Safari:"}
                 </p>
                 <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
-                  Apple staat geen APK toe, maar met <strong>&ldquo;Zet op beginscherm&rdquo;</strong> krijg je exact dezelfde echte app op je iPhone zonder Safari balk!
+                  Apple staat geen APK toe, maar met <strong>&ldquo;Zet op beginscherm&rdquo;</strong> krijg je de echte full-screen app op je {isIpad ? "iPad" : "iPhone"} zonder Safari balk!
                 </p>
               </div>
 
@@ -123,7 +126,9 @@ export default function InstallPage() {
                   <div>
                     <p className="font-bold text-white">Stap 1: Tik op het Deel-icoon</p>
                     <p className="text-[11.5px] text-white/60 mt-0.5">
-                      Tik onderaan in Safari op het vierkantje met de pijl omhoog (het blauwe deel-icoon).
+                      {isIpad
+                        ? "Tik rechtsboven in Safari op het Deel-icoon [⎋] (naast de adresbalk)."
+                        : "Tik onderaan in Safari op het vierkantje met de pijl omhoog (het blauwe deel-icoon [⎋])."}
                     </p>
                   </div>
                 </div>
@@ -147,7 +152,7 @@ export default function InstallPage() {
                   <div>
                     <p className="font-bold text-white">Stap 3: Tik op &ldquo;Voeg toe&rdquo;</p>
                     <p className="text-[11.5px] text-white/60 mt-0.5">
-                      Tik rechtsboven op <strong>Voeg toe</strong>. Zytron Share staat nu tussen je apps op je iPhone!
+                      Tik rechtsboven op <strong>Voeg toe</strong>. Zytron Share staat nu direct tussen de apps op je {isIpad ? "iPad" : "iPhone"}!
                     </p>
                   </div>
                 </div>
