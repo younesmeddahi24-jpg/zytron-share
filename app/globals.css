@@ -121,25 +121,80 @@ body {
   }
 }
 
+/* ─── Claude Anthropic Luxury Editorial Aesthetic & Design System ─── */
+:root {
+  --claude-terracotta: #d97757;
+  --claude-amber: #e07a5f;
+  --claude-sand: #f5f2eb;
+  --claude-dark-bg: #0f0e0d;
+  --claude-card-bg: #171513;
+  --claude-border: rgba(245, 242, 235, 0.08);
+}
+
+html {
+  background: #0d0c0b;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #0d0c0b;
+  color: #f5f2eb;
+  font-feature-settings: "ss01", "cv11";
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: rgba(217, 119, 87, 0.85);
+  color: #0f0e0d;
+}
+
 .luxury-glass-card {
-  background: linear-gradient(180deg, rgba(16, 20, 38, 0.78) 0%, rgba(8, 10, 20, 0.92) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(180deg, rgba(26, 23, 21, 0.82) 0%, rgba(17, 15, 14, 0.94) 100%);
+  border: 1px solid rgba(245, 242, 235, 0.09);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
-    0 24px 60px -15px rgba(0, 0, 0, 0.85);
+    inset 0 1px 0 0 rgba(245, 242, 235, 0.12),
+    0 24px 60px -15px rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(28px);
+}
+
+.btn-claude-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #d97757 0%, #e07a5f 45%, #f59e0b 100%);
+  color: #0d0c0b;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.55),
+    0 10px 30px -6px rgba(217, 119, 87, 0.5),
+    0 0 0 1px rgba(217, 119, 87, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-claude-primary:hover {
+  transform: translateY(-1.5px) scale(1.015);
+  box-shadow:
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.75),
+    0 14px 38px -6px rgba(217, 119, 87, 0.7),
+    0 0 0 1px rgba(224, 122, 95, 0.55);
+  filter: brightness(1.05);
+}
+
+.btn-claude-primary:active {
+  transform: translateY(0.5px) scale(0.985);
 }
 
 .btn-luxury-primary {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 50%, #34d399 100%);
-  color: #02040a;
+  background: linear-gradient(135deg, #d97757 0%, #ea580c 45%, #f59e0b 100%);
+  color: #0d0c0b;
   font-weight: 800;
   box-shadow:
     inset 0 1.5px 0 0 rgba(255, 255, 255, 0.65),
-    0 10px 30px -6px rgba(56, 189, 248, 0.55),
-    0 0 0 1px rgba(56, 189, 248, 0.4);
+    0 10px 30px -6px rgba(217, 119, 87, 0.55),
+    0 0 0 1px rgba(217, 119, 87, 0.4);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -147,8 +202,8 @@ body {
   transform: translateY(-1.5px) scale(1.015);
   box-shadow:
     inset 0 1.5px 0 0 rgba(255, 255, 255, 0.8),
-    0 14px 38px -6px rgba(56, 189, 248, 0.75),
-    0 0 0 1px rgba(125, 211, 252, 0.6);
+    0 14px 38px -6px rgba(217, 119, 87, 0.75),
+    0 0 0 1px rgba(234, 88, 12, 0.6);
   filter: brightness(1.06);
 }
 
@@ -157,22 +212,22 @@ body {
 }
 
 .btn-luxury-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(245, 242, 235, 0.07) 0%, rgba(245, 242, 235, 0.02) 100%);
+  border: 1px solid rgba(245, 242, 235, 0.11);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 0 rgba(245, 242, 235, 0.14),
     0 8px 20px -6px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(16px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-luxury-glass:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(56, 189, 248, 0.08) 100%);
-  border-color: rgba(56, 189, 248, 0.45);
+  background: linear-gradient(180deg, rgba(245, 242, 235, 0.11) 0%, rgba(217, 119, 87, 0.09) 100%);
+  border-color: rgba(217, 119, 87, 0.4);
   transform: translateY(-1px);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
-    0 12px 26px -6px rgba(56, 189, 248, 0.25);
+    inset 0 1px 0 0 rgba(245, 242, 235, 0.2),
+    0 12px 26px -6px rgba(217, 119, 87, 0.2);
 }
 
 .btn-luxury-glass:active {
@@ -180,21 +235,21 @@ body {
 }
 
 .btn-luxury-white {
-  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-  color: #02040a;
+  background: linear-gradient(180deg, #faf8f5 0%, #ebe6dc 100%);
+  color: #121110;
   font-weight: 800;
   box-shadow:
     inset 0 1.5px 0 0 #ffffff,
-    0 8px 24px -4px rgba(255, 255, 255, 0.35);
+    0 8px 24px -4px rgba(245, 242, 235, 0.25);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-luxury-white:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #bae6fd 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fed7aa 100%);
   transform: translateY(-1px) scale(1.02);
   box-shadow:
     inset 0 1.5px 0 0 #ffffff,
-    0 12px 28px -4px rgba(56, 189, 248, 0.5);
+    0 12px 28px -4px rgba(217, 119, 87, 0.45);
 }
 
 .btn-luxury-white:active {
