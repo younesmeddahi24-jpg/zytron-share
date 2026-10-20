@@ -4817,11 +4817,31 @@ export default function ZytronSharePage() {
                         </div>
 
                         <div className="pt-2 flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.location.href = "itms-services://?action=download-manifest&url=https://zytron-share.vercel.app/api/ios-manifest";
+                            }}
+                            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-black font-black text-xs text-center shadow-lg shadow-sky-500/20 transition cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <Zap className="w-3.5 h-3.5 fill-black" />
+                            <span>⚡ 1-Tik Directe Web Installatie (iOS OTA)</span>
+                          </button>
+
+                          <a
+                            href="/api/download-ipa"
+                            download="zytron-share.ipa"
+                            className="w-full py-2 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-extrabold text-xs text-center border border-white/10 transition flex items-center justify-center gap-1.5"
+                          >
+                            <Download className="w-3.5 h-3.5 text-sky-400" />
+                            <span>📲 Download iPhone App (.IPA - 8.2 MB)</span>
+                          </a>
+
                           <a
                             href="/install"
-                            className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/10 transition"
+                            className="w-full py-1.5 text-sky-300 hover:text-sky-200 text-[11px] text-center font-bold transition"
                           >
-                            ⚙️ Meer installatie-opties &amp; Profiel downloaden
+                            ⚙️ Bekijk alle installatie-opties &amp; Profielen $\rightarrow$
                           </a>
                         </div>
                       </div>
