@@ -121,113 +121,144 @@ body {
   }
 }
 
-/* ─── Claude Anthropic Luxury Editorial Aesthetic & Design System ─── */
+/* ─── Google Gemini AI Cosmic Design System & Hyper-Glow Tactile Buttons ─── */
 :root {
-  --claude-terracotta: #d97757;
-  --claude-amber: #e07a5f;
-  --claude-sand: #f5f2eb;
-  --claude-dark-bg: #0f0e0d;
-  --claude-card-bg: #171513;
-  --claude-border: rgba(245, 242, 235, 0.08);
+  --gemini-blue: #4285f4;
+  --gemini-indigo: #6366f1;
+  --gemini-purple: #9b72cf;
+  --gemini-violet: #8ab4f8;
+  --gemini-cyan: #38bdf8;
+  --gemini-dark-bg: #07080d;
+  --gemini-card-bg: #0f121d;
+  --gemini-border: rgba(138, 180, 248, 0.16);
 }
 
 html {
-  background: #0d0c0b;
+  background: #07080d;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: #0d0c0b;
-  color: #f5f2eb;
+  background: #07080d;
+  color: #f1f5f9;
   font-feature-settings: "ss01", "cv11";
   overscroll-behavior-y: none;
 }
 
 ::selection {
-  background: rgba(217, 119, 87, 0.85);
-  color: #0f0e0d;
+  background: rgba(155, 114, 207, 0.85);
+  color: #ffffff;
+}
+
+@keyframes geminiGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(66, 133, 244, 0.45), 0 0 50px rgba(155, 114, 207, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.65), 0 0 70px rgba(56, 189, 248, 0.4);
+  }
+}
+
+@keyframes geminiSheenSweep {
+  0% { transform: translateX(-150%) skewX(-25deg); }
+  50%, 100% { transform: translateX(250%) skewX(-25deg); }
 }
 
 .luxury-glass-card {
-  background: linear-gradient(180deg, rgba(26, 23, 21, 0.82) 0%, rgba(17, 15, 14, 0.94) 100%);
-  border: 1px solid rgba(245, 242, 235, 0.09);
+  background: linear-gradient(180deg, rgba(16, 20, 34, 0.82) 0%, rgba(9, 11, 20, 0.94) 100%);
+  border: 1px solid rgba(138, 180, 248, 0.15);
   box-shadow:
-    inset 0 1px 0 0 rgba(245, 242, 235, 0.12),
-    0 24px 60px -15px rgba(0, 0, 0, 0.88);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px -15px rgba(0, 0, 0, 0.9),
+    0 0 45px -10px rgba(66, 133, 244, 0.12);
   backdrop-filter: blur(28px);
 }
 
-.btn-claude-primary {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #d97757 0%, #e07a5f 45%, #f59e0b 100%);
-  color: #0d0c0b;
-  font-weight: 800;
-  box-shadow:
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.55),
-    0 10px 30px -6px rgba(217, 119, 87, 0.5),
-    0 0 0 1px rgba(217, 119, 87, 0.35);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-claude-primary:hover {
-  transform: translateY(-1.5px) scale(1.015);
-  box-shadow:
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.75),
-    0 14px 38px -6px rgba(217, 119, 87, 0.7),
-    0 0 0 1px rgba(224, 122, 95, 0.55);
-  filter: brightness(1.05);
-}
-
-.btn-claude-primary:active {
-  transform: translateY(0.5px) scale(0.985);
-}
-
+/* Iconic Google Gemini AI Gradient Button with Cosmic Holographic Flare */
+.btn-gemini-primary,
+.btn-claude-primary,
 .btn-luxury-primary {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #d97757 0%, #ea580c 45%, #f59e0b 100%);
-  color: #0d0c0b;
+  background: linear-gradient(135deg, #4285f4 0%, #6366f1 35%, #9b72cf 70%, #38bdf8 100%);
+  background-size: 200% 200%;
+  color: #ffffff;
   font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow:
     inset 0 1.5px 0 0 rgba(255, 255, 255, 0.65),
-    0 10px 30px -6px rgba(217, 119, 87, 0.55),
-    0 0 0 1px rgba(217, 119, 87, 0.4);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    0 10px 32px -4px rgba(66, 133, 244, 0.6),
+    0 0 20px rgba(155, 114, 207, 0.4);
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.btn-gemini-primary::after,
+.btn-claude-primary::after,
+.btn-luxury-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 80%
+  );
+  transform: translateX(-150%) skewX(-25deg);
+  pointer-events: none;
+}
+
+.btn-gemini-primary:hover::after,
+.btn-claude-primary:hover::after,
+.btn-luxury-primary:hover::after {
+  animation: geminiSheenSweep 1.6s ease-in-out infinite;
+}
+
+.btn-gemini-primary:hover,
+.btn-claude-primary:hover,
 .btn-luxury-primary:hover {
-  transform: translateY(-1.5px) scale(1.015);
+  transform: translateY(-2px) scale(1.025);
+  background-position: 100% 50%;
   box-shadow:
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.8),
-    0 14px 38px -6px rgba(217, 119, 87, 0.75),
-    0 0 0 1px rgba(234, 88, 12, 0.6);
-  filter: brightness(1.06);
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.85),
+    0 16px 45px -6px rgba(99, 102, 241, 0.75),
+    0 0 35px rgba(56, 189, 248, 0.65);
+  filter: brightness(1.1);
 }
 
+.btn-gemini-primary:active,
+.btn-claude-primary:active,
 .btn-luxury-primary:active {
-  transform: translateY(0.5px) scale(0.985);
+  transform: translateY(1px) scale(0.97);
 }
 
+/* Gemini Glass Secondary Tactile Button */
 .btn-luxury-glass {
-  background: linear-gradient(180deg, rgba(245, 242, 235, 0.07) 0%, rgba(245, 242, 235, 0.02) 100%);
-  border: 1px solid rgba(245, 242, 235, 0.11);
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(138, 180, 248, 0.18);
   box-shadow:
-    inset 0 1px 0 0 rgba(245, 242, 235, 0.14),
-    0 8px 20px -6px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(16px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    0 8px 24px -6px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(18px);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f1f5f9;
 }
 
 .btn-luxury-glass:hover {
-  background: linear-gradient(180deg, rgba(245, 242, 235, 0.11) 0%, rgba(217, 119, 87, 0.09) 100%);
-  border-color: rgba(217, 119, 87, 0.4);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(66, 133, 244, 0.14) 100%);
+  border-color: rgba(138, 180, 248, 0.55);
+  transform: translateY(-1.5px) scale(1.02);
   box-shadow:
-    inset 0 1px 0 0 rgba(245, 242, 235, 0.2),
-    0 12px 26px -6px rgba(217, 119, 87, 0.2);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    0 14px 32px -6px rgba(66, 133, 244, 0.4),
+    0 0 25px rgba(155, 114, 207, 0.3);
+  color: #ffffff;
 }
 
 .btn-luxury-glass:active {
@@ -235,21 +266,21 @@ body {
 }
 
 .btn-luxury-white {
-  background: linear-gradient(180deg, #faf8f5 0%, #ebe6dc 100%);
-  color: #121110;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+  color: #08090d;
   font-weight: 800;
   box-shadow:
     inset 0 1.5px 0 0 #ffffff,
-    0 8px 24px -4px rgba(245, 242, 235, 0.25);
+    0 8px 26px -4px rgba(138, 180, 248, 0.45);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-luxury-white:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #fed7aa 100%);
-  transform: translateY(-1px) scale(1.02);
+  background: linear-gradient(180deg, #ffffff 0%, #c7d2fe 100%);
+  transform: translateY(-1.5px) scale(1.02);
   box-shadow:
     inset 0 1.5px 0 0 #ffffff,
-    0 12px 28px -4px rgba(217, 119, 87, 0.45);
+    0 14px 32px -4px rgba(99, 102, 241, 0.6);
 }
 
 .btn-luxury-white:active {

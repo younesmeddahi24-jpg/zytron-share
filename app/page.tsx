@@ -3579,33 +3579,33 @@ export default function ZytronSharePage() {
   const primaryShortLabel = getShareActionLabel(primaryTargetBrand, false);
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#0d0c0b] text-[#f5f2eb] pb-20 selection:bg-[#d97757] selection:text-[#0d0c0b]">
-      {/* Ambient Spatial Aurora Backdrop - Claude warm terracotta & obsidian */}
+    <div className="relative min-h-screen overflow-x-clip bg-[#07080d] text-[#f1f5f9] pb-20 selection:bg-[#9b72cf] selection:text-white">
+      {/* Ambient Spatial Aurora Backdrop - Google Gemini Cosmic Blue & Violet Spark */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-20 overflow-hidden">
-        <div className="absolute -left-[12%] -top-[18%] h-[62vh] w-[62vw] rounded-full bg-[radial-gradient(closest-side,rgba(217,119,87,0.16),transparent)] blur-3xl" />
-        <div className="absolute -right-[12%] top-[12%] h-[58vh] w-[54vw] rounded-full bg-[radial-gradient(closest-side,rgba(245,158,11,0.12),transparent)] blur-3xl" />
-        <div className="absolute bottom-[-22%] left-[22%] h-[55vh] w-[60vw] rounded-full bg-[radial-gradient(closest-side,rgba(224,122,95,0.14),transparent)] blur-3xl" />
+        <div className="absolute -left-[12%] -top-[18%] h-[62vh] w-[62vw] rounded-full bg-[radial-gradient(closest-side,rgba(66,133,244,0.20),transparent)] blur-3xl" />
+        <div className="absolute -right-[12%] top-[12%] h-[58vh] w-[54vw] rounded-full bg-[radial-gradient(closest-side,rgba(155,114,207,0.18),transparent)] blur-3xl" />
+        <div className="absolute bottom-[-22%] left-[22%] h-[55vh] w-[60vw] rounded-full bg-[radial-gradient(closest-side,rgba(56,189,248,0.16),transparent)] blur-3xl" />
       </div>
 
       {/* Sleek Floating Dynamic Island Top Bar */}
       <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
         <div className="luxury-glass-card mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-full px-4 py-2.5 sm:px-6 sm:py-3">
-          {/* Brand Logo */}
+          {/* Brand Logo - Gemini Cosmic Squircle */}
           <div className="flex items-center gap-3.5">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-[#d97757]/50 bg-gradient-to-b from-[#d97757]/35 via-[#e07a5f]/20 to-[#f59e0b]/20 shadow-[inset_0_1px_0_0_rgba(245,242,235,0.45),0_0_25px_-3px_rgba(217,119,87,0.65)]">
-              <Radar className="h-5 w-5 text-[#fed7aa]" />
-              <span className="pulse-ring absolute inset-0 rounded-2xl border border-[#d97757]/40" />
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-400/40 bg-gradient-to-br from-[#4285f4]/35 via-[#6366f1]/25 to-[#9b72cf]/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45),0_0_25px_-3px_rgba(66,133,244,0.6)]">
+              <Radar className="h-5 w-5 text-[#93c5fd]" />
+              <span className="pulse-ring absolute inset-0 rounded-2xl border border-indigo-400/40" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-extrabold tracking-tight text-white sm:text-base">
                   Zytron Share
                 </span>
-                <span className="rounded-full border border-[#d97757]/35 bg-[#d97757]/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#fed7aa]">
-                  PRO
+                <span className="rounded-full border border-indigo-400/40 bg-indigo-500/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c7d2fe]">
+                  AI PRO
                 </span>
               </div>
-              <p className="hidden font-mono text-[10.5px] text-[#f5f2eb]/60 sm:block">
+              <p className="hidden font-mono text-[10.5px] text-[#94a3b8] sm:block">
                 AirDrop &amp; Quick Share Studio
               </p>
             </div>
@@ -3626,7 +3626,7 @@ export default function ZytronSharePage() {
                 ? `${uniqueNearbyDevices.length} toestel dichtbij (${uniqueNearbyDevices[0].name})`
                 : "Live Radar Actief"}
             </span>
-            <RefreshCw className={`h-3 w-3 text-[#fed7aa] ${isScanningDevice ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3 w-3 text-[#93c5fd] ${isScanningDevice ? "animate-spin" : ""}`} />
           </button>
 
           {/* Luxury Tactile Action Buttons */}
@@ -3637,18 +3637,18 @@ export default function ZytronSharePage() {
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition ${
                 bgPermissionGranted
                   ? "btn-luxury-glass border-emerald-400/40 text-emerald-300"
-                  : "btn-luxury-glass border-[#d97757]/50 text-[#fed7aa]"
+                  : "btn-luxury-glass border-indigo-400/40 text-[#c7d2fe]"
               }`}
               title="Achtergrond-Ontvangst & Systeemnotificaties"
             >
-              <Bell className="h-3.5 w-3.5 text-[#fed7aa]" />
+              <Bell className="h-3.5 w-3.5 text-[#93c5fd]" />
               <span className="hidden md:inline">{bgPermissionGranted ? "Achtergrond Aan" : "Meldingen"}</span>
             </button>
 
             <button
               type="button"
               onClick={installZytronDropPwa}
-              className="btn-claude-primary inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-extrabold"
+              className="btn-gemini-primary inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-extrabold"
             >
               <Download className="h-3.5 w-3.5" />
               <span>{isInstalledPwa ? "Geïnstalleerd" : "Installeer App"}</span>
@@ -3666,8 +3666,8 @@ export default function ZytronSharePage() {
               const isCurrentDesktop = device?.brand === "desktop";
               const CurrentDeviceIcon = isCurrentDesktop ? Laptop : isCurrentIpad ? Tablet : Smartphone;
               return (
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-[#d97757]/30 bg-[#d97757]/10 px-3 py-1.5 font-mono text-xs font-bold text-[#fed7aa]">
-                  <CurrentDeviceIcon className="h-3.5 w-3.5 text-[#fed7aa]" />
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-400/40 bg-indigo-500/15 px-3 py-1.5 font-mono text-xs font-bold text-[#93c5fd]">
+                  <CurrentDeviceIcon className="h-3.5 w-3.5 text-[#93c5fd]" />
                   Dit Toestel:
                 </span>
               );
@@ -3676,7 +3676,7 @@ export default function ZytronSharePage() {
               type="text"
               value={customDeviceName}
               onChange={(e) => setCustomDeviceName(e.target.value)}
-              className="rounded-xl border border-white/15 bg-black/50 px-3.5 py-1.5 text-xs font-bold text-white shadow-inner outline-none transition focus:border-[#d97757]"
+              className="rounded-xl border border-white/15 bg-black/50 px-3.5 py-1.5 text-xs font-bold text-white shadow-inner outline-none transition focus:border-indigo-400"
               aria-label="Toestelnaam"
               placeholder="Typ je toestelnaam…"
             />
@@ -3691,7 +3691,7 @@ export default function ZytronSharePage() {
                   }}
                   className={`rounded-lg px-2.5 py-1 font-mono text-[10.5px] font-semibold transition ${
                     customDeviceName === preset
-                      ? "bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-black shadow-[0_0_16px_rgba(217,119,87,0.5)]"
+                      ? "bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-black shadow-[0_0_18px_rgba(66,133,244,0.6)]"
                       : "btn-luxury-glass text-white/70 hover:text-white"
                   }`}
                 >
@@ -3773,20 +3773,20 @@ export default function ZytronSharePage() {
           onDragLeave={() => setIsDraggingOver(false)}
           onDrop={handleDrop}
           className={`luxury-glass-card relative overflow-hidden rounded-[36px] p-6 transition duration-300 sm:p-10 ${
-            isDraggingOver ? "ring-2 ring-[#d97757] shadow-[0_0_80px_rgba(217,119,87,0.4)]" : ""
+            isDraggingOver ? "ring-2 ring-indigo-400 shadow-[0_0_80px_rgba(99,102,241,0.5)]" : ""
           }`}
         >
-          {/* Subtle Ambient Radial Glow */}
+          {/* Subtle Ambient Radial Glow - Gemini Cosmic Aurora */}
           <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="h-[520px] w-[520px] rounded-full bg-gradient-to-tr from-[#d97757]/14 via-[#e07a5f]/8 to-[#f59e0b]/14 blur-3xl" />
+            <div className="h-[520px] w-[520px] rounded-full bg-gradient-to-tr from-[#4285f4]/15 via-[#6366f1]/10 to-[#9b72cf]/15 blur-3xl" />
           </div>
 
           {/* Top Hero Section: Title + Primary CTA Buttons */}
           <div className="relative z-10 flex flex-col justify-between gap-6 border-b border-white/[0.08] pb-8 lg:flex-row lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#d97757]/35 bg-[#d97757]/15 px-3.5 py-1">
-                <Sparkles className="h-3.5 w-3.5 text-[#fed7aa]" />
-                <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#fed7aa]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3.5 py-1">
+                <Sparkles className="h-3.5 w-3.5 text-[#93c5fd]" />
+                <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#c7d2fe]">
                   {primaryShortLabel} Studio
                 </span>
               </div>
@@ -3795,7 +3795,7 @@ export default function ZytronSharePage() {
                   ? `${queuedFiles.length} bestand(en) klaar voor verzending`
                   : "Deel razendsnel tussen Telefoon & PC"}
               </h1>
-              <p className="mt-1.5 text-xs text-[#f5f2eb]/60 sm:text-sm">
+              <p className="mt-1.5 text-xs text-[#94a3b8] sm:text-sm">
                 Kies een bestand of gebruik een snelle functie en tik op een toestel hieronder.
               </p>
             </div>
@@ -3804,7 +3804,7 @@ export default function ZytronSharePage() {
             <div className="flex flex-wrap items-center gap-3">
               <label
                 htmlFor="primary-file-input"
-                className="btn-claude-primary cursor-pointer inline-flex items-center gap-2.5 rounded-2xl px-6 py-4 text-xs sm:text-sm font-extrabold tracking-wide"
+                className="btn-gemini-primary cursor-pointer inline-flex items-center gap-2.5 rounded-2xl px-6 py-4 text-xs sm:text-sm font-extrabold tracking-wide"
               >
                 <Upload className="h-4 w-4 stroke-[2.5]" />
                 <span>Kies Bestanden / Foto&apos;s</span>
@@ -3816,7 +3816,7 @@ export default function ZytronSharePage() {
                 className="btn-luxury-glass inline-flex items-center gap-2 rounded-2xl px-5 py-4 text-xs sm:text-sm font-bold text-white"
                 title="Deel direct via iOS AirDrop of Samsung Quick Share systeemmenu"
               >
-                <Share2 className="h-4 w-4 text-[#fed7aa]" />
+                <Share2 className="h-4 w-4 text-[#93c5fd]" />
                 <span>Systeem Deel</span>
               </button>
             </div>
@@ -3996,17 +3996,17 @@ export default function ZytronSharePage() {
               value={quickText}
               onChange={(e) => setQuickText(e.target.value)}
               placeholder={`Typ of plak hier een link of notitie om direct te ${primaryShortLabel === "AirDrop" ? "AirDroppen" : "Quick Sharen"}…`}
-              className="flex-1 rounded-2xl border border-white/15 bg-black/55 px-4 py-3.5 text-xs text-white placeholder:text-white/40 shadow-inner outline-none transition focus:border-[#d97757] sm:text-sm"
+              className="flex-1 rounded-2xl border border-white/15 bg-black/55 px-4 py-3.5 text-xs text-white placeholder:text-white/40 shadow-inner outline-none transition focus:border-indigo-400 sm:text-sm"
             />
 
             {/* Quick Deadshot / Game Party Invite trigger button */}
             <button
               type="button"
               onClick={() => setShowDeadshotModal(true)}
-              className="btn-luxury-glass flex items-center gap-1.5 rounded-2xl px-4 py-3.5 text-xs font-bold text-[#fed7aa] border-[#d97757]/40 hover:border-[#d97757] transition"
+              className="btn-luxury-glass flex items-center gap-1.5 rounded-2xl px-4 py-3.5 text-xs font-bold text-[#c7d2fe] border-indigo-400/40 hover:border-indigo-400 transition"
               title="Deadshot.io Game Invite & Multiplayer Hub"
             >
-              <Gamepad2 className="h-4 w-4 text-[#fed7aa]" />
+              <Gamepad2 className="h-4 w-4 text-[#93c5fd]" />
               <span className="hidden sm:inline">Deadshot Party</span>
             </button>
 
@@ -4014,7 +4014,7 @@ export default function ZytronSharePage() {
               <button
                 type="button"
                 onClick={() => beamFilesToPeer()}
-                className="btn-claude-primary inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-xs font-extrabold sm:text-sm"
+                className="btn-gemini-primary inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-xs font-extrabold sm:text-sm"
               >
                 <Send className="h-4 w-4" />
                 <span>Verstuur</span>
@@ -4042,16 +4042,16 @@ export default function ZytronSharePage() {
             </motion.div>
           )}
 
-          {/* UNIVERSAL ZERO-APP DISCOVERY HUB (Claude Terracotta Aesthetic) */}
-          <div className="relative z-10 mt-6 rounded-2xl border border-[#d97757]/30 bg-gradient-to-r from-[#d97757]/[0.10] via-[#e07a5f]/[0.05] to-[#f59e0b]/[0.08] p-4.5 backdrop-blur-md">
+          {/* UNIVERSAL ZERO-APP DISCOVERY HUB (Google Gemini Cosmic Blue & Violet) */}
+          <div className="relative z-10 mt-6 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-[#4285f4]/[0.12] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#fed7aa]" />
+                <Sparkles className="h-4 w-4 text-[#93c5fd]" />
                 <span className="text-xs font-extrabold uppercase tracking-wider text-white">
                   Apparaten Zonder App of Link Bereiken (Zero-App Hub)
                 </span>
               </div>
-              <span className="font-mono text-[10.5px] text-[#fed7aa]/75">
+              <span className="font-mono text-[10.5px] text-[#c7d2fe]/75">
                 Ontvanger hoeft de app NIET geopend te hebben
               </span>
             </div>
@@ -4061,17 +4061,17 @@ export default function ZytronSharePage() {
               <button
                 type="button"
                 onClick={() => shareFilesViaNativeOs()}
-                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-[#d97757]/60 hover:shadow-[0_0_25px_rgba(217,119,87,0.35)]"
+                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-[#4285f4]/60 hover:shadow-[0_0_25px_rgba(66,133,244,0.35)]"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#d97757]/45 bg-[#d97757]/20 text-[#fed7aa] shadow-[0_0_15px_rgba(217,119,87,0.3)] transition group-hover:scale-105">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#4285f4]/45 bg-[#4285f4]/20 text-[#93c5fd] shadow-[0_0_15px_rgba(66,133,244,0.3)] transition group-hover:scale-105">
                   <Share2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-white">Systeem AirDrop</p>
-                    <span className="rounded bg-[#d97757]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#fed7aa]">Direct</span>
+                    <span className="rounded bg-[#4285f4]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#93c5fd]">Direct</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#f5f2eb]/60">Naar elk scherm in de kamer</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Naar elk scherm in de kamer</p>
                 </div>
               </button>
 
@@ -4079,17 +4079,17 @@ export default function ZytronSharePage() {
               <button
                 type="button"
                 onClick={() => setShowQrModal(true)}
-                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-amber-400/50 hover:shadow-[0_0_25px_rgba(251,191,36,0.3)]"
+                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-[#9b72cf]/60 hover:shadow-[0_0_25px_rgba(155,114,207,0.35)]"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/40 bg-amber-400/15 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] transition group-hover:scale-105">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#9b72cf]/40 bg-[#9b72cf]/20 text-[#c4b5fd] shadow-[0_0_15px_rgba(155,114,207,0.3)] transition group-hover:scale-105">
                   <QrCode className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-white">Camera Scan</p>
-                    <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">1 Sec</span>
+                    <span className="rounded bg-[#9b72cf]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#c4b5fd]">1 Sec</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#f5f2eb]/60">Bro richt gewone camera</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Bro richt gewone camera</p>
                 </div>
               </button>
 
@@ -4107,7 +4107,7 @@ export default function ZytronSharePage() {
                     <p className="text-xs font-extrabold text-white">Deadshot Party</p>
                     <span className="rounded bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">Games</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#f5f2eb]/60">1v1 Multiplayer Invite</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">1v1 Multiplayer Invite</p>
                 </div>
               </button>
 
@@ -4115,17 +4115,17 @@ export default function ZytronSharePage() {
               <button
                 type="button"
                 onClick={startNfcDropBroadcast}
-                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-indigo-400/40 hover:shadow-[0_0_25px_rgba(129,140,248,0.25)]"
+                className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(56,189,248,0.3)]"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-400/40 bg-indigo-400/15 text-indigo-300 shadow-[0_0_15px_rgba(129,140,248,0.3)] transition group-hover:scale-105">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-400/15 text-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.3)] transition group-hover:scale-105">
                   <Radio className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-white">NFC Tik</p>
-                    <span className="rounded bg-indigo-400/20 px-1.5 py-0.5 text-[9px] font-bold text-indigo-300">Bump</span>
+                    <span className="rounded bg-cyan-400/20 px-1.5 py-0.5 text-[9px] font-bold text-cyan-300">Bump</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#f5f2eb]/60">Back-to-Back tegen iPhone</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Back-to-Back tegen iPhone</p>
                 </div>
               </button>
             </div>
@@ -4150,7 +4150,7 @@ export default function ZytronSharePage() {
                   onClick={() => setShowQrModal(true)}
                   className="btn-luxury-glass inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-white"
                 >
-                  <QrCode className="h-3.5 w-3.5 text-[#fed7aa]" />
+                  <QrCode className="h-3.5 w-3.5 text-[#93c5fd]" />
                   <span>QR-Code</span>
                 </button>
 
@@ -4158,9 +4158,9 @@ export default function ZytronSharePage() {
                   type="button"
                   onClick={scanRealBluetoothNearby}
                   disabled={isScanningBluetooth}
-                  className="btn-luxury-glass inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-[#fed7aa]"
+                  className="btn-luxury-glass inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-[#93c5fd]"
                 >
-                  <Radar className={`h-3.5 w-3.5 text-[#fed7aa] ${isScanningBluetooth ? "animate-spin" : ""}`} />
+                  <Radar className={`h-3.5 w-3.5 text-[#93c5fd] ${isScanningBluetooth ? "animate-spin" : ""}`} />
                   <span>Bluetooth Scan</span>
                 </button>
 
@@ -4196,17 +4196,17 @@ export default function ZytronSharePage() {
                       onClick={() => beamFilesToPeer(peer.peerId)}
                       className={`group cursor-pointer relative flex flex-col justify-between overflow-hidden rounded-3xl p-5 transition duration-200 hover:-translate-y-1 ${
                         isSelected
-                          ? "border-2 border-[#d97757] bg-[#d97757]/20 shadow-[0_0_40px_rgba(217,119,87,0.45)]"
+                          ? "border-2 border-[#6366f1] bg-[#6366f1]/20 shadow-[0_0_40px_rgba(99,102,241,0.5)]"
                           : "btn-luxury-glass"
                       }`}
                     >
                       <div className="flex items-start justify-between">
-                        {/* Luxury 3D Device Avatar Squircle - Claude Terracotta */}
-                        <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] shadow-[inset_0_1.5px_0_0_#ffffff,0_10px_25px_rgba(217,119,87,0.5)]">
+                        {/* Luxury 3D Device Avatar Squircle - Google Gemini AI Gradient */}
+                        <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white shadow-[inset_0_1.5px_0_0_rgba(255,255,255,0.6),0_10px_25px_rgba(66,133,244,0.5)]">
                           <DeviceIcon className="h-7 w-7 stroke-[2.2]" />
                           <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-80" />
-                            <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-[#0d0c0b] bg-emerald-400" />
+                            <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-[#07080d] bg-emerald-400" />
                           </span>
                         </div>
 
@@ -4235,14 +4235,14 @@ export default function ZytronSharePage() {
                             ONLINE
                           </span>
                         </div>
-                        <p className="mt-0.5 font-mono text-xs text-[#fed7aa]/80">
+                        <p className="mt-0.5 font-mono text-xs text-[#c7d2fe]/90">
                           {peer.brandLabel} • {getShareActionLabel(peer.brand, false)}
                         </p>
                       </div>
 
                       {/* Tactile Send CTA Button inside card */}
                       <div className="mt-5">
-                        <span className="btn-claude-primary flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-xs font-extrabold">
+                        <span className="btn-gemini-primary flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-xs font-extrabold">
                           <Send className="h-3.5 w-3.5" />
                           <span>{actionLabel}</span>
                         </span>
@@ -4252,13 +4252,13 @@ export default function ZytronSharePage() {
                 })}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#171513]/70 py-12 px-6 text-center shadow-inner">
-                <div className="relative mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-[#d97757]/45 bg-gradient-to-b from-[#d97757]/25 to-[#f59e0b]/15 text-[#fed7aa] shadow-[0_0_35px_rgba(217,119,87,0.3)]">
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0d101b]/70 py-12 px-6 text-center shadow-inner">
+                <div className="relative mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-indigo-400/40 bg-gradient-to-b from-[#4285f4]/25 to-[#9b72cf]/20 text-[#93c5fd] shadow-[0_0_35px_rgba(66,133,244,0.35)]">
                   <Radar className="h-8 w-8 animate-spin" style={{ animationDuration: "3.5s" }} />
                 </div>
                 <p className="text-base font-extrabold text-white">Klaar om te verbinden</p>
-                <p className="mt-1.5 max-w-md text-xs leading-relaxed text-[#f5f2eb]/70 sm:text-sm">
-                  Open <strong className="text-[#fed7aa]">zytron-share.vercel.app</strong> op je andere toestel (telefoon of PC) — hij verschijnt hier binnen 1 seconde vanzelf!
+                <p className="mt-1.5 max-w-md text-xs leading-relaxed text-[#94a3b8] sm:text-sm">
+                  Open <strong className="text-[#93c5fd]">zytron-share.vercel.app</strong> op je andere toestel (telefoon of PC) — hij verschijnt hier binnen 1 seconde vanzelf!
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
                   <button
@@ -4266,13 +4266,13 @@ export default function ZytronSharePage() {
                     onClick={() => setShowQrModal(true)}
                     className="btn-luxury-glass inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-extrabold text-white"
                   >
-                    <QrCode className="h-4 w-4 text-[#fed7aa]" />
+                    <QrCode className="h-4 w-4 text-[#93c5fd]" />
                     <span>Koppel via QR-Code</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => shareFilesViaNativeOs()}
-                    className="btn-claude-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-extrabold"
+                    className="btn-gemini-primary inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-extrabold"
                   >
                     <Share2 className="h-4 w-4" />
                     <span>Systeem AirDrop (Direct naar schermen)</span>
@@ -4650,21 +4650,21 @@ export default function ZytronSharePage() {
 
             <div className="h-4" />
 
-            {/* Centered High-Impact Arrival & Download Pop-Up Card - Claude Terracotta & Obsidian */}
+            {/* Centered High-Impact Arrival & Download Pop-Up Card - Gemini Cosmic Blue & Violet */}
             <motion.div
               initial={{ scale: 0.88, opacity: 0, y: 25 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 15 }}
               transition={{ type: "spring", stiffness: 300, damping: 26 }}
-              className="pointer-events-auto relative z-30 my-auto w-full max-w-sm rounded-[28px] border border-[#d97757]/45 bg-[#171513]/95 p-6 shadow-[0_0_60px_15px_rgba(217,119,87,0.35)] backdrop-blur-2xl text-center text-[#f5f2eb]"
+              className="pointer-events-auto relative z-30 my-auto w-full max-w-sm rounded-[28px] border border-indigo-400/40 bg-[#0c101d]/95 p-6 shadow-[0_0_60px_15px_rgba(66,133,244,0.35)] backdrop-blur-2xl text-center text-[#f1f5f9]"
             >
               {/* Header Badge */}
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d97757]/40 bg-[#d97757]/20 px-3 py-1 font-mono text-[10px] font-bold tracking-wider uppercase text-[#fed7aa]">
-                  <Sparkles className="h-3 w-3 text-[#fed7aa]" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/40 bg-indigo-500/20 px-3 py-1 font-mono text-[10px] font-bold tracking-wider uppercase text-[#c7d2fe]">
+                  <Sparkles className="h-3 w-3 text-[#93c5fd]" />
                   {receiveFx.phase === "done" ? "Bestand Ontvangen ✓" : "Bestand Binnenkomend"}
                 </span>
-                <span className="font-mono text-xs text-[#fed7aa] font-bold">
+                <span className="font-mono text-xs text-[#93c5fd] font-bold">
                   {receiveFx.progress}%
                 </span>
               </div>
@@ -4672,7 +4672,7 @@ export default function ZytronSharePage() {
               {/* Center Visual / Thumbnail */}
               <div className="mt-5 flex flex-col items-center">
                 {receiveFx.thumbs && receiveFx.thumbs[0] ? (
-                  <div className="relative mb-3 h-28 w-28 overflow-hidden rounded-2xl border-2 border-[#d97757]/60 shadow-[0_0_30px_rgba(217,119,87,0.45)]">
+                  <div className="relative mb-3 h-28 w-28 overflow-hidden rounded-2xl border-2 border-indigo-400/60 shadow-[0_0_30px_rgba(99,102,241,0.5)]">
                     <img
                       src={receiveFx.thumbs[0]}
                       alt="Ontvangen bestand"
@@ -4680,19 +4680,19 @@ export default function ZytronSharePage() {
                     />
                   </div>
                 ) : (
-                  <div className="relative mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-[#d97757]/40 bg-[#d97757]/20 shadow-[0_0_30px_rgba(217,119,87,0.35)]">
-                    <Download className="h-9 w-9 text-[#fed7aa] animate-bounce" />
+                  <div className="relative mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-indigo-400/40 bg-indigo-500/20 shadow-[0_0_30px_rgba(66,133,244,0.35)]">
+                    <Download className="h-9 w-9 text-[#93c5fd] animate-bounce" />
                   </div>
                 )}
 
                 <h3 className="text-base font-bold text-white tracking-tight">
                   {receiveFx.phase === "done" ? "Bestand Klaar voor Gebruik" : `Inkomend van ${receiveFx.senderName}`}
                 </h3>
-                <p className="mt-1 line-clamp-1 max-w-[260px] text-xs font-semibold text-[#fed7aa]">
+                <p className="mt-1 line-clamp-1 max-w-[260px] text-xs font-semibold text-[#c7d2fe]">
                   {receiveFx.fileName || receiveFx.label}
                 </p>
                 {receiveFx.totalSize > 0 && (
-                  <p className="mt-0.5 font-mono text-[11px] text-[#f5f2eb]/60">
+                  <p className="mt-0.5 font-mono text-[11px] text-[#94a3b8]">
                     {formatBytes(receiveFx.totalSize)}
                   </p>
                 )}
@@ -4701,7 +4701,7 @@ export default function ZytronSharePage() {
               {/* Smooth Progress Bar */}
               <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/10 p-0.5">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] shadow-[0_0_12px_rgba(217,119,87,0.8)]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] shadow-[0_0_12px_rgba(66,133,244,0.8)]"
                   style={{ width: `${receiveFx.progress}%` }}
                   transition={{ duration: 0.2 }}
                 />
@@ -4788,9 +4788,9 @@ export default function ZytronSharePage() {
               initial={{ y: 25, scale: 0.95, opacity: 0 }}
               animate={{ y: -8, scale: 1, opacity: 1 }}
               exit={{ y: 20, scale: 0.95, opacity: 0 }}
-              className="pointer-events-auto relative z-20 mb-2 flex items-center gap-3 rounded-full border border-[#d97757]/45 bg-[#171513]/90 px-5 py-2 shadow-[0_0_40px_10px_rgba(217,119,87,0.35)] backdrop-blur-xl"
+              className="pointer-events-auto relative z-20 mb-2 flex items-center gap-3 rounded-full border border-indigo-400/40 bg-[#0d101b]/90 px-5 py-2 shadow-[0_0_40px_10px_rgba(66,133,244,0.35)] backdrop-blur-xl"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#fed7aa]" />
+              <Sparkles className="h-3.5 w-3.5 text-[#93c5fd]" />
               <span className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-white">
                 {receiveFx.phase === "done"
                   ? `✓ ONTVANGEN VAN ${receiveFx.senderName.toUpperCase()}`
@@ -4799,7 +4799,7 @@ export default function ZytronSharePage() {
               <button
                 type="button"
                 onClick={() => setReceiveFx(null)}
-                className="ml-2 rounded-full bg-white px-3 py-0.5 font-mono text-[10px] font-bold text-black hover:bg-[#fed7aa]"
+                className="ml-2 rounded-full bg-white px-3 py-0.5 font-mono text-[10px] font-bold text-black hover:bg-[#c7d2fe]"
               >
                 Klaar
               </button>
@@ -5053,7 +5053,7 @@ export default function ZytronSharePage() {
           </motion.div>
         )}
 
-        {/* Instant QR Code Pairing Modal - Claude Terracotta & Warm Obsidian */}
+        {/* Instant QR Code Pairing Modal - Google Gemini Cosmic Blue & Violet */}
         {showQrModal && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -5067,13 +5067,13 @@ export default function ZytronSharePage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.92, y: 16 }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl border border-[#d97757]/40 bg-[#171513] p-6 shadow-[0_0_50px_rgba(217,119,87,0.3)] text-center text-[#f5f2eb]"
+              className="w-full max-w-sm rounded-3xl border border-indigo-400/40 bg-[#0c101d] p-6 shadow-[0_0_50px_rgba(66,133,244,0.35)] text-center text-[#f1f5f9]"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d97757]/45 bg-[#d97757]/20 text-[#fed7aa] shadow-[0_0_20px_rgba(217,119,87,0.35)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-400/45 bg-[#4285f4]/20 text-[#93c5fd] shadow-[0_0_20px_rgba(66,133,244,0.35)]">
                 <QrCode className="h-6 w-6" />
               </div>
               <h3 className="mt-3 text-base font-extrabold text-white">Scan met Camera (Geen App Nodig)</h3>
-              <p className="mt-1 text-xs text-[#f5f2eb]/70">
+              <p className="mt-1 text-xs text-[#94a3b8]">
                 Richt de normale camera van je iPad of iPhone op deze code — hij opent binnen 1 seconde direct in Safari:
               </p>
 
@@ -5090,7 +5090,7 @@ export default function ZytronSharePage() {
                 />
               </div>
 
-              <div className="mt-3.5 inline-flex items-center gap-2 rounded-xl border border-[#d97757]/30 bg-[#d97757]/15 px-3.5 py-1.5 font-mono text-xs font-bold text-[#fed7aa]">
+              <div className="mt-3.5 inline-flex items-center gap-2 rounded-xl border border-indigo-400/30 bg-indigo-500/15 px-3.5 py-1.5 font-mono text-xs font-bold text-[#c7d2fe]">
                 <span>Toestel Code: {myFriendCode}</span>
               </div>
 
@@ -5098,7 +5098,7 @@ export default function ZytronSharePage() {
                 <button
                   type="button"
                   onClick={() => shareFilesViaNativeOs()}
-                  className="btn-claude-primary w-full inline-flex items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-extrabold"
+                  className="btn-gemini-primary w-full inline-flex items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-extrabold"
                 >
                   <Share2 className="h-3.5 w-3.5" />
                   <span>Stuur via Systeem AirDrop</span>
@@ -5116,7 +5116,7 @@ export default function ZytronSharePage() {
           </motion.div>
         )}
 
-        {/* DEADSHOT.IO & MULTIPLAYER PARTY INVITE MODAL (Claude Aesthetic) */}
+        {/* DEADSHOT.IO & MULTIPLAYER PARTY INVITE MODAL (Google Gemini AI Aesthetic) */}
         {showDeadshotModal && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -5130,9 +5130,9 @@ export default function ZytronSharePage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.92, y: 16 }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="w-full max-w-md rounded-3xl border border-[#d97757]/45 bg-[#171513] p-6 shadow-[0_0_50px_rgba(217,119,87,0.35)] text-center text-[#f5f2eb]"
+              className="w-full max-w-md rounded-3xl border border-indigo-400/40 bg-[#0c101d] p-6 shadow-[0_0_50px_rgba(66,133,244,0.35)] text-center text-[#f1f5f9]"
             >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d97757]/50 bg-gradient-to-tr from-[#d97757]/35 via-[#e07a5f]/25 to-[#f59e0b]/20 text-[#fed7aa] shadow-[0_0_25px_rgba(217,119,87,0.4)]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/50 bg-gradient-to-tr from-[#4285f4]/35 via-[#6366f1]/25 to-[#9b72cf]/20 text-[#93c5fd] shadow-[0_0_25px_rgba(66,133,244,0.4)]">
                 <Gamepad2 className="h-7 w-7" />
               </div>
 
@@ -5142,15 +5142,15 @@ export default function ZytronSharePage() {
               </div>
 
               <h3 className="mt-2 text-lg font-extrabold text-white">Nodig je Bro uit voor Deadshot!</h3>
-              <p className="mt-1 text-xs text-[#f5f2eb]/70">
+              <p className="mt-1 text-xs text-[#94a3b8]">
                 Geen app of gedoe nodig. Je vriend kan meedoen via AirDrop of door zijn camera te richten!
               </p>
 
               {/* Room Code & Link Box */}
-              <div className="mt-4 flex items-center justify-between rounded-2xl border border-[#d97757]/30 bg-black/60 p-3.5 text-left">
+              <div className="mt-4 flex items-center justify-between rounded-2xl border border-indigo-400/30 bg-black/60 p-3.5 text-left">
                 <div className="min-w-0 flex-1 pr-2">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#f5f2eb]/50">Deadshot Room Link</span>
-                  <p className="font-mono text-xs font-bold text-[#fed7aa] truncate">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#94a3b8]">Deadshot Room Link</span>
+                  <p className="font-mono text-xs font-bold text-[#93c5fd] truncate">
                     https://deadshot.io/?room={deadshotRoomCode}
                   </p>
                 </div>
@@ -5192,7 +5192,7 @@ export default function ZytronSharePage() {
                       url: gameUrl,
                     });
                   }}
-                  className="btn-claude-primary flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-extrabold tracking-wide"
+                  className="btn-gemini-primary flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-extrabold tracking-wide"
                 >
                   <Send className="h-4 w-4" />
                   <span>AirDrop naar Bro (Zonder App)</span>
@@ -5207,9 +5207,9 @@ export default function ZytronSharePage() {
                       navigator.clipboard.writeText(gameUrl);
                       showToast("Deadshot link gekopieerd!");
                     }}
-                    className="btn-luxury-glass flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold text-[#f5f2eb]"
+                    className="btn-luxury-glass flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold text-[#f1f5f9]"
                   >
-                    <Clipboard className="h-4 w-4 text-[#fed7aa]" />
+                    <Clipboard className="h-4 w-4 text-[#93c5fd]" />
                     <span>Kopieer Link</span>
                   </button>
 

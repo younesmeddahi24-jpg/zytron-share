@@ -87,23 +87,23 @@ export default function InstallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0c0b] text-[#f5f2eb] flex flex-col justify-between p-4 sm:p-8 font-sans selection:bg-[#d97757] selection:text-[#0d0c0b]">
-      {/* Ambient background glow - Claude Terracotta & Warm Honey */}
+    <div className="min-h-screen bg-[#07080d] text-[#f1f5f9] flex flex-col justify-between p-4 sm:p-8 font-sans selection:bg-[#9b72cf] selection:text-white">
+      {/* Ambient background glow - Google Gemini AI Blue & Violet */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#d97757]/18 via-[#e07a5f]/12 to-[#f59e0b]/14 blur-3xl" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#4285f4]/18 via-[#6366f1]/14 to-[#9b72cf]/16 blur-3xl" />
       </div>
 
       {/* Header */}
       <header className="max-w-md mx-auto w-full flex items-center justify-between py-2">
         <a href="/" className="flex items-center gap-2.5 text-white/80 hover:text-white transition">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#d97757] via-[#e07a5f] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-[#d97757]/30 text-[#0d0c0b]">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#4285f4] via-[#6366f1] to-[#9b72cf] flex items-center justify-center shadow-lg shadow-[#4285f4]/35 text-white">
             <Radio className="w-4 h-4 stroke-[2.5]" />
           </div>
           <span className="font-extrabold text-sm tracking-tight text-white">Zytron Share</span>
         </a>
         <a
           href="/"
-          className="text-xs font-semibold text-[#fed7aa] hover:text-[#f59e0b] transition flex items-center gap-1"
+          className="text-xs font-semibold text-[#93c5fd] hover:text-white transition flex items-center gap-1"
         >
           <span>Naar App</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -119,7 +119,7 @@ export default function InstallPage() {
             onClick={() => setPlatform("ios")}
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
               platform === "ios"
-                ? "bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-black shadow-lg"
+                ? "bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-black shadow-lg"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -130,7 +130,7 @@ export default function InstallPage() {
             onClick={() => setPlatform("android")}
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
               platform === "android"
-                ? "bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-black shadow-lg"
+                ? "bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-black shadow-lg"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -138,11 +138,11 @@ export default function InstallPage() {
           </button>
         </div>
 
-        <div className="relative rounded-3xl border border-[#d97757]/25 bg-[#171513]/90 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-black/80 text-center">
+        <div className="relative rounded-3xl border border-indigo-400/25 bg-[#0c101d]/90 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-black/80 text-center">
           {/* App Icon */}
           <div className="relative inline-flex items-center justify-center mx-auto mb-4">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#d97757] via-[#e07a5f] to-[#f59e0b] p-[2px] shadow-2xl shadow-[#d97757]/30">
-              <div className="w-full h-full rounded-[20px] bg-[#171513] flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#4285f4] via-[#6366f1] to-[#9b72cf] p-[2px] shadow-2xl shadow-[#4285f4]/35">
+              <div className="w-full h-full rounded-[20px] bg-[#0c101d] flex items-center justify-center overflow-hidden">
                 <img src="/apple-touch-icon.png" alt="Zytron Share Icon" className="w-14 h-14 object-contain" />
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function InstallPage() {
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             Zytron Share {platform === "ios" ? (isIpad ? "voor iPad" : "voor iPhone") : "voor Android"}
           </h1>
-          <p className="text-xs font-mono text-[#fed7aa] mt-1 uppercase tracking-widest font-bold">
+          <p className="text-xs font-mono text-[#93c5fd] mt-1 uppercase tracking-widest font-bold">
             {platform === "ios"
               ? isIpad
                 ? "Directe installatie zonder App Store"
@@ -243,9 +243,9 @@ export default function InstallPage() {
                   <button
                     type="button"
                     onClick={handleOtaInstall}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-[#d97757]/30 hover:scale-[1.01] active:scale-[0.99] transition cursor-pointer"
+                    className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-[#4285f4]/35 hover:scale-[1.01] active:scale-[0.99] transition cursor-pointer"
                   >
-                    <Zap className="w-4 h-4 fill-[#0d0c0b]" />
+                    <Zap className="w-4 h-4 fill-white" />
                     <span>⚡ 1-Tik Directe Web Installatie (iOS OTA)</span>
                   </button>
 
@@ -255,17 +255,17 @@ export default function InstallPage() {
                     onClick={handleIosIpaDownload}
                     className="w-full py-3 px-5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-[#fed7aa]" />
+                    <Download className="w-4 h-4 text-[#93c5fd]" />
                     <span>📲 Download zytron-share.ipa (iPhone App)</span>
                   </button>
 
                   <div className="space-y-2 text-xs">
                     <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <span className="w-5 h-5 rounded-full bg-[#d97757]/20 text-[#fed7aa] font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                      <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-[#93c5fd] font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
                       <span className="text-white/80">Tik op <strong>1-Tik Directe Web Installatie</strong>.</span>
                     </div>
                     <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <span className="w-5 h-5 rounded-full bg-[#d97757]/20 text-[#fed7aa] font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                      <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-[#93c5fd] font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                       <span className="text-white/80">iOS toont: <em>&ldquo;zytron-share wil Zytron Share installeren&rdquo;</em> $\rightarrow$ tik op <strong>Installeer</strong>.</span>
                     </div>
                     <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
@@ -279,8 +279,8 @@ export default function InstallPage() {
               {/* TAB 2: WEBCLIP PROFILE (VIA SETTINGS) */}
               {activeIosTab === "profile" && (
                 <div className="space-y-3">
-                  <div className="p-3.5 rounded-2xl bg-[#d97757]/15 border border-[#d97757]/30 text-left">
-                    <p className="text-xs font-extrabold text-[#fed7aa]">
+                  <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/25 text-left">
+                    <p className="text-xs font-extrabold text-[#c7d2fe]">
                       ⚙️ Apple WebClip Configuratieprofiel:
                     </p>
                     <p className="text-[11px] text-white/70 mt-1 leading-relaxed">
@@ -291,7 +291,7 @@ export default function InstallPage() {
                   <button
                     type="button"
                     onClick={handleIosProfileDownload}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-[#d97757]/30 hover:scale-[1.01] transition cursor-pointer"
+                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-[#4285f4]/35 hover:scale-[1.01] transition cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     <span>📲 Download iOS Profiel (zytron-share)</span>
@@ -405,7 +405,7 @@ export default function InstallPage() {
               <button
                 onClick={handleAndroidDownload}
                 type="button"
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#d97757] via-[#e07a5f] to-[#f59e0b] text-[#0d0c0b] font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-[#d97757]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#4285f4] via-[#6366f1] to-[#9b72cf] text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-[#4285f4]/35 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Download className="w-5 h-5 stroke-[2.5]" />
                 <span>{downloadStarted ? "Opnieuw Downloaden" : "📲 Download Android APK"}</span>
