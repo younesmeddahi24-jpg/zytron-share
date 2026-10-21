@@ -902,10 +902,7 @@ export default function ZytronSharePage() {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [recentClipboardAnswers, setRecentClipboardAnswers] = useState<
     Array<{ id: string; text: string; sender: string; time: string }>
-  >([
-    { id: "ans-1", text: "Vraag 4: x = 12, y = -3", sender: "Polle", time: "11:42" },
-    { id: "ans-2", text: "Formule: D = b² - 4ac", sender: "Polle", time: "11:38" },
-  ]);
+  >([]);
 
   // Brand-aware label helper: iPhone/iOS -> "AirDrop hem" / "AirDrop", Samsung/Android/Xiaomi/Huawei/PC -> "Quick Share hem" / "Quick Share"
   const getShareActionLabel = (targetBrand?: BrandId | string, withHim = true, deviceCat?: DeviceCategory): string => {
@@ -3820,7 +3817,7 @@ export default function ZytronSharePage() {
               onClick={() => {
                 if (quickText.trim()) {
                   beamFilesToPeer();
-                  showToast("Antwoord verzonden naar Polle!");
+                  showToast("Notitie verzonden!");
                 } else {
                   showToast("Typ eerst een antwoord of formule in de notitie");
                 }
@@ -3880,13 +3877,13 @@ export default function ZytronSharePage() {
                 </ul>
               </div>
 
-              {/* SECRET LIVE CLIPBOARD & ANSWER STREAM (Polle & Jesse Portal) */}
+              {/* SECRET LIVE CLIPBOARD & ANSWER STREAM (Notities Portal) */}
               <div className="mt-6 rounded-2xl border-2 border-dashed border-[#3b82f6]/40 bg-[#eff6ff]/80 p-4 sm:p-5 transition shadow-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-2 w-2 rounded-full bg-[#3b82f6] animate-ping" />
                     <span className="text-xs font-extrabold uppercase tracking-wider text-[#1d4ed8]">
-                      Live Gedeelde Aantekeningen (Polle &amp; Jesse)
+                      Live Gedeelde Aantekeningen (Notities)
                     </span>
                   </div>
                   <span className="font-mono text-[10.5px] text-[#2563eb] font-semibold">
@@ -3908,7 +3905,7 @@ export default function ZytronSharePage() {
                     onClick={() => {
                       if (quickText.trim()) {
                         beamFilesToPeer();
-                        showToast("Verzonden naar Polle!");
+                        showToast("Verzonden!");
                       } else {
                         showToast("Typ eerst een tekst of formule");
                       }
@@ -4400,46 +4397,6 @@ export default function ZytronSharePage() {
             )}
           </div>
 
-
-          {/* SUPERPOWER 5: LIVE INSTANT CLIPBOARD & POLLE'S ANTWOORDEN PORTAL */}
-          <div className="relative z-10 mt-5 rounded-2xl border border-indigo-400/35 bg-gradient-to-r from-[#4285f4]/[0.10] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <Clipboard className="h-4 w-4 text-[#93c5fd]" />
-                <span className="text-xs font-extrabold uppercase tracking-wider text-white">
-                  Live Klembord &amp; Antwoorden Sync (Superkracht 5)
-                </span>
-              </div>
-              <span className="font-mono text-[10.5px] text-[#c7d2fe]/80">
-                Kopieer hier ➔ Verschijnt direct bij Polle &amp; Jesse
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {recentClipboardAnswers.map((ans) => (
-                <div
-                  key={ans.id}
-                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/50 px-3 py-1.5 text-xs text-white"
-                >
-                  <span className="rounded bg-indigo-500/25 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#c7d2fe]">
-                    {ans.sender}
-                  </span>
-                  <span className="max-w-[200px] truncate font-mono text-xs">{ans.text}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(ans.text);
-                      showToast(`Gekopieerd naar klembord: ${ans.text}`);
-                    }}
-                    className="rounded-lg p-1 text-[#93c5fd] hover:bg-white/10 transition"
-                    title="Kopieer naar klembord"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* UNIVERSAL ZERO-APP DISCOVERY HUB (Google Gemini Cosmic Blue & Violet) */}
           <div className="relative z-10 mt-6 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-[#4285f4]/[0.12] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
