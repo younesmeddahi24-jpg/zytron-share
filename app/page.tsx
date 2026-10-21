@@ -724,10 +724,9 @@ function notifyIncomingDrop(
             icon,
             badge: icon,
             tag: `zytron-${dropDetails?.dropId || dropDetails?.offerId || Date.now()}`,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            vibrate: [250, 100, 250] as any,
+            vibrate: [250, 100, 250],
             renotify: true,
-          });
+          } as any);
         }).catch(() => {
           try {
             new Notification(title, { body, icon });
@@ -1515,7 +1514,10 @@ export default function ZytronSharePage() {
         playAirDropChime("offer");
 
         if (incomingSender && peerRef.current) {
-          dialPeer(incomingSender);
+          try {
+            const conn = peerRef.current.connect(incomingSender, { reliable: true });
+            bindConnectionEvents(conn);
+          } catch {}
         }
       }
 
