@@ -954,8 +954,6 @@ export default function ZytronSharePage() {
   const [nfcSuccess, setNfcSuccess] = useState(false);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [audioRecordingSec, setAudioRecordingSec] = useState(0);
-  const [showDeadshotModal, setShowDeadshotModal] = useState(false);
-  const [deadshotRoomCode, setDeadshotRoomCode] = useState("ZYTRON-4821");
   const [toast, setToast] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1390,7 +1388,7 @@ export default function ZytronSharePage() {
         return [newF, ...prev];
       });
       playAirDropChime("connect");
-      showToast(`⭐ ${friendName} (${cleanFriendCode}) toegevoegd als Vaste Vriend!`);
+      showToast(`⭐ ${friendName} (${cleanFriendCode}) toegevoegd aan bewaarde apparaten`);
     }
 
     // Check if opened via WhatsApp Pairing Link (?pair=wa-xxxx&from=Name&phone=...)
@@ -3334,7 +3332,7 @@ export default function ZytronSharePage() {
           f.peerId === peer.peerId,
       );
       if (exists) {
-        showToast(`${peer.name} verwijderd uit Vaste Vrienden`);
+        showToast(`${peer.name} verwijderd uit bewaarde apparaten`);
         return prev.filter(
           (f) =>
             !(peer.friendCode && f.friendCode.toUpperCase() === peer.friendCode.toUpperCase()) &&
@@ -3354,7 +3352,7 @@ export default function ZytronSharePage() {
           lastSeen: Date.now(),
         };
         playAirDropChime("connect");
-        showToast(`⭐ ${peer.name} toegevoegd als Vaste Vriend! Je kunt nu ook vanaf school sturen.`);
+        showToast(`⭐ ${peer.name} opgeslagen als vertrouwd apparaat.`);
         return [newF, ...prev];
       }
     });
@@ -3363,7 +3361,7 @@ export default function ZytronSharePage() {
   const addFriendManually = () => {
     const code = friendCodeInput.trim().toUpperCase();
     if (!code) {
-      showToast("Voer een Vrienden-Code in (bijv. ZY-4821)");
+      showToast("Voer een koppelcode in (bijv. ZY-4821)");
       return;
     }
     const name = friendNameInput.trim() || `Vriend (${code})`;
@@ -3398,7 +3396,7 @@ export default function ZytronSharePage() {
     navigator.clipboard?.writeText(link).then(() => {
       showToast(`Vriendenlink gekopieerd! Deel met je vriend of stuur naar je PC.`);
     }).catch(() => {
-      showToast(`Jouw Vrienden-Code: ${myFriendCode}`);
+      showToast(`Jouw apparaat-koppelcode: ${myFriendCode}`);
     });
   };
 
@@ -3768,12 +3766,9 @@ export default function ZytronSharePage() {
                 <span className="text-sm font-extrabold tracking-tight text-white sm:text-base">
                   Zytron Share
                 </span>
-                <span className="rounded-full border border-indigo-400/40 bg-indigo-500/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c7d2fe]">
-                  AI PRO
-                </span>
               </div>
               <p className="hidden font-mono text-[10.5px] text-[#94a3b8] sm:block">
-                AirDrop &amp; Quick Share Studio
+                Lokale P2P Bestandsoverdracht
               </p>
             </div>
           </div>
@@ -4166,16 +4161,6 @@ export default function ZytronSharePage() {
               className="flex-1 rounded-2xl border border-white/15 bg-black/55 px-4 py-3.5 text-xs text-white placeholder:text-white/40 shadow-inner outline-none transition focus:border-indigo-400 sm:text-sm"
             />
 
-            {/* Quick Deadshot / Game Party Invite trigger button */}
-            <button
-              type="button"
-              onClick={() => setShowDeadshotModal(true)}
-              className="btn-luxury-glass flex items-center gap-1.5 rounded-2xl px-4 py-3.5 text-xs font-bold text-[#c7d2fe] border-indigo-400/40 hover:border-indigo-400 transition"
-              title="Deadshot.io Game Invite & Multiplayer Hub"
-            >
-              <Gamepad2 className="h-4 w-4 text-[#93c5fd]" />
-              <span className="hidden sm:inline">Deadshot Party</span>
-            </button>
 
             {quickText.trim() && (
               <button
@@ -4189,25 +4174,6 @@ export default function ZytronSharePage() {
             )}
           </div>
 
-          {quickText.trim() && /(deadshot|1v1|krunker|roblox|\.io|\.gg|https?:\/\/)/i.test(quickText) && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative z-10 mt-2.5 flex items-center justify-between gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 p-3 text-xs font-bold text-emerald-200"
-            >
-              <div className="flex items-center gap-2">
-                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span>🎮 Game Invite Link klaar! Tik op je bro hieronder op de radar of gebruik Systeem AirDrop.</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowDeadshotModal(true)}
-                className="rounded-xl bg-emerald-400/25 px-3 py-1 font-mono text-[11px] font-extrabold text-emerald-300 hover:bg-emerald-400/40 transition"
-              >
-                Open Party Hub ➔
-              </button>
-            </motion.div>
-          )}
 
           {/* UNIVERSAL ZERO-APP DISCOVERY HUB (Google Gemini Cosmic Blue & Violet) */}
           <div className="relative z-10 mt-6 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-[#4285f4]/[0.12] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
@@ -4254,31 +4220,36 @@ export default function ZytronSharePage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-white">Camera Scan</p>
-                    <span className="rounded bg-[#9b72cf]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#c4b5fd]">1 Sec</span>
+                    <span className="rounded bg-[#9b72cf]/25 px-1.5 py-0.5 text-[9px] font-bold text-[#c4b5fd]">Direct</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Bro richt gewone camera</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Scan met camera-app</p>
                 </div>
               </button>
 
-              {/* 3. Deadshot.io 1-Tap Invite */}
+              {/* 3. Beveiligde PIN Overdracht */}
               <button
                 type="button"
-                onClick={() => setShowDeadshotModal(true)}
+                onClick={async () => {
+                  const drop = await createActiveDropOnServer();
+                  if (drop?.pin) {
+                    showToast(`Beveiligde overdracht actief (PIN: ${drop.pin})`);
+                  }
+                }}
                 className="btn-luxury-glass group flex items-center gap-3 rounded-2xl p-3.5 text-left transition hover:border-emerald-400/50 hover:shadow-[0_0_25px_rgba(52,211,153,0.3)]"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-400/40 bg-emerald-400/15 text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.3)] transition group-hover:scale-105">
-                  <Gamepad2 className="h-5 w-5" />
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-extrabold text-white">Deadshot Party</p>
-                    <span className="rounded bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">Games</span>
+                    <p className="text-xs font-extrabold text-white">Beveiligde PIN</p>
+                    <span className="rounded bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">Code</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">1v1 Multiplayer Invite</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">4-cijferige web code</p>
                 </div>
               </button>
 
-              {/* 4. NFC Back-to-Back Tik */}
+              {/* 4. NFC Tik */}
               <button
                 type="button"
                 onClick={startNfcDropBroadcast}
@@ -4290,9 +4261,9 @@ export default function ZytronSharePage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-extrabold text-white">NFC Tik</p>
-                    <span className="rounded bg-cyan-400/20 px-1.5 py-0.5 text-[9px] font-bold text-cyan-300">Bump</span>
+                    <span className="rounded bg-cyan-400/20 px-1.5 py-0.5 text-[9px] font-bold text-cyan-300">NFC</span>
                   </div>
-                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Back-to-Back tegen iPhone</p>
+                  <p className="truncate font-mono text-[10.5px] text-[#94a3b8]">Tegen ander NFC-toestel</p>
                 </div>
               </button>
             </div>
@@ -4492,7 +4463,7 @@ export default function ZytronSharePage() {
                                 ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)]"
                                 : "border-white/10 bg-white/[0.04] text-white/45 hover:border-amber-400/40 hover:text-amber-300"
                             }`}
-                            title="Bewaar als vaste vriend"
+                            title="Bewaar als vertrouwd apparaat"
                           >
                             <Star className={`h-4 w-4 ${isFriend ? "fill-amber-300" : ""}`} />
                           </button>
@@ -4581,15 +4552,15 @@ export default function ZytronSharePage() {
             )}
           </div>
 
-          {/* COMPACT BOTTOM PANELS: Vaste Vrienden & Recente Bestanden */}
+          {/* COMPACT BOTTOM PANELS: Bewaarde Apparaten & Recente Bestanden */}
           <div className="relative z-10 mt-9 grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {/* VASTE VRIENDEN (School <-> Thuis) */}
+            {/* BEWAARDE APPARATEN (Thuis / Kantoor / Mobiel) */}
             <div className="rounded-3xl border border-amber-400/30 bg-black/55 p-6 shadow-inner">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
                   <span className="font-mono text-xs font-extrabold uppercase tracking-wider text-amber-300">
-                    Vaste Vrienden ({savedFriends.length})
+                    Bewaarde Apparaten ({savedFriends.length})
                   </span>
                 </div>
                 <button
@@ -4604,7 +4575,7 @@ export default function ZytronSharePage() {
               <div className="mt-4 flex gap-2">
                 <input
                   type="text"
-                  placeholder="Vrienden-Code (bijv. ZY-4821)"
+                  placeholder="Koppelcode (bijv. ZY-4821)"
                   value={friendCodeInput}
                   onChange={(e) => setFriendCodeInput(e.target.value)}
                   className="flex-1 rounded-xl border border-white/15 bg-black/60 px-3.5 py-2.5 font-mono text-xs text-white placeholder-white/35 focus:border-amber-400 focus:outline-none"
@@ -5415,125 +5386,6 @@ export default function ZytronSharePage() {
           </motion.div>
         )}
 
-        {/* DEADSHOT.IO & MULTIPLAYER PARTY INVITE MODAL (Google Gemini AI Aesthetic) */}
-        {showDeadshotModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[105] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
-            onClick={() => setShowDeadshotModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.92, y: 16 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.92, y: 16 }}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="w-full max-w-md rounded-3xl border border-indigo-400/40 bg-[#0c101d] p-6 shadow-[0_0_50px_rgba(66,133,244,0.35)] text-center text-[#f1f5f9]"
-            >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/50 bg-gradient-to-tr from-[#4285f4]/35 via-[#6366f1]/25 to-[#9b72cf]/20 text-[#93c5fd] shadow-[0_0_25px_rgba(66,133,244,0.4)]">
-                <Gamepad2 className="h-7 w-7" />
-              </div>
-
-              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-3 py-0.5 font-mono text-[11px] font-bold text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                Deadshot.io Multiplayer Party
-              </div>
-
-              <h3 className="mt-2 text-lg font-extrabold text-white">Nodig je Bro uit voor Deadshot!</h3>
-              <p className="mt-1 text-xs text-[#94a3b8]">
-                Geen app of gedoe nodig. Je vriend kan meedoen via AirDrop of door zijn camera te richten!
-              </p>
-
-              {/* Room Code & Link Box */}
-              <div className="mt-4 flex items-center justify-between rounded-2xl border border-indigo-400/30 bg-black/60 p-3.5 text-left">
-                <div className="min-w-0 flex-1 pr-2">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#94a3b8]">Deadshot Room Link</span>
-                  <p className="font-mono text-xs font-bold text-[#93c5fd] truncate">
-                    https://deadshot.io/?room={deadshotRoomCode}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newCode = "ZYTRON-" + Math.floor(1000 + Math.random() * 9000);
-                    setDeadshotRoomCode(newCode);
-                    showToast("Nieuwe room code aangemaakt!");
-                  }}
-                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white transition"
-                  title="Genereer nieuwe room code"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </button>
-              </div>
-
-              {/* QR Image for Instant Camera Join */}
-              <div className="mt-3.5 mx-auto flex h-44 w-44 items-center justify-center rounded-2xl bg-white p-2.5 shadow-lg">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                    `https://deadshot.io/?room=${deadshotRoomCode}`
-                  )}`}
-                  alt="Deadshot Party QR Code"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-4 flex flex-col gap-2.5">
-                {/* 1. Systeem AirDrop naar bro */}
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const gameUrl = `https://deadshot.io/?room=${deadshotRoomCode}`;
-                    await shareFilesViaNativeOs({
-                      title: "Deadshot.io Game Invite",
-                      text: `🎮 Join mijn Deadshot.io party! Klik hier om direct in te stappen: ${gameUrl}`,
-                      url: gameUrl,
-                    });
-                  }}
-                  className="btn-gemini-primary flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-extrabold tracking-wide"
-                >
-                  <Send className="h-4 w-4" />
-                  <span>AirDrop naar Bro (Zonder App)</span>
-                </button>
-
-                {/* 2. Klembord & Direct Meespelen */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const gameUrl = `https://deadshot.io/?room=${deadshotRoomCode}`;
-                      navigator.clipboard.writeText(gameUrl);
-                      showToast("Deadshot link gekopieerd!");
-                    }}
-                    className="btn-luxury-glass flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold text-[#f1f5f9]"
-                  >
-                    <Clipboard className="h-4 w-4 text-[#93c5fd]" />
-                    <span>Kopieer Link</span>
-                  </button>
-
-                  <a
-                    href={`https://deadshot.io/?room=${deadshotRoomCode}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-luxury-glass flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold text-emerald-300 border-emerald-400/30 hover:border-emerald-400/60"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    <span>Speel Nu Zelf</span>
-                  </a>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowDeadshotModal(false)}
-                className="mt-4 w-full rounded-2xl border border-white/10 bg-white/[0.04] py-2.5 text-xs font-semibold text-white/60 hover:text-white transition"
-              >
-                Sluiten
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
         {/* OPTIE 1: NFC Back-to-Back Modal */}
         {showNfcModal && (
           <motion.div
