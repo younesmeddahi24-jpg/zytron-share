@@ -19,6 +19,7 @@ import {
   Camera,
   Check,
   Clipboard,
+  ClipboardCheck,
   Copy,
   Cpu,
   Download,
@@ -41,6 +42,7 @@ import {
   Mic,
   MicOff,
   Monitor,
+  PenTool,
   Phone,
   QrCode,
   Radar,
@@ -61,6 +63,7 @@ import {
   Users,
   Wifi,
   Zap,
+  BookOpen,
 } from "lucide-react";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -895,6 +898,14 @@ export default function ZytronSharePage() {
   const [activeDropPin, setActiveDropPin] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState<string>("");
   const [deviceCategoryFilter, setDeviceCategoryFilter] = useState<DeviceCategory>("all");
+  const [isNotabilityStealth, setIsNotabilityStealth] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [recentClipboardAnswers, setRecentClipboardAnswers] = useState<
+    Array<{ id: string; text: string; sender: string; time: string }>
+  >([
+    { id: "ans-1", text: "Vraag 4: x = 12, y = -3", sender: "Polle", time: "11:42" },
+    { id: "ans-2", text: "Formule: D = b² - 4ac", sender: "Polle", time: "11:38" },
+  ]);
 
   // Brand-aware label helper: iPhone/iOS -> "AirDrop hem" / "AirDrop", Samsung/Android/Xiaomi/Huawei/PC -> "Quick Share hem" / "Quick Share"
   const getShareActionLabel = (targetBrand?: BrandId | string, withHim = true, deviceCat?: DeviceCategory): string => {
@@ -3743,6 +3754,210 @@ export default function ZytronSharePage() {
   const primaryActionLabel = getShareActionLabel(primaryTargetBrand, true);
   const primaryShortLabel = getShareActionLabel(primaryTargetBrand, false);
 
+  if (isNotabilityStealth) {
+    return (
+      <div className="relative min-h-screen bg-[#fbfbf9] text-[#1e293b] font-sans antialiased selection:bg-[#93c5fd]">
+        {/* Notability iPad Top Navigation Bar */}
+        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#e2e8f0] bg-[#ffffff]/98 px-3 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsNotabilityStealth(false)}
+              className="flex items-center gap-1 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition"
+              title="Terug naar Zytron Radar"
+            >
+              <span className="text-base leading-none">‹</span>
+              <span>Notities</span>
+            </button>
+
+            <div className="h-4 w-px bg-[#e2e8f0]" />
+
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#3b82f6]" />
+              <span className="text-xs sm:text-sm font-bold text-[#0f172a]">Wiskunde B — H4 Kwadratische Functies</span>
+              <span className="hidden sm:inline-block rounded-md bg-[#f1f5f9] px-2 py-0.5 font-mono text-[10px] font-medium text-[#64748b]">
+                Klas 3 • Les 4.2
+              </span>
+            </div>
+          </div>
+
+          {/* Notability Iconic Center Toolbar */}
+          <div className="flex items-center gap-1 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-1 shadow-inner">
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3b82f6] text-white shadow-xs"
+              title="Pen (Actief)"
+            >
+              <PenTool className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
+              title="Markeerstift"
+            >
+              <span className="text-xs font-black">M</span>
+            </button>
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
+              title="Gum"
+            >
+              <span className="text-xs font-black">⌫</span>
+            </button>
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
+              title="Tekstgereedschap"
+            >
+              <span className="text-xs font-black">T</span>
+            </button>
+          </div>
+
+          {/* Disguised Action & Quick Exit */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (quickText.trim()) {
+                  beamFilesToPeer();
+                  showToast("Antwoord verzonden naar Polle!");
+                } else {
+                  showToast("Typ eerst een antwoord of formule in de notitie");
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#3b82f6]/40 bg-[#3b82f6]/10 px-3 py-1.5 text-xs font-bold text-[#2563eb] hover:bg-[#3b82f6]/20 transition"
+            >
+              <Send className="h-3 w-3" />
+              <span>Deel Notitie</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsNotabilityStealth(false)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:text-[#0f172a] transition"
+              title="Sluit Notability weergave (of druk op Esc)"
+            >
+              ✕
+            </button>
+          </div>
+        </header>
+
+        {/* Notability Lined Paper Body */}
+        <main className="mx-auto max-w-4xl p-3 sm:p-6 md:p-8">
+          <div
+            className="relative min-h-[85vh] rounded-2xl border border-[#e2e8f0] bg-white p-5 sm:p-8 md:p-10 shadow-sm"
+            style={{
+              backgroundImage:
+                "linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #fee2e2 1px, transparent 1px)",
+              backgroundSize: "100% 28px, 60px 100%",
+              backgroundPosition: "0 0, 48px 0",
+            }}
+          >
+            {/* Document Header */}
+            <div className="mb-6 pl-8 sm:pl-12 border-b border-[#e2e8f0] pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h1 className="text-lg sm:text-2xl font-extrabold text-[#0f172a] font-serif">
+                  Wiskunde B — Kwadratische Formules &amp; Parabolen
+                </h1>
+                <span className="font-mono text-xs text-[#94a3b8]">21 okt 2026</span>
+              </div>
+              <p className="mt-1 text-xs text-[#64748b]">
+                Aantekeningen les 4.3 • Huiswerkopgaven blz. 84 (opgaven 12 t/m 19)
+              </p>
+            </div>
+
+            {/* Realistic Math School Notes */}
+            <div className="pl-8 sm:pl-12 space-y-4 text-xs sm:text-sm text-[#334155] leading-relaxed">
+              <div className="rounded-xl border border-[#cbd5e1]/60 bg-[#f8fafc]/90 p-4">
+                <p className="font-bold text-[#0f172a]">1. Algemene Vorm &amp; Nulpunten:</p>
+                <p className="font-mono text-xs text-[#1e293b] mt-1">
+                  f(x) = ax² + bx + c &nbsp;•&nbsp; Discriminant: D = b² - 4ac
+                </p>
+                <ul className="mt-1.5 list-disc list-inside text-xs text-[#475569] space-y-0.5">
+                  <li>Als D &gt; 0: twee reële oplossingen (twee snijpunten met de x-as)</li>
+                  <li>Als D = 0: één oplossing (raakpunt x-as: x = -b / 2a)</li>
+                  <li>Als D &lt; 0: geen snijpunten met de x-as</li>
+                </ul>
+              </div>
+
+              {/* SECRET LIVE CLIPBOARD & ANSWER STREAM (Polle & Jesse Portal) */}
+              <div className="mt-6 rounded-2xl border-2 border-dashed border-[#3b82f6]/40 bg-[#eff6ff]/80 p-4 sm:p-5 transition shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 rounded-full bg-[#3b82f6] animate-ping" />
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#1d4ed8]">
+                      Live Gedeelde Aantekeningen (Polle &amp; Jesse)
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10.5px] text-[#2563eb] font-semibold">
+                    Real-Time Klembord Sync Actief
+                  </span>
+                </div>
+
+                {/* Live Input Field disguised as note input */}
+                <div className="mt-3 flex gap-2">
+                  <input
+                    type="text"
+                    value={quickText}
+                    onChange={(e) => setQuickText(e.target.value)}
+                    placeholder="Typ hier een antwoord of formule om direct te sturen…"
+                    className="flex-1 rounded-xl border border-[#bfdbfe] bg-white px-3.5 py-2 text-xs text-[#0f172a] placeholder-[#94a3b8] focus:border-[#3b82f6] focus:outline-none shadow-inner"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (quickText.trim()) {
+                        beamFilesToPeer();
+                        showToast("Verzonden naar Polle!");
+                      } else {
+                        showToast("Typ eerst een tekst of formule");
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#1d4ed8] transition"
+                  >
+                    <Send className="h-3 w-3" />
+                    <span>Verstuur</span>
+                  </button>
+                </div>
+
+                {/* Answer Feed */}
+                <div className="mt-3.5 space-y-2">
+                  {recentClipboardAnswers.map((ans) => (
+                    <div
+                      key={ans.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-[#dbeafe] bg-white p-2.5 text-xs text-[#1e293b] shadow-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="rounded-md bg-[#dbeafe] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#1e40af]">
+                          {ans.sender}
+                        </span>
+                        <span className="truncate font-mono font-medium text-[#0f172a]">{ans.text}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-mono text-[10px] text-[#94a3b8]">{ans.time}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(ans.text);
+                            showToast(`Gekopieerd: "${ans.text.slice(0, 25)}..."`);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#bfdbfe] bg-[#eff6ff] px-2.5 py-1 text-[10.5px] font-bold text-[#1d4ed8] hover:bg-[#dbeafe] transition"
+                        >
+                          <Copy className="h-3 w-3" />
+                          <span>Kopieer</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen overflow-x-clip bg-[#07080d] text-[#f1f5f9] pb-20 selection:bg-[#9b72cf] selection:text-white">
       {/* Ambient Spatial Aurora Backdrop - Google Gemini Cosmic Blue & Violet Spark */}
@@ -3793,6 +4008,17 @@ export default function ZytronSharePage() {
 
           {/* Luxury Tactile Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* School Notability Camouflage Quick Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsNotabilityStealth(true)}
+              className="btn-luxury-glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-[#c7d2fe] border-indigo-400/40 hover:border-indigo-400 transition"
+              title="School Notability Camouflage (Paniek-knop of druk op Esc)"
+            >
+              <PenTool className="h-3.5 w-3.5 text-[#93c5fd]" />
+              <span className="hidden sm:inline">Notability Modus</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowBackgroundPermissionModal(true)}
@@ -4175,6 +4401,46 @@ export default function ZytronSharePage() {
           </div>
 
 
+          {/* SUPERPOWER 5: LIVE INSTANT CLIPBOARD & POLLE'S ANTWOORDEN PORTAL */}
+          <div className="relative z-10 mt-5 rounded-2xl border border-indigo-400/35 bg-gradient-to-r from-[#4285f4]/[0.10] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Clipboard className="h-4 w-4 text-[#93c5fd]" />
+                <span className="text-xs font-extrabold uppercase tracking-wider text-white">
+                  Live Klembord &amp; Antwoorden Sync (Superkracht 5)
+                </span>
+              </div>
+              <span className="font-mono text-[10.5px] text-[#c7d2fe]/80">
+                Kopieer hier ➔ Verschijnt direct bij Polle &amp; Jesse
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {recentClipboardAnswers.map((ans) => (
+                <div
+                  key={ans.id}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/50 px-3 py-1.5 text-xs text-white"
+                >
+                  <span className="rounded bg-indigo-500/25 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#c7d2fe]">
+                    {ans.sender}
+                  </span>
+                  <span className="max-w-[200px] truncate font-mono text-xs">{ans.text}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(ans.text);
+                      showToast(`Gekopieerd naar klembord: ${ans.text}`);
+                    }}
+                    className="rounded-lg p-1 text-[#93c5fd] hover:bg-white/10 transition"
+                    title="Kopieer naar klembord"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* UNIVERSAL ZERO-APP DISCOVERY HUB (Google Gemini Cosmic Blue & Violet) */}
           <div className="relative z-10 mt-6 rounded-2xl border border-indigo-400/30 bg-gradient-to-r from-[#4285f4]/[0.12] via-[#6366f1]/[0.08] to-[#9b72cf]/[0.10] p-4.5 backdrop-blur-md">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -4428,7 +4694,17 @@ export default function ZytronSharePage() {
                       initial={{ scale: 0.92, opacity: 0, y: 10 }}
                       animate={{ scale: 1, opacity: 1, y: 0 }}
                       transition={SPRING}
-                      onClick={() => beamFilesToPeer(peer.peerId)}
+                      onClick={() => {
+                        if (isMultiSelectMode) {
+                          setSelectedTargetIds((prev) =>
+                            prev.includes(peer.peerId)
+                              ? prev.filter((id) => id !== peer.peerId)
+                              : [...prev, peer.peerId]
+                          );
+                        } else {
+                          beamFilesToPeer(peer.peerId);
+                        }
+                      }}
                       className={`group cursor-pointer relative flex flex-col justify-between overflow-hidden rounded-3xl p-5 transition duration-200 hover:-translate-y-1 ${
                         isSelected
                           ? "border-2 border-[#6366f1] bg-[#6366f1]/20 shadow-[0_0_40px_rgba(99,102,241,0.5)]"
