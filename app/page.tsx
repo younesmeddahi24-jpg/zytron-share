@@ -692,26 +692,59 @@ function notifyIncomingDrop(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dropDetails?: any,
 ) {
-  if (typeof window === "undefined" || !("Notification" in window)) return;
-  if (Notification.permission === "granted") {
+  if (typeof window === "undefined") return;
+
+  // 1. Play audible sound chime even if screen is blurred
+  try {
+    playBeamSound("offer");
+  } catch {}
+
+  // 2. Tab title flash alert for background tabs
+  if (typeof document !== "undefined" && document.hidden) {
+    document.title = `🔔 (1) ${senderName}: ${fileName.slice(0, 24)}`;
+    const resetTitle = () => {
+      document.title = "Zytron Share - Instant Local Drop";
+      window.removeEventListener("focus", resetTitle);
+    };
+    window.addEventListener("focus", resetTitle, { once: true });
+  }
+
+  // 3. Native OS Notification (Windows Action Center, macOS, iPadOS, Android)
+  if ("Notification" in window && Notification.permission === "granted") {
     try {
       const title = `Zytron Share`;
       const body = `${senderName}: ${fileName}`;
-      const icon = "/icon.svg";
+      const icon = "/icon-192.png";
 
-      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      if ("serviceWorker" in navigator) {
         navigator.serviceWorker.ready.then((reg) => {
           reg.showNotification(title, {
             body,
             icon,
             badge: icon,
-            tag: `zytron-${dropDetails?.dropId || Date.now()}`,
+            tag: `zytron-${dropDetails?.dropId || dropDetails?.offerId || Date.now()}`,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            vibrate: [200, 100, 200] as any,
+            vibrate: [250, 100, 250] as any,
+            renotify: true,
           });
         }).catch(() => {
-          new Notification(title, { body, icon });
+          try {
+            new Notification(title, { body, icon });
+          } catch {}
         });
+
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: "SHOW_NOTIFICATION",
+            title,
+            options: {
+              body,
+              icon,
+              tag: `zytron-${dropDetails?.dropId || dropDetails?.offerId || Date.now()}`,
+              renotify: true,
+            },
+          });
+        }
       } else {
         new Notification(title, { body, icon });
       }
@@ -974,6 +1007,7 @@ export default function ZytronSharePage() {
   const peerRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const connectionsRef = useRef<Map<string, any>>(new Map());
+  const audioKeepaliveRef = useRef<HTMLAudioElement | null>(null);
   const dialingPeersRef = useRef<Map<string, number>>(new Map());
   const peerLastPongRef = useRef<Map<string, number>>(new Map());
   const pendingOfferResolveRef = useRef<Map<string, (accepted: boolean) => void>>(new Map());
@@ -1047,6 +1081,17 @@ export default function ZytronSharePage() {
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate?.([150, 80, 150]);
       }
+      try {
+        if (!audioKeepaliveRef.current && typeof Audio !== "undefined") {
+          // Micro silent audio loop that prevents iOS Safari & Chrome from freezing background tab
+          const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+          silentAudio.loop = true;
+          silentAudio.volume = 0.001;
+          audioKeepaliveRef.current = silentAudio;
+        }
+        audioKeepaliveRef.current?.play().catch(() => {});
+      } catch {}
+
       localStorage.setItem("zytron_bg_permission_granted", "1");
       setBgPermissionGranted(true);
       setShowBackgroundPermissionModal(false);
@@ -1728,6 +1773,10 @@ export default function ZytronSharePage() {
             thumbs: Array.isArray(data.thumbs) ? data.thumbs : [],
             textPreview: data.textPreview ? String(data.textPreview) : undefined,
           };
+
+          // Trigger background notification for incoming WebRTC offer
+          const offerLabel = offer.kind === "text" ? (offer.textPreview || "Bericht") : (offer.files.length === 1 ? offer.files[0].name : `${offer.files.length} bestanden`);
+          notifyIncomingDrop(offer.senderName, offerLabel, offer);
 
           if (autoAcceptRef.current) {
             conn.send({
@@ -2911,6 +2960,30 @@ export default function ZytronSharePage() {
       if (isMounted) syncRadarPresenceRef.current(false);
     }, 600);
 
+    // Dedicated background Web Worker timer: immune to browser background tab freezing/throttling!
+    let bgWorker: Worker | null = null;
+    try {
+      const workerBlob = new Blob([
+        `var t = null;
+        self.onmessage = function(e) {
+          if (e.data === 'run') {
+            if (!t) {
+              t = setInterval(function() { self.postMessage('tick'); }, 1000);
+            }
+          } else if (e.data === 'stop') {
+            if (t) { clearInterval(t); t = null; }
+          }
+        };`
+      ], { type: "application/javascript" });
+      bgWorker = new Worker(URL.createObjectURL(workerBlob));
+      bgWorker.onmessage = () => {
+        if (isMounted && syncRadarPresenceRef.current) {
+          syncRadarPresenceRef.current(false);
+        }
+      };
+      bgWorker.postMessage("run");
+    } catch {}
+
     const onUserTouch = () => {
       requestNotificationPermission();
     };
@@ -2962,6 +3035,10 @@ export default function ZytronSharePage() {
       window.removeEventListener("touchstart", onUserTouch);
       window.clearTimeout(initialTimer);
       window.clearInterval(radarInterval);
+      try {
+        bgWorker?.postMessage("stop");
+        bgWorker?.terminate();
+      } catch {}
       peerRef.current?.destroy?.();
     };
   }, []);

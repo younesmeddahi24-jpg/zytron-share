@@ -93,3 +93,50 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
+// Receive background push events even when tab is completely closed
+self.addEventListener("push", (event) => {
+  let payload = {
+    title: "Zytron Share",
+    body: "Nieuw inkomend bericht of bestand ontvangen!",
+    icon: "/icon-192.png",
+  };
+  try {
+    if (event.data) {
+      const parsed = event.data.json();
+      payload = { ...payload, ...parsed };
+    }
+  } catch (e) {
+    if (event.data) {
+      payload.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: payload.body,
+    icon: payload.icon || "/icon-192.png",
+    badge: "/icon-192.png",
+    vibrate: [200, 100, 200],
+    data: payload,
+    tag: payload.tag || `zytron-${Date.now()}`,
+    renotify: true,
+  };
+
+  event.waitUntil(self.registration.showNotification(payload.title, options));
+});
+
+// Allow client tabs to trigger notifications directly through service worker
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SHOW_NOTIFICATION") {
+    const { title, options } = event.data;
+    event.waitUntil(
+      self.registration.showNotification(title || "Zytron Share", {
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        vibrate: [200, 100, 200],
+        ...options,
+      })
+    );
+  }
+});
+
+
