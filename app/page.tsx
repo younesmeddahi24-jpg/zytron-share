@@ -10,6 +10,7 @@ import {
   type DragEvent,
 } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import NotabilityStealthView from "./NotabilityStealthView";
 import {
   Activity,
   ArrowLeftRight,
@@ -696,7 +697,7 @@ function notifyIncomingDrop(
 
   // 1. Play audible sound chime even if screen is blurred
   try {
-    playBeamSound("offer");
+    playAirDropChime("offer");
   } catch {}
 
   // 2. Tab title flash alert for background tabs
@@ -3830,205 +3831,25 @@ export default function ZytronSharePage() {
 
   if (isNotabilityStealth) {
     return (
-      <div className="relative min-h-screen bg-[#fbfbf9] text-[#1e293b] font-sans antialiased selection:bg-[#93c5fd]">
-        {/* Notability iPad Top Navigation Bar */}
-        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#e2e8f0] bg-[#ffffff]/98 px-3 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setIsNotabilityStealth(false)}
-              className="flex items-center gap-1 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition"
-              title="Terug naar Zytron Radar"
-            >
-              <span className="text-base leading-none">‹</span>
-              <span>Notities</span>
-            </button>
-
-            <div className="h-4 w-px bg-[#e2e8f0]" />
-
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#3b82f6]" />
-              <span className="text-xs sm:text-sm font-bold text-[#0f172a]">Wiskunde B — H4 Kwadratische Functies</span>
-              <span className="hidden sm:inline-block rounded-md bg-[#f1f5f9] px-2 py-0.5 font-mono text-[10px] font-medium text-[#64748b]">
-                Klas 3 • Les 4.2
-              </span>
-            </div>
-          </div>
-
-          {/* Notability Iconic Center Toolbar */}
-          <div className="flex items-center gap-1 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-1 shadow-inner">
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3b82f6] text-white shadow-xs"
-              title="Pen (Actief)"
-            >
-              <PenTool className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
-              title="Markeerstift"
-            >
-              <span className="text-xs font-black">M</span>
-            </button>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
-              title="Gum"
-            >
-              <span className="text-xs font-black">⌫</span>
-            </button>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-white transition"
-              title="Tekstgereedschap"
-            >
-              <span className="text-xs font-black">T</span>
-            </button>
-          </div>
-
-          {/* Disguised Action & Quick Exit */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (quickText.trim()) {
-                  beamFilesToPeer();
-                  showToast("Notitie verzonden!");
-                } else {
-                  showToast("Typ eerst een antwoord of formule in de notitie");
-                }
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#3b82f6]/40 bg-[#3b82f6]/10 px-3 py-1.5 text-xs font-bold text-[#2563eb] hover:bg-[#3b82f6]/20 transition"
-            >
-              <Send className="h-3 w-3" />
-              <span>Deel Notitie</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsNotabilityStealth(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:text-[#0f172a] transition"
-              title="Sluit Notability weergave (of druk op Esc)"
-            >
-              ✕
-            </button>
-          </div>
-        </header>
-
-        {/* Notability Lined Paper Body */}
-        <main className="mx-auto max-w-4xl p-3 sm:p-6 md:p-8">
-          <div
-            className="relative min-h-[85vh] rounded-2xl border border-[#e2e8f0] bg-white p-5 sm:p-8 md:p-10 shadow-sm"
-            style={{
-              backgroundImage:
-                "linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #fee2e2 1px, transparent 1px)",
-              backgroundSize: "100% 28px, 60px 100%",
-              backgroundPosition: "0 0, 48px 0",
-            }}
-          >
-            {/* Document Header */}
-            <div className="mb-6 pl-8 sm:pl-12 border-b border-[#e2e8f0] pb-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h1 className="text-lg sm:text-2xl font-extrabold text-[#0f172a] font-serif">
-                  Wiskunde B — Kwadratische Formules &amp; Parabolen
-                </h1>
-                <span className="font-mono text-xs text-[#94a3b8]">21 okt 2026</span>
-              </div>
-              <p className="mt-1 text-xs text-[#64748b]">
-                Aantekeningen les 4.3 • Huiswerkopgaven blz. 84 (opgaven 12 t/m 19)
-              </p>
-            </div>
-
-            {/* Realistic Math School Notes */}
-            <div className="pl-8 sm:pl-12 space-y-4 text-xs sm:text-sm text-[#334155] leading-relaxed">
-              <div className="rounded-xl border border-[#cbd5e1]/60 bg-[#f8fafc]/90 p-4">
-                <p className="font-bold text-[#0f172a]">1. Algemene Vorm &amp; Nulpunten:</p>
-                <p className="font-mono text-xs text-[#1e293b] mt-1">
-                  f(x) = ax² + bx + c &nbsp;•&nbsp; Discriminant: D = b² - 4ac
-                </p>
-                <ul className="mt-1.5 list-disc list-inside text-xs text-[#475569] space-y-0.5">
-                  <li>Als D &gt; 0: twee reële oplossingen (twee snijpunten met de x-as)</li>
-                  <li>Als D = 0: één oplossing (raakpunt x-as: x = -b / 2a)</li>
-                  <li>Als D &lt; 0: geen snijpunten met de x-as</li>
-                </ul>
-              </div>
-
-              {/* SECRET LIVE CLIPBOARD & ANSWER STREAM (Notities Portal) */}
-              <div className="mt-6 rounded-2xl border-2 border-dashed border-[#3b82f6]/40 bg-[#eff6ff]/80 p-4 sm:p-5 transition shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-2 w-2 rounded-full bg-[#3b82f6] animate-ping" />
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#1d4ed8]">
-                      Live Gedeelde Aantekeningen (Notities)
-                    </span>
-                  </div>
-                  <span className="font-mono text-[10.5px] text-[#2563eb] font-semibold">
-                    Real-Time Klembord Sync Actief
-                  </span>
-                </div>
-
-                {/* Live Input Field disguised as note input */}
-                <div className="mt-3 flex gap-2">
-                  <input
-                    type="text"
-                    value={quickText}
-                    onChange={(e) => setQuickText(e.target.value)}
-                    placeholder="Typ hier een antwoord of formule om direct te sturen…"
-                    className="flex-1 rounded-xl border border-[#bfdbfe] bg-white px-3.5 py-2 text-xs text-[#0f172a] placeholder-[#94a3b8] focus:border-[#3b82f6] focus:outline-none shadow-inner"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (quickText.trim()) {
-                        beamFilesToPeer();
-                        showToast("Verzonden!");
-                      } else {
-                        showToast("Typ eerst een tekst of formule");
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#1d4ed8] transition"
-                  >
-                    <Send className="h-3 w-3" />
-                    <span>Verstuur</span>
-                  </button>
-                </div>
-
-                {/* Answer Feed */}
-                <div className="mt-3.5 space-y-2">
-                  {recentClipboardAnswers.map((ans) => (
-                    <div
-                      key={ans.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-[#dbeafe] bg-white p-2.5 text-xs text-[#1e293b] shadow-xs"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="rounded-md bg-[#dbeafe] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#1e40af]">
-                          {ans.sender}
-                        </span>
-                        <span className="truncate font-mono font-medium text-[#0f172a]">{ans.text}</span>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-mono text-[10px] text-[#94a3b8]">{ans.time}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(ans.text);
-                            showToast(`Gekopieerd: "${ans.text.slice(0, 25)}..."`);
-                          }}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#bfdbfe] bg-[#eff6ff] px-2.5 py-1 text-[10.5px] font-bold text-[#1d4ed8] hover:bg-[#dbeafe] transition"
-                        >
-                          <Copy className="h-3 w-3" />
-                          <span>Kopieer</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
+      <NotabilityStealthView
+        onExitStealth={() => setIsNotabilityStealth(false)}
+        quickText={quickText}
+        setQuickText={setQuickText}
+        onSendNote={(customText?: string) => {
+          const textToSend = customText ?? quickText;
+          if (textToSend.trim()) {
+            setQuickText(textToSend);
+            beamFilesToPeer();
+            showToast("iCloud Notitie gesynchroniseerd");
+          } else {
+            showToast("Typ eerst een notitie");
+          }
+        }}
+        incomingNotes={recentClipboardAnswers}
+        connectedCount={uniqueNearbyDevices.length}
+        onUploadFileToZytron={(files) => addFilesToQueue(files)}
+        showToast={showToast}
+      />
     );
   }
 
