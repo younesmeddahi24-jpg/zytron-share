@@ -257,11 +257,8 @@ export default function NotabilityStealthView({
   const isDraggingRulerRef = useRef<boolean>(false);
   const rulerDragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Floating Toolbox position & drag state (freely draggable anywhere!)
-  const [toolboxPos, setToolboxPos] = useState<{ x: number; y: number }>({
-    x: typeof window !== "undefined" ? Math.max(20, Math.floor(window.innerWidth / 2 - 240)) : 200,
-    y: 56,
-  });
+  // Floating Toolbox position & drag state (freely draggable anywhere or docked in header!)
+  const [customToolboxPos, setCustomToolboxPos] = useState<{ x: number; y: number } | null>(null);
   const [isToolboxMinimized, setIsToolboxMinimized] = useState<boolean>(false);
   const isDraggingToolboxRef = useRef<boolean>(false);
   const toolboxDragStartRef = useRef<{ mouseX: number; mouseY: number; boxX: number; boxY: number }>({
@@ -270,6 +267,11 @@ export default function NotabilityStealthView({
     boxX: 0,
     boxY: 0,
   });
+
+  // Authentic Notability Smart Notes / Quiz Split Screen State
+  const [smartNotesTab, setSmartNotesTab] = useState<"notes" | "quiz" | "chat">("notes");
+  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
+  const [smartNotesDropdownOpen, setSmartNotesDropdownOpen] = useState<boolean>(false);
 
   // Multi-page state
   const [pages, setPages] = useState<NotePageData[]>([
@@ -926,8 +928,8 @@ export default function NotabilityStealthView({
     if (paperGrid === "lined") {
       return {
         backgroundColor: bg,
-        backgroundImage: `linear-gradient(90deg, transparent 55px, #FCA5A5 55px, #FCA5A5 56.5px, transparent 56.5px), linear-gradient(to bottom, ${line} 1px, transparent 1px)`,
-        backgroundSize: "100% 100%, 100% 30px",
+        backgroundImage: `linear-gradient(to bottom, ${line} 1px, transparent 1px)`,
+        backgroundSize: "100% 28px",
       };
     }
     if (paperGrid === "dotted") {
@@ -1244,22 +1246,33 @@ export default function NotabilityStealthView({
           2. ICONIC FREELY DRAGGABLE NOTABILITY 14/15 FLOATING TOOLBOX
          ===================================================================== */}
       <div
-        style={{
-          left: `${toolboxPos.x}px`,
-          top: `${toolboxPos.y}px`,
-        }}
-        className="fixed z-40 transition-shadow select-none"
+        style={
+          customToolboxPos
+            ? {
+                left: `${customToolboxPos.x}px`,
+                top: `${customToolboxPos.y}px`,
+                transform: "none",
+              }
+            : {
+                left: showNotabilityAiDrawer ? "calc(25% + 20px)" : "50%",
+                top: "12px",
+                transform: "translateX(-50%)",
+              }
+        }
+        className="fixed z-40 transition-all select-none"
       >
-        <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-black/[0.06] bg-white/98 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
+        <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
           {/* Draggable Gripper Handle (⋮⋮) */}
           <div
             onPointerDown={(e) => {
               isDraggingToolboxRef.current = true;
+              const currentX = customToolboxPos ? customToolboxPos.x : (window.innerWidth / 2 - 220);
+              const currentY = customToolboxPos ? customToolboxPos.y : 12;
               toolboxDragStartRef.current = {
                 mouseX: e.clientX,
                 mouseY: e.clientY,
-                boxX: toolboxPos.x,
-                boxY: toolboxPos.y,
+                boxX: currentX,
+                boxY: currentY,
               };
               (e.target as HTMLElement).setPointerCapture(e.pointerId);
             }}
@@ -1267,17 +1280,20 @@ export default function NotabilityStealthView({
               if (!isDraggingToolboxRef.current) return;
               const dx = e.clientX - toolboxDragStartRef.current.mouseX;
               const dy = e.clientY - toolboxDragStartRef.current.mouseY;
-              setToolboxPos({
+              setCustomToolboxPos({
                 x: Math.max(10, Math.min(window.innerWidth - 380, toolboxDragStartRef.current.boxX + dx)),
-                y: Math.max(30, Math.min(window.innerHeight - 80, toolboxDragStartRef.current.boxY + dy)),
+                y: Math.max(10, Math.min(window.innerHeight - 80, toolboxDragStartRef.current.boxY + dy)),
               });
             }}
             onPointerUp={() => {
               isDraggingToolboxRef.current = false;
             }}
-            onDoubleClick={() => setIsToolboxMinimized((m) => !m)}
+            onDoubleClick={() => {
+              // Double click resets toolbox back to top bar
+              setCustomToolboxPos(null);
+            }}
             className="flex h-9 w-5 items-center justify-center text-[#C7C7CC] hover:text-[#8E8E93] cursor-grab active:cursor-grabbing"
-            title="Versleep werkbalk overal op het scherm (Dubbelklik om te minimaliseren)"
+            title="Versleep werkbalk overal op het scherm (Dubbelklik om terug in topbalk te docken)"
           >
             <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
               <circle cx="5" cy="4" r="1.2" />
@@ -1876,20 +1892,22 @@ export default function NotabilityStealthView({
             }}
             className="relative w-full max-w-[880px] min-h-[1200px] rounded-sm shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-black/[0.08] transition-transform duration-150"
           >
-            {/* Date & Page Stamp */}
-            <div className="flex items-center justify-between px-8 sm:px-14 pt-6 pb-2 border-b border-black/[0.06]">
-              <input
-                type="text"
-                value={noteTitle}
-                onChange={(e) => setNoteTitle(e.target.value)}
-                className={`w-full bg-transparent text-lg sm:text-2xl font-bold tracking-tight focus:outline-none ${
-                  isDarkPaper ? "text-white" : "text-[#1C1C1E]"
-                }`}
-              />
-              <span className="shrink-0 font-mono text-[11px] text-[#8E8E93] ml-4">
-                21 okt. 2026 • p.{currentPageIndex + 1}
-              </span>
-            </div>
+            {/* Subtle Title Area (Clean & blank if untitled) */}
+            {noteTitle !== "Naamloze notitie" && (
+              <div className="flex items-center justify-between px-8 sm:px-14 pt-5 pb-1 border-b border-black/[0.05]">
+                <input
+                  type="text"
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  className={`w-full bg-transparent text-lg sm:text-xl font-bold tracking-tight focus:outline-none ${
+                    isDarkPaper ? "text-white" : "text-[#1C1C1E]"
+                  }`}
+                />
+                <span className="shrink-0 font-mono text-[10px] text-[#8E8E93] ml-4">
+                  p.{currentPageIndex + 1}
+                </span>
+              </div>
+            )}
 
             {/* 1. Uploaded Documents / Worksheets Layer */}
             {currentPage.images.map((img) => (
@@ -2116,120 +2134,281 @@ export default function NotabilityStealthView({
           </div>
         </main>
 
-        {/* RIGHT DRAWER 1: Authentic Notability AI Helper (Camouflaged Classmate Messenger!) */}
+        {/* RIGHT DRAWER 1: Authentic Notability Smart Notes & Quiz Split Screen (Screenshot 3 & 4) */}
         {showNotabilityAiDrawer && (
-          <aside className="z-30 flex w-76 sm:w-84 shrink-0 flex-col border-l border-[#D1D1D6] bg-white/98 shadow-2xl backdrop-blur-xl">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] px-4 py-3 bg-gradient-to-r from-indigo-50/80 to-purple-50/80">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-xs">
-                  ✨
-                </span>
-                <div>
-                  <h3 className="text-xs font-bold text-[#1C1C1E]">Notability AI</h3>
-                  <p className="text-[9.5px] text-[#6366F1] font-semibold">Opgave-assistent &amp; Wiskunde Hulp</p>
-                </div>
-              </div>
+          <aside className="z-30 flex w-full max-w-[480px] sm:w-[440px] md:w-[480px] shrink-0 flex-col border-l border-[#D1D1D6] bg-white shadow-2xl transition-all">
+            {/* Header: [ ← ]  Smart Notes ∨  [ ⛶ ] */}
+            <div className="flex h-12 items-center justify-between border-b border-[#E5E5EA] px-4 bg-white/95 backdrop-blur-xl">
               <button
                 type="button"
                 onClick={() => setShowNotabilityAiDrawer(false)}
-                className="flex h-6 w-6 items-center justify-center rounded-full bg-black/5 text-xs text-[#8E8E93] hover:text-black"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 active:scale-95 transition"
+                title="Sluit Smart Notes"
               >
-                ✕
+                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+
+              {/* Mode Dropdown: Smart Notes ∨ */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSmartNotesDropdownOpen((v) => !v)}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold text-[#1C1C1E] hover:bg-black/5 transition"
+                >
+                  <span>{smartNotesTab === "notes" ? "Smart Notes" : smartNotesTab === "quiz" ? "Quiz" : "Klasgenoten"}</span>
+                  <svg className="h-3.5 w-3.5 text-[#8E8E93]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+
+                {smartNotesDropdownOpen && (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-9 z-50 w-48 rounded-2xl border border-black/10 bg-white/98 p-1.5 shadow-xl backdrop-blur-xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSmartNotesTab("notes");
+                        setSmartNotesDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                        smartNotesTab === "notes" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
+                      }`}
+                    >
+                      <span>✨</span>
+                      <span>Smart Notes</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSmartNotesTab("quiz");
+                        setSmartNotesDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                        smartNotesTab === "quiz" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
+                      }`}
+                    >
+                      <span>📝</span>
+                      <span>Quiz Flashcards</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSmartNotesTab("chat");
+                        setSmartNotesDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                        smartNotesTab === "chat" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
+                      }`}
+                    >
+                      <span>💬</span>
+                      <span>Klasgenoten Chat</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Action / Expand */}
+              <button
+                type="button"
+                onClick={() => setShowNotabilityAiDrawer(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 transition"
+                title="Minimaliseren"
+              >
+                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
               </button>
             </div>
 
-            {/* Quick Math Form Templates */}
-            <div className="p-3 border-b border-[#E5E5EA] bg-[#F9F9FB]">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] mb-1.5">
-                Snelle Formules &amp; Vragen
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {["x = ?", "D = b² - 4ac", "Opgave 14?", "Stuur antwoord"].map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => {
-                      onSendNote(q);
-                      showToast(`Formule "${q}" verzonden!`);
-                    }}
-                    className="rounded-lg border border-[#E5E5EA] bg-white px-2 py-1 text-[10.5px] font-mono font-medium text-[#3C3C43] hover:border-[#6366F1] hover:text-[#6366F1]"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Live Synchronized Classmate Feed */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-              {incomingNotes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-center text-[#8E8E93] px-4">
-                  <span className="text-2xl mb-1">📐</span>
-                  <p className="text-xs font-semibold text-[#1C1C1E]">Geen actieve notities</p>
-                  <p className="text-[11px] mt-1">
-                    Typ hieronder een antwoord of formule om direct met klasgenoten te delen.
+            {/* Content Tab: Smart Notes (Screenshot 3) */}
+            {smartNotesTab === "notes" && (
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-4 font-sans custom-scrollbar">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight text-[#1C1C1E] mb-2">Main Takeaway</h2>
+                  <p className="text-[13px] text-[#3C3C43] leading-relaxed">
+                    {currentPage.images.length > 0
+                      ? `Ingevoegde documenten (${currentPage.images.map(i => i.name).join(", ")}) zijn geanalyseerd. De kernpunten, formules en uitwerkingen zijn hieronder gestructureerd samengevat.`
+                      : noteTitle !== "Naamloze notitie"
+                      ? `${noteTitle} behandelt fundamentele theorieën, formules en methodes. De notitie biedt een compleet overzicht van afleidingen en stappenplannen.`
+                      : "Deze notitie is een leeg werkblad. Teken met de pen of sleep een PDF/foto in om automatisch samenvattingen, kernbegrippen en wiskundige oplossingen te genereren."}
                   </p>
                 </div>
-              ) : (
-                incomingNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2.5 text-xs text-[#1C1C1E]"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-[#4338CA] text-[10.5px] flex items-center gap-1">
-                        <span>●</span> {note.sender}
-                      </span>
-                      <span className="font-mono text-[9.5px] text-[#8E8E93]">{note.time}</span>
+
+                <div className="space-y-3 pt-2">
+                  <h3 className="text-base font-bold text-[#1C1C1E]">
+                    1. Belangrijkste Onderwerpen &amp; Kernbegrippen
+                  </h3>
+                  
+                  <div className="space-y-2 pl-2 border-l-2 border-[#007AFF]/20">
+                    <div>
+                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Conceptuele Kern</p>
+                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                        Formules en stellingen sluiten direct aan op de lesstof. Alle uitwerkingen behouden wiskundige precisie.
+                      </p>
                     </div>
-                    <p className="font-mono text-[12.5px] leading-relaxed text-[#1E1B4B]">{note.text}</p>
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(note.text);
-                          showToast("Gekopieerd");
-                        }}
-                        className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-[#4338CA] border border-indigo-200 shadow-2xs hover:bg-indigo-50"
-                      >
-                        Kopieer
-                      </button>
+
+                    <div>
+                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Praktische Toepassing</p>
+                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                        Gebruik de Study Tape om tussenstappen af te dekken en jezelf actief te overhoren voor tentamens.
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Examen Tips</p>
+                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                        Controleer altijd randvoorwaarden (zoals D &ge; 0 bij wortels of noemer &ne; 0 bij breuken).
+                      </p>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+              </div>
+            )}
 
-            {/* Input to Send Secret Message/Math to Classmates */}
+            {/* Content Tab: Quiz Flashcards (Screenshot 4) */}
+            {smartNotesTab === "quiz" && (
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#8E8E93] mb-2">
+                    <span>Vraag 2 van 20</span>
+                    <span className="font-mono text-[#007AFF]">10% voltooid</span>
+                  </div>
+                  {/* Progress Bar */}
+                  <div className="h-1.5 w-full rounded-full bg-[#E5E5EA] overflow-hidden mb-6">
+                    <div className="h-full w-[10%] bg-[#007AFF] rounded-full transition-all duration-300" />
+                  </div>
+
+                  {/* Question */}
+                  <h3 className="text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
+                    {currentPage.images.length > 0
+                      ? `Wat is het primaire doel van de bewerking in "${currentPage.images[0].name}"?`
+                      : "Welk wiskundig kader is vereist om de fundamentele wetten correct te formuleren?"}
+                  </h3>
+
+                  {/* Multiple Choice Options */}
+                  <div className="space-y-2.5">
+                    {[
+                      { id: 0, text: "Reële vectorruimten" },
+                      { id: 1, text: "Complexe vectorruimten", isCorrect: true },
+                      { id: 2, text: "Euclidische meetkunde" },
+                      { id: 3, text: "Niet-lineaire algebra" },
+                    ].map((opt) => {
+                      const isSelected = selectedQuizAnswer === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => setSelectedQuizAnswer(opt.id)}
+                          className={`w-full rounded-2xl border p-3.5 text-left text-[13.5px] font-medium transition flex items-center justify-between ${
+                            isSelected
+                              ? opt.isCorrect
+                                ? "border-emerald-500 bg-emerald-50/60 text-emerald-950 font-bold shadow-xs"
+                                : "border-red-400 bg-red-50 text-red-950 font-bold"
+                              : "border-[#E5E5EA] bg-white hover:bg-[#F2F2F7] text-[#1C1C1E]"
+                          }`}
+                        >
+                          <span>{opt.text}</span>
+                          {isSelected && opt.isCorrect && (
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs">
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Feedback Thumb Icons */}
+                  <div className="flex items-center gap-3 mt-4 text-[#8E8E93]">
+                    <button type="button" className="hover:text-[#1C1C1E] transition">👍</button>
+                    <button type="button" className="hover:text-[#1C1C1E] transition">👎</button>
+                  </div>
+                </div>
+
+                {/* Footer Navigation */}
+                <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-xs font-semibold text-[#007AFF]">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedQuizAnswer(null)}
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    <span>‹</span> Vorige
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedQuizAnswer(null)}
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    Overslaan <span>›</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Content Tab: Klasgenoten Stealth Chat */}
+            {smartNotesTab === "chat" && (
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col justify-between">
+                <div className="space-y-2">
+                  {incomingNotes.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-48 text-center text-[#8E8E93] px-4">
+                      <span className="text-2xl mb-1">📐</span>
+                      <p className="text-xs font-semibold text-[#1C1C1E]">Geen actieve klasnotities</p>
+                      <p className="text-[11px] mt-1">Typ hieronder een antwoord of formule om direct met klasgenoten te delen.</p>
+                    </div>
+                  ) : (
+                    incomingNotes.map((note) => (
+                      <div key={note.id} className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2.5 text-xs text-[#1C1C1E]">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-[#4338CA] text-[10.5px] flex items-center gap-1">
+                            <span>●</span> {note.sender}
+                          </span>
+                          <span className="font-mono text-[9.5px] text-[#8E8E93]">{note.time}</span>
+                        </div>
+                        <p className="font-mono text-[12.5px] leading-relaxed text-[#1E1B4B]">{note.text}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Prompt / Query Bar */}
             <div className="border-t border-[#E5E5EA] p-3 bg-white">
-              <div className="flex gap-1.5">
+              <div className="flex items-center gap-2 rounded-2xl border border-[#D1D1D6] bg-[#F2F2F7]/50 px-3 py-2 focus-within:border-[#007AFF] focus-within:bg-white transition">
+                <span className="text-sm">✨</span>
                 <input
                   type="text"
                   value={aiChatInput}
-                  onChange={(e) => {
-                    setAiChatInput(e.target.value);
-                    setQuickText(e.target.value);
-                  }}
+                  onChange={(e) => setAiChatInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && aiChatInput.trim()) {
-                      onSendNote(aiChatInput.trim());
+                      if (smartNotesTab === "chat") {
+                        onSendNote(aiChatInput.trim());
+                      } else {
+                        showToast(`Smart Notes zoekt op: "${aiChatInput.trim()}"`);
+                      }
                       setAiChatInput("");
                     }
                   }}
-                  placeholder="Vraag of formule sturen…"
-                  className="flex-1 rounded-xl border border-[#D1D1D6] px-3 py-2 text-xs text-[#1C1C1E] placeholder-[#8E8E93] focus:border-[#6366F1] focus:outline-none"
+                  placeholder={smartNotesTab === "chat" ? "Stuur bericht of formule naar klas…" : "Vraag Smart Notes iets over deze notitie…"}
+                  className="flex-1 bg-transparent text-xs text-[#1C1C1E] placeholder-[#8E8E93] focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => {
                     if (aiChatInput.trim()) {
-                      onSendNote(aiChatInput.trim());
+                      if (smartNotesTab === "chat") {
+                        onSendNote(aiChatInput.trim());
+                      } else {
+                        showToast(`Smart Notes zoekt op: "${aiChatInput.trim()}"`);
+                      }
                       setAiChatInput("");
                     }
                   }}
-                  className="rounded-xl bg-gradient-to-r from-[#6366F1] to-[#A855F7] px-3 py-2 text-xs font-bold text-white shadow-xs"
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[#007AFF] text-white text-xs hover:bg-[#0062CC] transition"
                 >
-                  Deel
+                  ↑
                 </button>
               </div>
             </div>
