@@ -1245,7 +1245,7 @@ export default function NotabilityStealthView({
 
       {/* Note Replay Audio Playback Bar (When audio was recorded) */}
       {hasRecordedAudio && (
-        <div className="relative z-30 flex h-8 items-center justify-between border-b border-[#D1D1D6] bg-amber-50/95 px-6 text-xs text-[#1C1C1E]">
+        <div className="relative z-30 flex h-8 items-center justify-between border-b border-[#D1D1D6] bg-[#F7F7F7]/95 px-6 text-xs text-[#1C1C1E]">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -1257,11 +1257,11 @@ export default function NotabilityStealthView({
             <span className="font-mono text-[11px] text-[#636366]">
               {formatTimer(recordingSeconds)} / {formatTimer(recordingSeconds)}
             </span>
-            <div className="h-1.5 w-48 rounded-full bg-amber-200 overflow-hidden">
-              <div className="h-full w-2/3 bg-amber-500 rounded-full" />
+            <div className="h-1.5 w-48 rounded-full bg-[#E5E5EA] overflow-hidden">
+              <div className="h-full w-2/3 bg-[#FF3B30] rounded-full" />
             </div>
-            <span className="text-[10.5px] font-semibold text-[#78350F]">
-              Note Replay • Audio gekoppeld aan inktlijnen
+            <span className="text-[10.5px] font-semibold text-[#636366]">
+              Opname
             </span>
           </div>
           <button
@@ -1401,7 +1401,7 @@ export default function NotabilityStealthView({
                 }}
                 className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
                   activeTool === "text"
-                    ? "bg-[#007AFF]/12 text-[#007AFF] ring-1 ring-[#007AFF]/30"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
                     : "text-[#3C3C43] hover:bg-black/[0.04]"
                 }`}
                 title="Tekst typen (T)"
@@ -1425,7 +1425,7 @@ export default function NotabilityStealthView({
                   }}
                   className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                     activeTool === "pen"
-                      ? "bg-[#007AFF]/10 ring-1 ring-[#007AFF]/30 -translate-y-0.5"
+                      ? "bg-black/[0.08]"
                       : "hover:bg-black/[0.04]"
                   }`}
                   title="Balpen (Klik nogmaals voor kleur & dikte)"
@@ -1484,7 +1484,7 @@ export default function NotabilityStealthView({
                 }}
                 className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                   activeTool === "pencil"
-                    ? "bg-[#007AFF]/10 ring-1 ring-[#007AFF]/30 -translate-y-0.5"
+                    ? "bg-black/[0.08]"
                     : "hover:bg-black/[0.04]"
                 }`}
                 title="Potlood"
@@ -1510,7 +1510,7 @@ export default function NotabilityStealthView({
                   }}
                   className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                     activeTool === "highlighter"
-                      ? "bg-[#007AFF]/10 ring-1 ring-[#007AFF]/30 -translate-y-0.5"
+                      ? "bg-black/[0.08]"
                       : "hover:bg-black/[0.04]"
                   }`}
                   title="Markeerstift"
@@ -1564,7 +1564,7 @@ export default function NotabilityStealthView({
                   }}
                   className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                     activeTool === "eraser"
-                      ? "bg-[#007AFF]/10 ring-1 ring-[#007AFF]/30 -translate-y-0.5"
+                      ? "bg-black/[0.08]"
                       : "hover:bg-black/[0.04]"
                   }`}
                   title="Gum (Hele lijn of Gedeeltelijk)"
@@ -1625,7 +1625,7 @@ export default function NotabilityStealthView({
                   }}
                   className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                     activeTool === "tape"
-                      ? "bg-amber-400/20 text-amber-700 ring-1 ring-amber-400"
+                      ? "bg-black/[0.08] text-[#1C1C1E]"
                       : "text-[#3C3C43] hover:bg-black/[0.04]"
                   }`}
                   title="Studietracks / Tape (Dek antwoorden af om te leren; tik om te onthullen!)"
@@ -1667,7 +1667,7 @@ export default function NotabilityStealthView({
                 }}
                 className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
                   activeTool === "lasso"
-                    ? "bg-[#007AFF]/12 text-[#007AFF] ring-1 ring-[#007AFF]/30"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
                     : "text-[#3C3C43] hover:bg-black/[0.04]"
                 }`}
                 title="Lasso Selectie"
@@ -1687,7 +1687,7 @@ export default function NotabilityStealthView({
                 }}
                 className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
                   activeTool === "laser"
-                    ? "bg-[#FF3B30]/15 text-[#FF3B30] ring-1 ring-[#FF3B30]/40"
+                    ? "bg-black/[0.08] text-[#FF3B30]"
                     : "text-[#3C3C43] hover:bg-black/[0.04]"
                 }`}
                 title="Laserpointer"
@@ -1704,7 +1704,7 @@ export default function NotabilityStealthView({
                 onClick={() => setShowRuler((v) => !v)}
                 className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
                   showRuler
-                    ? "bg-[#007AFF]/12 text-[#007AFF] ring-1 ring-[#007AFF]/30"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
                     : "text-[#3C3C43] hover:bg-black/[0.04]"
                 }`}
                 title="Liniaal tonen/verbergen"
@@ -1734,7 +1734,7 @@ export default function NotabilityStealthView({
               <button
                 type="button"
                 onClick={() => docUploadInputRef.current?.click()}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F2F2F7] text-[#007AFF] hover:bg-[#007AFF] hover:text-white transition font-bold text-lg"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition text-xl font-light"
                 title="Foto, PDF of Werkblad uploaden op papier"
               >
                 +
