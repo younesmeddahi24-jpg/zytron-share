@@ -958,201 +958,67 @@ export default function NotabilityStealthView({
 
 
       {/* =====================================================================
-          1. AUTHENTIC NOTABILITY iPadOS TOP NAVIGATION BAR
+          AUTHENTIC NOTABILITY iPadOS FLOATING ISLANDS HEADER
          ===================================================================== */}
-      <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#C6C6C8]/60 bg-[#F7F7F7]/90 px-3 backdrop-blur-xl shadow-[0_0.5px_0_rgba(0,0,0,0.08)]">
-        {/* Left Navigation Group: Back to Library, Sidebar Toggle, Document Import */}
-        <div className="flex items-center gap-1.5">
-          {/* Back Arrow (<) : Single click toggles Subject Library, Double click exits to Zytron */}
+      <div className="fixed top-3 left-3 right-3 z-40 flex items-center justify-between pointer-events-none select-none">
+        {/* Island 1: Back to Library */}
+        <div className="flex items-center gap-2 pointer-events-auto">
           <button
             type="button"
             onClick={() => setShowLibrarySidebar((v) => !v)}
             onDoubleClick={onExitStealth}
-            className="flex h-8 items-center gap-1 rounded-lg px-2 text-[#007AFF] hover:bg-black/[0.05] active:scale-95 transition"
-            title="Klik voor Vakken-bibliotheek • Dubbelklik (of Esc) voor Zytron Radar"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-black/[0.08] bg-white/98 text-[#1C1C1E] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:bg-black/5 active:scale-95 transition backdrop-blur-xl"
+            title="Bibliotheek • Dubbelklik om Zytron te openen"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
-            <span className="text-[13px] font-semibold hidden sm:inline">Bibliotheek</span>
-          </button>
-
-          {/* Sidebar Icon */}
-          <button
-            type="button"
-            onClick={() => setShowLibrarySidebar((v) => !v)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-              showLibrarySidebar ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Zijbalk Vakken & Onderwerpen"
-          >
-            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2.5" />
-              <line x1="9" y1="3" x2="9" y2="21" />
-            </svg>
-          </button>
-
-          {/* Import Worksheet / PDF / Photo Icon */}
-          <button
-            type="button"
-            onClick={() => docUploadInputRef.current?.click()}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#3C3C43] hover:bg-black/[0.05] transition"
-            title="Importeer Werkblad / PDF / Foto"
-          >
-            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
           </button>
         </div>
 
-        {/* Center Note Title & Subject Pill */}
-        <div className="flex flex-col items-center justify-center min-w-0 max-w-[42%] sm:max-w-[48%]">
-          <div className="flex items-center gap-1.5 w-full justify-center">
-            <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{ backgroundColor: activeSubject.color }}
-            />
-            <input
-              type="text"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              className="w-full truncate bg-transparent text-center text-[13.5px] font-semibold text-[#1C1C1E] focus:bg-white focus:px-2 focus:rounded-md focus:outline-none focus:ring-1 focus:ring-[#007AFF]"
-            />
-          </div>
-          <span className="text-[10px] text-[#8E8E93] leading-tight truncate">
-            {activeSubject.name} · {currentPageIndex + 1}/{pages.length}
-          </span>
-        </div>
-
-        {/* Right Group: Zoom Pill, Microphone, Notability AI (Secret Chat), Search, Page Thumbnails, Paper Settings (...) */}
-        <div className="flex items-center gap-1">
-          {/* Zoom Level Indicator Pill */}
-          <div className="hidden items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-2 py-0.5 text-[10.5px] font-mono font-bold text-[#636366]">
-            <button
-              type="button"
-              onClick={() => setZoomLevel((z) => Math.max(0.75, Number((z - 0.25).toFixed(2))))}
-              className="hover:text-black"
-            >
-              -
-            </button>
-            <span>{Math.round(zoomLevel * 100)}%</span>
-            <button
-              type="button"
-              onClick={() => setZoomLevel((z) => Math.min(1.5, Number((z + 0.25).toFixed(2))))}
-              className="hover:text-black"
-            >
-              +
-            </button>
-          </div>
-
-          {/* Notability Iconic Microphone Audio Recorder with Live Bouncing Waveform */}
+        {/* Island 3: Floating Utilities Capsule (Undo, Redo, More ···, Smart Notes ✨, Pages ❐) */}
+        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-black/[0.08] bg-white/98 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
+          {/* Undo */}
           <button
             type="button"
-            onClick={() => {
-              if (!isRecordingAudio) {
-                setIsRecordingAudio(true);
-                setRecordingSeconds(0);
-              } else {
-                setIsRecordingAudio(false);
-                setHasRecordedAudio(true);
-                showToast("Spraakopname gesynchroniseerd met notitietijdlijn");
-              }
-            }}
-            className={`flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold transition ${
-              isRecordingAudio
-                ? "bg-[#FF3B30] text-white animate-pulse shadow-xs"
-                : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Geluidsopname starten/stoppen (Note Replay)"
+            onClick={handleUndo}
+            disabled={currentPage.strokes.length === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] active:scale-90 disabled:opacity-30 transition"
+            title="Ongedaan maken (Ctrl+Z)"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
-            </svg>
-            {isRecordingAudio && <span className="font-mono text-[11px]">{formatTimer(recordingSeconds)}</span>}
-          </button>
-
-          {/* NOTABILITY AI (Camouflaged Secret Classmate Messenger!) */}
-          <button
-            type="button"
-            onClick={() => setShowNotabilityAiDrawer((v) => !v)}
-            className={`flex h-8 items-center gap-1 rounded-xl px-2 text-xs font-bold transition ${
-              showNotabilityAiDrawer
-                ? "bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-xs"
-                : "text-[#6366F1] hover:bg-[#6366F1]/10"
-            }`}
-            title="Zytron AI"
-          >
-            <span className="text-sm">✨</span>
-            <span className="hidden sm:inline font-sans text-[11.5px]">Zytron AI</span>
-            {incomingNotes.length > 0 && (
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-            )}
-          </button>
-
-          {/* Search Icon */}
-          <button
-            type="button"
-            onClick={() => setShowSearchBar((v) => !v)}
-            className={`relative flex h-8 w-8 items-center justify-center rounded-lg transition ${
-              showSearchBar ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Zoek in notitie"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 14L4 9l5-5" />
+              <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
             </svg>
           </button>
 
-          {/* Page Manager (Stacked Pages Icon) */}
+          {/* Redo */}
           <button
             type="button"
-            onClick={() => setShowPagesSidebar((v) => !v)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-              showPagesSidebar ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Pagina-overzicht"
+            onClick={handleRedo}
+            disabled={currentPage.redoStack.length === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] active:scale-90 disabled:opacity-30 transition"
+            title="Opnieuw (Ctrl+Shift+Z)"
           >
-            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="8" y="2" width="13" height="16" rx="2" />
-              <path d="M16 18v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" />
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 14l5-5-5-5" />
+              <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
             </svg>
           </button>
 
-          {/* Share / Export Icon */}
-          <button
-            type="button"
-            onClick={handleExportNote}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#3C3C43] hover:bg-black/[0.05] transition"
-            title="Deel of exporteer notitie (PDF / Afbeelding)"
-          >
-            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
-          </button>
-
-          {/* More / Paper Settings (...) */}
+          {/* More Options (··· in circle) */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowTemplateMenu((v) => !v)}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-                showTemplateMenu ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                showTemplateMenu ? "bg-black/[0.08] text-[#1C1C1E]" : "text-[#3C3C43] hover:bg-black/[0.05]"
               }`}
-              title="Papier, Rooster & Opties"
+              title="Notitie-opties (Papier & Rooster)"
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="5" cy="12" r="1.75" />
-                <circle cx="12" cy="12" r="1.75" />
-                <circle cx="19" cy="12" r="1.75" />
-              </svg>
+              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px] font-bold">
+                ···
+              </div>
             </button>
 
             {/* Authentic Notability Paper & Template Popover */}
@@ -1176,10 +1042,10 @@ export default function NotabilityStealthView({
                 <div className="grid grid-cols-4 gap-1.5 mb-4">
                   {(
                     [
-                      { id: "grid", label: "Ruitjes" },
-                      { id: "lined", label: "Gelijnd" },
-                      { id: "dotted", label: "Stippels" },
                       { id: "blank", label: "Blanco" },
+                      { id: "lined", label: "Gelijnd" },
+                      { id: "grid", label: "Ruitjes" },
+                      { id: "dotted", label: "Stippels" },
                     ] as const
                   ).map((t) => (
                     <button
@@ -1240,7 +1106,7 @@ export default function NotabilityStealthView({
                     }}
                     className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
                   >
-                    <span>Exporteren</span>
+                    <span>Exporteren (PDF / PNG)</span>
                     <span>📥</span>
                   </button>
 
@@ -1261,15 +1127,48 @@ export default function NotabilityStealthView({
                     onClick={onExitStealth}
                     className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#007AFF] hover:bg-[#F2F2F7] transition"
                   >
-                    <span>Terug naar Zytron</span>
+                    <span>Terug naar Zytron Radar</span>
                     <span>➔</span>
                   </button>
                 </div>
               </div>
             )}
           </div>
+
+          {/* Smart Notes (✨) */}
+          <button
+            type="button"
+            onClick={() => setShowNotabilityAiDrawer((v) => !v)}
+            className={`flex h-8 items-center gap-1 rounded-xl px-2.5 text-xs font-semibold transition ${
+              showNotabilityAiDrawer
+                ? "bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-xs"
+                : "text-[#6366F1] hover:bg-[#6366F1]/10"
+            }`}
+            title="Smart Notes / Zytron AI"
+          >
+            <span className="text-sm">✨</span>
+            <span className="hidden sm:inline font-sans text-[11px] font-bold">Smart Notes</span>
+            {incomingNotes.length > 0 && (
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+            )}
+          </button>
+
+          {/* Content / Page Manager (❐) */}
+          <button
+            type="button"
+            onClick={() => setShowPagesSidebar((v) => !v)}
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+              showPagesSidebar ? "bg-black/[0.08] text-[#1C1C1E]" : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Paginabeheer"
+          >
+            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="8" y="2" width="13" height="16" rx="2" />
+              <path d="M16 18v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" />
+            </svg>
+          </button>
         </div>
-      </header>
+      </div>
 
       {/* Note Replay Audio Playback Bar (When audio was recorded) */}
       {hasRecordedAudio && (
@@ -1392,54 +1291,7 @@ export default function NotabilityStealthView({
 
           {!isToolboxMinimized ? (
             <>
-              {/* Undo & Redo */}
-              <button
-                type="button"
-                onClick={handleUndo}
-                disabled={currentPage.strokes.length === 0}
-                className="flex h-9 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] disabled:opacity-30 transition"
-                title="Ongedaan maken (Ctrl+Z)"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 14L4 9l5-5" />
-                  <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={handleRedo}
-                disabled={currentPage.redoStack.length === 0}
-                className="flex h-9 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] disabled:opacity-30 transition"
-                title="Opnieuw (Ctrl+Shift+Z)"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 14l5-5-5-5" />
-                  <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
-                </svg>
-              </button>
-
-              <div className="mx-0.5 h-6 w-px bg-[#E5E5EA]" />
-
-              {/* 1. TEXT TOOL (T) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("text");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
-                  activeTool === "text"
-                    ? "bg-black/[0.08] text-[#1C1C1E]"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Tekst typen (T)"
-              >
-                <div className="flex h-6 w-6 items-center justify-center rounded border border-dashed border-current font-serif text-sm font-bold">
-                  T
-                </div>
-              </button>
-
-              {/* 2. BALLPOINT PEN */}
+              {/* 1. FOUNTAIN PEN */}
               <div className="relative">
                 <button
                   type="button"
@@ -1458,12 +1310,16 @@ export default function NotabilityStealthView({
                   }`}
                   title="Balpen (Klik nogmaals voor kleur & dikte)"
                 >
-                  <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none">
-                    <path d="M11 28L12.5 14H19.5L21 28H11Z" fill="#F2F2F7" stroke="#3C3C43" strokeWidth="1.5" />
-                    <rect x="12.2" y="16" width="7.6" height="3.5" fill={penColor} />
-                    <path d="M12.5 14L15 6.5C15.3 5.5 16.7 5.5 17 6.5L19.5 14H12.5Z" fill="#E5E5EA" stroke="#3C3C43" strokeWidth="1.4" />
-                    <path d="M14.8 7.5L16 3.5L17.2 7.5H14.8Z" fill={penColor} />
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                    <path d="M2 2l7.586 7.586"/>
+                    <circle cx="11" cy="11" r="2" fill={penColor}/>
                   </svg>
+                  <span
+                    className="absolute bottom-1.5 right-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: penColor }}
+                  />
                 </button>
 
                 {openPopoverTool === "pen" && (
@@ -1485,7 +1341,19 @@ export default function NotabilityStealthView({
                         ))}
                       </div>
                     </div>
-                    <div className="mb-3.5 flex items-center gap-3 rounded-xl bg-[#F2F2F7] px-3 py-2.5"><span className="rounded-full" style={{ width: 4, height: 4, backgroundColor: penColor }} /><input type="range" min={1} max={14} step={0.5} value={penSize} onChange={(e) => setPenSize(Number(e.target.value))} className="h-1 flex-1 cursor-pointer accent-[#007AFF]" /><span className="rounded-full" style={{ width: 14, height: 14, backgroundColor: penColor }} /></div>
+                    <div className="mb-3.5 flex items-center gap-3 rounded-xl bg-[#F2F2F7] px-3 py-2.5">
+                      <span className="rounded-full" style={{ width: 4, height: 4, backgroundColor: penColor }} />
+                      <input
+                        type="range"
+                        min={1}
+                        max={14}
+                        step={0.5}
+                        value={penSize}
+                        onChange={(e) => setPenSize(Number(e.target.value))}
+                        className="h-1 flex-1 cursor-pointer accent-[#007AFF]"
+                      />
+                      <span className="rounded-full" style={{ width: 14, height: 14, backgroundColor: penColor }} />
+                    </div>
                     <div className="grid grid-cols-5 gap-2">
                       {PEN_COLORS.map((c) => (
                         <button
@@ -1519,7 +1387,7 @@ export default function NotabilityStealthView({
                 )}
               </div>
 
-              {/* 3. PENCIL */}
+              {/* 2. PENCIL */}
               <button
                 type="button"
                 onClick={() => {
@@ -1533,14 +1401,13 @@ export default function NotabilityStealthView({
                 }`}
                 title="Potlood"
               >
-                <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none">
-                  <path d="M12 28V15L16 5L20 15V28H12Z" fill="#FDE68A" stroke="#3C3C43" strokeWidth="1.5" />
-                  <path d="M12 15H20V28H12V15Z" fill="#E5E5EA" stroke="#3C3C43" strokeWidth="1.5" />
-                  <path d="M14.3 9.2L16 5L17.7 9.2H14.3Z" fill={pencilColor} />
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                  <path d="M15 5l4 4"/>
                 </svg>
               </button>
 
-              {/* 4. HIGHLIGHTER */}
+              {/* 3. HIGHLIGHTER */}
               <div className="relative">
                 <button
                   type="button"
@@ -1559,11 +1426,14 @@ export default function NotabilityStealthView({
                   }`}
                   title="Markeerstift"
                 >
-                  <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none">
-                    <path d="M13 11L19 7.5V14H13V11Z" fill={highlighterColor} opacity="0.85" />
-                    <path d="M10.5 28L12 14H20L21.5 28H10.5Z" fill="#FFFFFF" stroke="#3C3C43" strokeWidth="1.5" />
-                    <rect x="11.5" y="17" width="9" height="5" fill={highlighterColor} opacity="0.85" />
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="m9 11-6 6v3h3l6-6"/>
+                    <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>
                   </svg>
+                  <span
+                    className="absolute bottom-1.5 right-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: highlighterColor }}
+                  />
                 </button>
 
                 {openPopoverTool === "highlighter" && (
@@ -1594,7 +1464,7 @@ export default function NotabilityStealthView({
                 )}
               </div>
 
-              {/* 5. ERASER */}
+              {/* 4. ERASER */}
               <div className="relative">
                 <button
                   type="button"
@@ -1611,11 +1481,12 @@ export default function NotabilityStealthView({
                       ? "bg-black/[0.08]"
                       : "hover:bg-black/[0.04]"
                   }`}
-                  title="Gum (Hele lijn of Gedeeltelijk)"
+                  title="Gum"
                 >
-                  <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none">
-                    <rect x="11" y="7" width="10" height="9" rx="2" fill="#FDA4AF" stroke="#3C3C43" strokeWidth="1.5" />
-                    <path d="M10.5 14H21.5L22 28H10L10.5 14Z" fill="#F2F2F7" stroke="#3C3C43" strokeWidth="1.5" />
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>
+                    <path d="M22 21H7"/>
+                    <path d="m5 11 9 9"/>
                   </svg>
                 </button>
 
@@ -1655,7 +1526,123 @@ export default function NotabilityStealthView({
                 )}
               </div>
 
-              {/* 6. NOTABILITY TAPE TOOL (Study Answer Cover) */}
+              {/* 5. TEXT TOOL (Tt - Authentic Double T icon) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTool("text");
+                  setOpenPopoverTool(null);
+                }}
+                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
+                  activeTool === "text"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
+                    : "text-[#3C3C43] hover:bg-black/[0.04]"
+                }`}
+                title="Tekst typen (Tt)"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 7V4h10v3" />
+                  <path d="M9 4v16" />
+                  <path d="M15 11v-2h6v2" />
+                  <path d="M18 9v11" />
+                </svg>
+              </button>
+
+              {/* 6. LASSO TOOL (Authentic dashed box with 4 corner anchors) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTool("lasso");
+                  setOpenPopoverTool(null);
+                }}
+                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
+                  activeTool === "lasso"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
+                    : "text-[#3C3C43] hover:bg-black/[0.04]"
+                }`}
+                title="Lasso selectie"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeDasharray="2 2">
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <circle cx="4" cy="4" r="1.5" fill="currentColor" stroke="none" />
+                  <circle cx="20" cy="4" r="1.5" fill="currentColor" stroke="none" />
+                  <circle cx="4" cy="20" r="1.5" fill="currentColor" stroke="none" />
+                  <circle cx="20" cy="20" r="1.5" fill="currentColor" stroke="none" />
+                </svg>
+              </button>
+
+              {/* 7. INSERT MEDIA (+ / Photo Button) */}
+              <button
+                type="button"
+                onClick={() => docUploadInputRef.current?.click()}
+                className="flex h-10 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition"
+                title="Voeg foto, werkblad of document in"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </button>
+
+              {/* 8. AUDIO RECORDER (Integrated right in the capsule!) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isRecordingAudio) {
+                    setIsRecordingAudio(true);
+                    setRecordingSeconds(0);
+                  } else {
+                    setIsRecordingAudio(false);
+                    setHasRecordedAudio(true);
+                    showToast("Spraakopname gesynchroniseerd met notitietijdlijn");
+                  }
+                }}
+                className="flex h-10 items-center justify-center rounded-xl px-1.5 transition text-[#3C3C43] hover:bg-black/[0.05]"
+                title="Audio-opname (Note Replay)"
+              >
+                {isRecordingAudio ? (
+                  <div className="flex flex-col items-center">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-xs animate-pulse">
+                      <div className="h-2 w-2 rounded-2xs bg-white" />
+                    </div>
+                    <span className="font-mono text-[8px] font-bold text-rose-600 leading-none mt-0.5">
+                      {formatTimer(recordingSeconds)}
+                    </span>
+                  </div>
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                  </svg>
+                )}
+              </button>
+
+              {/* 9. HAND TOOL (Pan / Scroll) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTool("hand");
+                  setOpenPopoverTool(null);
+                }}
+                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
+                  activeTool === "hand"
+                    ? "bg-black/[0.08] text-[#1C1C1E]"
+                    : "text-[#3C3C43] hover:bg-black/[0.04]"
+                }`}
+                title="Verschuiven / Scrollen"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M18 11V6a2 2 0 0 0-4 0v5"/>
+                  <path d="M14 10V4a2 2 0 0 0-4 0v7"/>
+                  <path d="M10 10.5V6a2 2 0 0 0-4 0v8"/>
+                  <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+                </svg>
+              </button>
+
+              {/* 10. NOTABILITY TAPE TOOL (Study Answer Cover) */}
               <div className="relative">
                 <button
                   type="button"
@@ -1669,14 +1656,12 @@ export default function NotabilityStealthView({
                   }}
                   className={`relative flex h-10 w-9 items-center justify-center rounded-xl transition ${
                     activeTool === "tape"
-                      ? "bg-black/[0.08] text-[#1C1C1E]"
+                      ? "bg-black/[0.08]"
                       : "text-[#3C3C43] hover:bg-black/[0.04]"
                   }`}
-                  title="Studietracks / Tape (Dek antwoorden af om te leren; tik om te onthullen!)"
+                  title="Studie Tape (Antwoorden afdekken om te leren)"
                 >
-                  <div className="flex h-5 w-6 items-center justify-center rounded-sm border-2 border-dashed border-amber-600 bg-amber-200 text-[10px] font-bold">
-                    ▤
-                  </div>
+                  <div className="h-3 w-4.5 rounded-xs border border-dashed border-amber-600 bg-amber-200" />
                 </button>
 
                 {openPopoverTool === "tape" && (
@@ -1695,54 +1680,11 @@ export default function NotabilityStealthView({
                         />
                       ))}
                     </div>
-                    <p className="mt-2 text-[10px] text-[#8E8E93] leading-tight">
-                      Trek tape over formules. Tik op de tape om het antwoord te onthullen of verbergen!
-                    </p>
                   </div>
                 )}
               </div>
 
-              {/* 7. LASSO TOOL */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("lasso");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
-                  activeTool === "lasso"
-                    ? "bg-black/[0.08] text-[#1C1C1E]"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Lasso Selectie"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2">
-                  <ellipse cx="12" cy="11" rx="8" ry="6" />
-                  <path d="M7 16c-2 2-1 5 2 4" strokeDasharray="none" />
-                </svg>
-              </button>
-
-              {/* 8. LASER POINTER */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("laser");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-10 w-9 items-center justify-center rounded-xl transition ${
-                  activeTool === "laser"
-                    ? "bg-black/[0.08] text-[#FF3B30]"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Laserpointer"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3" fill="currentColor" />
-                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" />
-                </svg>
-              </button>
-
-              {/* 9. RULER */}
+              {/* 11. RULER */}
               <button
                 type="button"
                 onClick={() => setShowRuler((v) => !v)}
@@ -1751,9 +1693,9 @@ export default function NotabilityStealthView({
                     ? "bg-black/[0.08] text-[#1C1C1E]"
                     : "text-[#3C3C43] hover:bg-black/[0.04]"
                 }`}
-                title="Liniaal tonen/verbergen"
+                title="Liniaal"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
                   <path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2" />
                 </svg>
