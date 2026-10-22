@@ -798,58 +798,72 @@ export default function NotabilityStealthView({
     );
   };
 
-  // Upload Document / Image / Worksheet directly onto Notability Page
+  // Drag & drop file over state
+  const [isDraggingFileOver, setIsDraggingFileOver] = useState<boolean>(false);
+  const [pressureSensitivity, setPressureSensitivity] = useState<boolean>(true);
+
+  // Upload or Drop Document / Image / Worksheet directly onto Notability Page
+  const handleFilesDrop = useCallback(
+    (fileList: FileList, dropX?: number, dropY?: number) => {
+      setIsDraggingFileOver(false);
+      const files = Array.from(fileList);
+      if (files.length === 0) return;
+
+      if (onUploadFileToZytron) {
+        onUploadFileToZytron(fileList);
+      }
+
+      files.forEach((file) => {
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = String(reader.result || "");
+            const imgItem: UploadedDocImage = {
+              id: `doc-img-${Date.now()}-${Math.random()}`,
+              name: file.name,
+              dataUrl,
+              x: dropX ?? 48,
+              y: dropY ?? 110,
+              width: 580,
+              height: 420,
+            };
+            setPages((prev) =>
+              prev.map((pg, idx) =>
+                idx === currentPageIndex ? { ...pg, images: [...pg.images, imgItem] } : pg
+              )
+            );
+            showToast(`Afbeelding "${file.name}" direct op de pagina geplaatst!`);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          const reader = new FileReader();
+          reader.onload = () => {
+            setPages((prev) =>
+              prev.map((pg, idx) =>
+                idx === currentPageIndex
+                  ? {
+                      ...pg,
+                      typedText:
+                        (pg.typedText ? pg.typedText + "\n\n" : "") +
+                        `📄 [Geïmporteerd Document: ${file.name} (${Math.round(file.size / 1024)} KB)]\n` +
+                        `--------------------------------------------------\n`,
+                    }
+                  : pg
+              )
+            );
+            showToast(`Document "${file.name}" direct op je pagina geplaatst!`);
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      });
+    },
+    [currentPageIndex, onUploadFileToZytron, showToast]
+  );
+
   const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    if (onUploadFileToZytron) {
-      onUploadFileToZytron(files);
-    }
-
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const dataUrl = String(reader.result || "");
-          const imgItem: UploadedDocImage = {
-            id: `doc-img-${Date.now()}-${Math.random()}`,
-            name: file.name,
-            dataUrl,
-            x: 48,
-            y: 110,
-            width: 580,
-            height: 420,
-          };
-          setPages((prev) =>
-            prev.map((pg, idx) =>
-              idx === currentPageIndex ? { ...pg, images: [...pg.images, imgItem] } : pg
-            )
-          );
-          showToast(`Werkblad "${file.name}" ingevoegd — teken direct op de pagina!`);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPages((prev) =>
-            prev.map((pg, idx) =>
-              idx === currentPageIndex
-                ? {
-                    ...pg,
-                    typedText:
-                      pg.typedText +
-                      `\n\n📄 [Geïmporteerd Document: ${file.name} (${Math.round(file.size / 1024)} KB)]\n` +
-                      `--------------------------------------------------\n`,
-                  }
-                : pg
-            )
-          );
-          showToast(`Document "${file.name}" geüpload in notitie!`);
-        };
-        reader.readAsArrayBuffer(file);
-      }
-    });
+    handleFilesDrop(files);
     e.target.value = "";
   };
 
@@ -1107,6 +1121,20 @@ export default function NotabilityStealthView({
             <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="8" y="2" width="13" height="16" rx="2" />
               <path d="M16 18v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" />
+            </svg>
+          </button>
+
+          {/* Share / Export Icon */}
+          <button
+            type="button"
+            onClick={handleExportNote}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#3C3C43] hover:bg-black/[0.05] transition"
+            title="Deel of exporteer notitie (PDF / Afbeelding)"
+          >
+            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
             </svg>
           </button>
 
@@ -1471,6 +1499,22 @@ export default function NotabilityStealthView({
                         />
                       ))}
                     </div>
+                    <div className="flex items-center justify-between py-1 border-t border-[#E5E5EA] mt-3 pt-2">
+                      <span className="text-[11px] font-medium text-[#1C1C1E]">Drukgevoeligheid</span>
+                      <button
+                        type="button"
+                        onClick={() => setPressureSensitivity((p) => !p)}
+                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          pressureSensitivity ? "bg-[#34C759]" : "bg-[#E5E5EA]"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                            pressureSensitivity ? "translate-x-4" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1830,12 +1874,63 @@ export default function NotabilityStealthView({
         )}
 
         {/* CENTER SCROLLABLE PAPER CANVAS AREA */}
-        <main className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#E5E5EA] p-2 sm:p-6 md:p-8 flex justify-center">
+        <main
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            setIsDraggingFileOver(true);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+            setIsDraggingFileOver(false);
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDraggingFileOver(false);
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              handleFilesDrop(e.dataTransfer.files, 60, 100);
+            }
+          }}
+          className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#E5E5EA] p-2 sm:p-6 md:p-8 flex justify-center"
+        >
+          {isDraggingFileOver && (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#007AFF]/15 border-4 border-dashed border-[#007AFF] backdrop-blur-xs pointer-events-none transition-all">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-2xl text-[#007AFF] mb-4 animate-bounce">
+                <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </div>
+              <p className="text-xl font-bold text-[#1C1C1E]">Laat document los om in te voegen</p>
+              <p className="text-sm font-medium text-[#3C3C43] mt-1">PDF&apos;s, werkbladen en foto&apos;s worden direct op je notitieblad geplaatst</p>
+            </div>
+          )}
+
           <div
             style={{
               ...getPaperStyles(),
               transform: `scale(${zoomLevel})`,
               transformOrigin: "top center",
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.dataTransfer.dropEffect = "copy";
+              setIsDraggingFileOver(true);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDraggingFileOver(false);
+              const files = e.dataTransfer.files;
+              if (files && files.length > 0) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = Math.max(30, e.clientX - rect.left - 100);
+                const y = Math.max(80, e.clientY - rect.top - 50);
+                handleFilesDrop(files, x, y);
+              }
             }}
             className="relative w-full max-w-[880px] min-h-[1200px] rounded-sm shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-black/[0.08] transition-transform duration-150"
           >
