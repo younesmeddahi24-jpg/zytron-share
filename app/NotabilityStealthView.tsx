@@ -204,7 +204,7 @@ export default function NotabilityStealthView({
   const activeSubject =
     NOTABILITY_SUBJECTS.find((s) => s.id === activeSubjectId) || NOTABILITY_SUBJECTS[0];
 
-  const [noteTitle, setNoteTitle] = useState<string>(activeSubject.defaultTitle);
+  const [noteTitle, setNoteTitle] = useState<string>("Naamloze notitie");
   const [showLibrarySidebar, setShowLibrarySidebar] = useState<boolean>(false);
   const [showPagesSidebar, setShowPagesSidebar] = useState<boolean>(false);
   const [showTemplateMenu, setShowTemplateMenu] = useState<boolean>(false);
@@ -225,7 +225,7 @@ export default function NotabilityStealthView({
   const [zoomLevel, setZoomLevel] = useState<number>(1);
 
   // Paper appearance
-  const [paperGrid, setPaperGrid] = useState<PaperGridType>("grid");
+  const [paperGrid, setPaperGrid] = useState<PaperGridType>("blank");
   const [paperColor, setPaperColor] = useState<PaperColorType>("white");
 
   // Toolbox state
@@ -277,15 +277,6 @@ export default function NotabilityStealthView({
       id: "page-1",
       strokes: [],
       redoStack: [],
-      typedText: activeSubject.defaultContent,
-      tapes: [],
-      stickies: [],
-      images: [],
-    },
-    {
-      id: "page-2",
-      strokes: [],
-      redoStack: [],
       typedText: "",
       tapes: [],
       stickies: [],
@@ -309,11 +300,11 @@ export default function NotabilityStealthView({
   // Switch subject handler
   const handleSelectSubject = (subj: SubjectFolder) => {
     setActiveSubjectId(subj.id);
-    setNoteTitle(subj.defaultTitle);
+    setNoteTitle("Naamloze notitie");
     setPages((prev) => {
       const copy = [...prev];
       if (copy[0]) {
-        copy[0] = { ...copy[0], typedText: subj.defaultContent };
+        copy[0] = { ...copy[0] };
       }
       return copy;
     });
