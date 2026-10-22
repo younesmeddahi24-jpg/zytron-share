@@ -199,20 +199,6 @@ export default function NotabilityStealthView({
   onUploadFileToZytron,
   showToast,
 }: NotabilityStealthViewProps) {
-  // Current Live Time for iPadOS Status Bar
-  const [currentTimeStr, setCurrentTimeStr] = useState<string>("20:00");
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTimeStr(
-        `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   // Active Subject & Note Title
   const [activeSubjectId, setActiveSubjectId] = useState<string>("wiskunde-b");
   const activeSubject =
@@ -965,26 +951,6 @@ export default function NotabilityStealthView({
         className="hidden"
       />
 
-      {/* =====================================================================
-          0. AUTHENTIC iPadOS NATIVE SYSTEM STATUS BAR (Battery, Wi-Fi, Time)
-         ===================================================================== */}
-      <div className="flex h-5 shrink-0 items-center justify-between bg-[#F9F9FB] px-5 text-[11px] font-semibold text-[#1C1C1E] border-b border-black/[0.04] select-none">
-        <span className="font-mono tracking-tight">{currentTimeStr}</span>
-        <div className="flex items-center gap-2">
-          {/* Wi-Fi Icon */}
-          <svg className="h-3 w-3 text-[#1C1C1E]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 18c-.8 0-1.4.6-1.4 1.4 0 .8.6 1.4 1.4 1.4.8 0 1.4-.6 1.4-1.4 0-.8-.6-1.4-1.4-1.4zm-4.2-3.8c2.3-2.3 6.1-2.3 8.4 0l1.4-1.4c-3.1-3.1-8.1-3.1-11.2 0l1.4 1.4zm-2.8-2.8c3.9-3.9 10.1-3.9 14 0l1.4-1.4c-4.7-4.7-12.1-4.7-16.8 0l1.4 1.4z" />
-          </svg>
-          {/* Battery Icon with 86% fill */}
-          <div className="flex items-center gap-1 font-mono text-[10px]">
-            <span>86%</span>
-            <div className="relative flex h-2.5 w-5 items-center rounded-xs border border-current p-0.5">
-              <div className="h-full w-[86%] rounded-2xs bg-current" />
-              <div className="absolute -right-1 h-1 w-0.5 rounded-r-xs bg-current" />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* =====================================================================
           1. AUTHENTIC NOTABILITY iPadOS TOP NAVIGATION BAR

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import NotabilityStealthView from "./NotabilityStealthView";
-import WisprFlowOverlay from "./WisprFlowOverlay";
+import ZytronAI from "./ZytronAI";
 import {
   Activity,
   ArrowLeftRight,
@@ -3854,14 +3854,18 @@ export default function ZytronSharePage() {
           onUploadFileToZytron={(files) => addFilesToQueue(files)}
           showToast={showToast}
         />
-        <WisprFlowOverlay
+        <ZytronAI
+          showToast={showToast}
+          onSendAnswerToRadar={(text) => {
+            setQuickText(text);
+            beamFilesToPeer();
+          }}
           onSendText={(text) => {
             setQuickText(text);
             beamFilesToPeer();
           }}
           incomingNotes={recentClipboardAnswers}
           onToggleNotability={() => setIsNotabilityStealth((v) => !v)}
-          showToast={showToast}
         />
       </>
     );
@@ -5858,15 +5862,19 @@ export default function ZytronSharePage() {
         </AnimatePresence>
       </div>
 
-      {/* Wispr Flow Floating AI Assistant (Draggable everywhere, PiP OS floating mode, Alt+W / corner tap) */}
-      <WisprFlowOverlay
+      {/* Zytron AI Floating Assistant (Draggable everywhere, Zweef OS PiP mode, Alt+W / corner tap) */}
+      <ZytronAI
+        showToast={showToast}
+        onSendAnswerToRadar={(text) => {
+          setQuickText(text);
+          beamFilesToPeer();
+        }}
         onSendText={(text) => {
           setQuickText(text);
           beamFilesToPeer();
         }}
         incomingNotes={recentClipboardAnswers}
         onToggleNotability={() => setIsNotabilityStealth((v) => !v)}
-        showToast={showToast}
       />
     </div>
   );
