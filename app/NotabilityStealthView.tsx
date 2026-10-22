@@ -1140,7 +1140,7 @@ export default function NotabilityStealthView({
             {showTemplateMenu && (
               <div className="absolute right-0 top-10 z-50 w-72 rounded-2xl border border-black/10 bg-white/98 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.16)] backdrop-blur-xl">
                 <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5 mb-3">
-                  <span className="text-xs font-bold text-[#1C1C1E]">Notitie-instellingen</span>
+                  <span className="text-xs font-bold text-[#1C1C1E]">Notitie</span>
                   <button
                     type="button"
                     onClick={() => setShowTemplateMenu(false)}
@@ -1212,16 +1212,16 @@ export default function NotabilityStealthView({
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-1.5 border-t border-[#E5E5EA] pt-3">
+                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white">
                   <button
                     type="button"
                     onClick={() => {
                       handleExportNote();
                       setShowTemplateMenu(false);
                     }}
-                    className="flex w-full items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2 text-xs font-semibold text-[#1C1C1E] hover:bg-[#E5E5EA] transition"
+                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
                   >
-                    <span>Exporteer Notitie (Afbeelding / PDF)</span>
+                    <span>Exporteren</span>
                     <span>📥</span>
                   </button>
 
@@ -1231,18 +1231,18 @@ export default function NotabilityStealthView({
                       handleClearPage();
                       setShowTemplateMenu(false);
                     }}
-                    className="flex w-full items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2 text-xs font-semibold text-[#FF3B30] hover:bg-[#E5E5EA] transition"
+                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#FF3B30] hover:bg-[#F2F2F7] transition"
                   >
-                    <span>Pagina leegmaken</span>
+                    <span>Pagina wissen</span>
                     <span>⌫</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={onExitStealth}
-                    className="flex w-full items-center justify-between rounded-xl bg-[#007AFF]/10 px-3 py-2 text-xs font-bold text-[#007AFF] hover:bg-[#007AFF]/20 transition"
+                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#007AFF] hover:bg-[#F2F2F7] transition"
                   >
-                    <span>Terug naar Zytron Radar</span>
+                    <span>Terug naar Zytron</span>
                     <span>➔</span>
                   </button>
                 </div>
@@ -1466,27 +1466,7 @@ export default function NotabilityStealthView({
                         ))}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between gap-1.5 mb-3.5 bg-[#F2F2F7] rounded-xl p-2">
-                      {[1.5, 2.5, 4, 6, 9, 12].map((sz) => (
-                        <button
-                          key={sz}
-                          type="button"
-                          onClick={() => setPenSize(sz)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
-                            penSize === sz ? "bg-white shadow-xs ring-1 ring-[#007AFF]" : "hover:bg-white/60"
-                          }`}
-                        >
-                          <span
-                            className="rounded-full"
-                            style={{
-                              width: Math.min(16, Math.max(4, sz * 1.3)),
-                              height: Math.min(16, Math.max(4, sz * 1.3)),
-                              backgroundColor: penColor,
-                            }}
-                          />
-                        </button>
-                      ))}
-                    </div>
+                    <div className="mb-3.5 flex items-center gap-3 rounded-xl bg-[#F2F2F7] px-3 py-2.5"><span className="rounded-full" style={{ width: 4, height: 4, backgroundColor: penColor }} /><input type="range" min={1} max={14} step={0.5} value={penSize} onChange={(e) => setPenSize(Number(e.target.value))} className="h-1 flex-1 cursor-pointer accent-[#007AFF]" /><span className="rounded-full" style={{ width: 14, height: 14, backgroundColor: penColor }} /></div>
                     <div className="grid grid-cols-5 gap-2">
                       {PEN_COLORS.map((c) => (
                         <button
@@ -1796,9 +1776,7 @@ export default function NotabilityStealthView({
                 </div>
                 <span className="text-sm font-bold text-[#1C1C1E]">Notability</span>
               </div>
-              <span className="rounded-full bg-[#E5E5EA] px-2 py-0.5 text-[10px] font-semibold text-[#636366]">
-                School iPad
-              </span>
+              
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 space-y-4">
