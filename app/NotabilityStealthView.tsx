@@ -1793,7 +1793,7 @@ export default function NotabilityStealthView({
 
               <div>
                 <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] mb-1.5">
-                  Vakken • Klas 3/4
+                  Vakken
                 </p>
                 <div className="space-y-1">
                   {NOTABILITY_SUBJECTS.map((subj) => {
