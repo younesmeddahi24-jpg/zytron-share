@@ -11,6 +11,7 @@ import {
 } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import NotabilityStealthView from "./NotabilityStealthView";
+import WisprFlowOverlay from "./WisprFlowOverlay";
 import {
   Activity,
   ArrowLeftRight,
@@ -3833,25 +3834,36 @@ export default function ZytronSharePage() {
 
   if (isNotabilityStealth) {
     return (
-      <NotabilityStealthView
-        onExitStealth={() => setIsNotabilityStealth(false)}
-        quickText={quickText}
-        setQuickText={setQuickText}
-        onSendNote={(customText?: string) => {
-          const textToSend = customText ?? quickText;
-          if (textToSend.trim()) {
-            setQuickText(textToSend);
+      <>
+        <NotabilityStealthView
+          onExitStealth={() => setIsNotabilityStealth(false)}
+          quickText={quickText}
+          setQuickText={setQuickText}
+          onSendNote={(customText?: string) => {
+            const textToSend = customText ?? quickText;
+            if (textToSend.trim()) {
+              setQuickText(textToSend);
+              beamFilesToPeer();
+              showToast("iCloud Notitie gesynchroniseerd");
+            } else {
+              showToast("Typ eerst een notitie");
+            }
+          }}
+          incomingNotes={recentClipboardAnswers}
+          connectedCount={uniqueNearbyDevices.length}
+          onUploadFileToZytron={(files) => addFilesToQueue(files)}
+          showToast={showToast}
+        />
+        <WisprFlowOverlay
+          onSendText={(text) => {
+            setQuickText(text);
             beamFilesToPeer();
-            showToast("iCloud Notitie gesynchroniseerd");
-          } else {
-            showToast("Typ eerst een notitie");
-          }
-        }}
-        incomingNotes={recentClipboardAnswers}
-        connectedCount={uniqueNearbyDevices.length}
-        onUploadFileToZytron={(files) => addFilesToQueue(files)}
-        showToast={showToast}
-      />
+          }}
+          incomingNotes={recentClipboardAnswers}
+          onToggleNotability={() => setIsNotabilityStealth((v) => !v)}
+          showToast={showToast}
+        />
+      </>
     );
   }
 
@@ -5845,6 +5857,17 @@ export default function ZytronSharePage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Wispr Flow Floating AI Assistant (Draggable everywhere, PiP OS floating mode, Alt+W / corner tap) */}
+      <WisprFlowOverlay
+        onSendText={(text) => {
+          setQuickText(text);
+          beamFilesToPeer();
+        }}
+        incomingNotes={recentClipboardAnswers}
+        onToggleNotability={() => setIsNotabilityStealth((v) => !v)}
+        showToast={showToast}
+      />
     </div>
   );
 }
