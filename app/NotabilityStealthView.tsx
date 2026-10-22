@@ -955,7 +955,7 @@ export default function NotabilityStealthView({
       {/* =====================================================================
           1. AUTHENTIC NOTABILITY iPadOS TOP NAVIGATION BAR
          ===================================================================== */}
-      <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#D1D1D6]/80 bg-[#F9F9FB]/95 px-3 backdrop-blur-md">
+      <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#C6C6C8]/60 bg-[#F7F7F7]/90 px-3 backdrop-blur-xl shadow-[0_0.5px_0_rgba(0,0,0,0.08)]">
         {/* Left Navigation Group: Back to Library, Sidebar Toggle, Document Import */}
         <div className="flex items-center gap-1.5">
           {/* Back Arrow (<) : Single click toggles Subject Library, Double click exits to Zytron */}
@@ -1017,15 +1017,14 @@ export default function NotabilityStealthView({
             />
           </div>
           <span className="text-[10px] text-[#8E8E93] leading-tight truncate">
-            {activeSubject.name} • Pagina {currentPageIndex + 1} van {pages.length}
-            {connectedCount > 0 ? ` • iCloud Sync (${connectedCount})` : " • iCloud"}
+            {activeSubject.name} · {currentPageIndex + 1}/{pages.length}
           </span>
         </div>
 
         {/* Right Group: Zoom Pill, Microphone, Notability AI (Secret Chat), Search, Page Thumbnails, Paper Settings (...) */}
         <div className="flex items-center gap-1">
           {/* Zoom Level Indicator Pill */}
-          <div className="hidden md:flex items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-2 py-0.5 text-[10.5px] font-mono font-bold text-[#636366]">
+          <div className="hidden items-center gap-1 rounded-lg border border-[#E5E5EA] bg-white px-2 py-0.5 text-[10.5px] font-mono font-bold text-[#636366]">
             <button
               type="button"
               onClick={() => setZoomLevel((z) => Math.max(0.75, Number((z - 0.25).toFixed(2))))}
@@ -1081,10 +1080,10 @@ export default function NotabilityStealthView({
                 ? "bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-xs"
                 : "text-[#6366F1] hover:bg-[#6366F1]/10"
             }`}
-            title="Notability AI Helper • Opgave-assistent & Formules (Geheime Chat)"
+            title="Zytron AI"
           >
             <span className="text-sm">✨</span>
-            <span className="hidden sm:inline font-sans text-[11.5px]">AI</span>
+            <span className="hidden sm:inline font-sans text-[11.5px]">Zytron AI</span>
             {incomingNotes.length > 0 && (
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
             )}
@@ -1333,7 +1332,7 @@ export default function NotabilityStealthView({
         }}
         className="fixed z-40 transition-shadow select-none"
       >
-        <div className="flex items-center gap-0.5 sm:gap-1 rounded-[22px] border border-black/[0.08] bg-white/95 px-2 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.14),0_1px_3px_rgba(0,0,0,0.06)] backdrop-blur-xl">
+        <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-black/[0.06] bg-white/98 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
           {/* Draggable Gripper Handle (⋮⋮) */}
           <div
             onPointerDown={(e) => {
