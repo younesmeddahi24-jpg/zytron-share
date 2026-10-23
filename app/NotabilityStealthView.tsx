@@ -424,7 +424,8 @@ export default function NotabilityStealthView({
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({ 1: 1 }); // Q2 option 1 (Complex vector spaces) pre-selected!
   const [quizFeedback, setQuizFeedback] = useState<Record<number, "up" | "down" | null>>({});
   const [smartNotesDropdownOpen, setSmartNotesDropdownOpen] = useState<boolean>(false);
-  const [isSampleDocLoaded, setIsSampleDocLoaded] = useState<boolean>(false);
+  const [sampleDocMode, setSampleDocMode] = useState<"none" | "physics" | "quantum" | "ap_english" | "computing">("none");
+  const isSampleDocLoaded = sampleDocMode !== "none";
 
   // Multi-page state
   const [pages, setPages] = useState<NotePageData[]>([
@@ -1251,20 +1252,90 @@ export default function NotabilityStealthView({
                   ))}
                 </div>
 
-                {/* Actions */}
-                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white">
+                {/* Authentic iPadOS Screenshot Documents Selector */}
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93] mb-2">
+                  Werkblad &amp; Documenten (Screenshots 1-5)
+                </p>
+                <div className="space-y-1 mb-3">
                   <button
                     type="button"
                     onClick={() => {
-                      setIsSampleDocLoaded((v) => !v);
+                      setSampleDocMode("none");
                       setShowTemplateMenu(false);
-                      showToast(isSampleDocLoaded ? "Voorbeeld werkblad gesloten" : "Quantum Mechanics werkblad geladen (Screenshot 3)");
+                      showToast("Schoon blanco blad geactiveerd");
                     }}
-                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#007AFF] hover:bg-[#F2F2F7] transition font-semibold"
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      sampleDocMode === "none" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
+                    }`}
                   >
-                    <span>{isSampleDocLoaded ? "Verberg Quantum Mechanics" : "⚛️ Laad Quantum Mechanics (Screenshot 3)"}</span>
-                    <span>📄</span>
+                    <span>📄 Puur Blanco Werkblad (Leeg)</span>
+                    {sampleDocMode === "none" && <span>✓</span>}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSampleDocMode("physics");
+                      setPaperGrid("lined");
+                      setShowTemplateMenu(false);
+                      showToast("Screenshot 4: Physics Hooke's Law & Oscillator geladen");
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      sampleDocMode === "physics" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
+                    }`}
+                  >
+                    <span>⚙️ Screenshot 4: Physics &amp; Hooke&apos;s Law</span>
+                    {sampleDocMode === "physics" && <span>✓</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSampleDocMode("quantum");
+                      setShowTemplateMenu(false);
+                      showToast("Screenshot 3: Quantum Mechanics Chapter 1 geladen");
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      sampleDocMode === "quantum" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
+                    }`}
+                  >
+                    <span>⚛️ Screenshot 3: Quantum Mechanics Ch. 1</span>
+                    {sampleDocMode === "quantum" && <span>✓</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSampleDocMode("ap_english");
+                      setShowTemplateMenu(false);
+                      showToast("Screenshot 5: AP English Essay & Oranje Sticky Notes geladen");
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      sampleDocMode === "ap_english" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
+                    }`}
+                  >
+                    <span>📝 Screenshot 5: AP English Essay &amp; Sticky Notes</span>
+                    {sampleDocMode === "ap_english" && <span>✓</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSampleDocMode("computing");
+                      setShowTemplateMenu(false);
+                      showToast("Screenshot 1: Emergent Computing & Turing Machine geladen");
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      sampleDocMode === "computing" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
+                    }`}
+                  >
+                    <span>💻 Screenshot 1: Emergent Computing</span>
+                    {sampleDocMode === "computing" && <span>✓</span>}
+                  </button>
+                </div>
+
+                {/* Actions */}
+                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white">
 
                   <button
                     type="button"
@@ -1785,14 +1856,14 @@ export default function NotabilityStealthView({
                     setHasRecordedAudio(true);
                     showToast("Audio-opname gesynchroniseerd met notitie");
                   }}
-                  className="flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-1 text-rose-600 shadow-xs hover:bg-rose-100 transition animate-pulse"
+                  className="flex items-center gap-1.5 rounded-full bg-rose-50/80 border border-rose-300 px-2.5 py-1 text-rose-600 shadow-2xs hover:bg-rose-100 transition animate-pulse"
                   title="Stop audio-opname"
                 >
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-white shadow-2xs">
+                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#FF3B30] text-white">
                     <span className="h-1.5 w-1.5 rounded-2xs bg-white" />
                   </span>
-                  <span className="font-mono text-[10px] font-bold text-rose-600">
-                    {formatTimer(recordingSeconds || 7)}
+                  <span className="font-mono text-[10px] font-bold text-[#FF3B30]">
+                    {formatTimer(recordingSeconds || 432)}
                   </span>
                 </button>
               ) : (
@@ -1813,6 +1884,9 @@ export default function NotabilityStealthView({
                   </svg>
                 </button>
               )}
+
+              {/* Separator line between mic and hand (Screenshot 5) */}
+              <div className="mx-0.5 h-5 w-px bg-black/[0.08]" />
 
               {/* 9. HAND TOOL (Pan / Scroll) */}
               <button
@@ -2074,8 +2148,95 @@ export default function NotabilityStealthView({
               </div>
             )}
 
-            {/* Authentic Quantum Mechanics Document Worksheet (Screenshot 3 Replica) */}
-            {isSampleDocLoaded && (
+            {/* =====================================================================
+                AUTHENTIC NOTABILITY SAMPLE DOCUMENTS (Screenshots 1, 3, 4, 5)
+               ===================================================================== */}
+
+            {/* 1. SCREENSHOT 4: Physics Hooke's Law & Oscillator Worksheet */}
+            {sampleDocMode === "physics" && (
+              <div className="relative z-12 mx-4 my-2 p-6 sm:p-8 rounded-xl font-serif text-[#1C1C1E] select-text">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
+                  <div className="text-xs font-mono text-[#8E8E93]">
+                    Spherical Coordinates (Review): See textbook for graphical representation
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSampleDocMode("none")}
+                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
+                  >
+                    ✕ Sluit werkblad
+                  </button>
+                </div>
+
+                <p className="font-serif italic text-sm text-[#1C1C1E] mb-3">
+                  Consider a mass m connected to a wall w/ no gravitational force.
+                </p>
+
+                {/* Spring & Mass System Diagram from Screenshot 4 */}
+                <div className="my-3 flex flex-col sm:flex-row items-center gap-6 p-3 bg-white/70 rounded-xl border border-black/5">
+                  <svg className="w-56 h-28 shrink-0 text-[#1C1C1E]" viewBox="0 0 220 110" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    {/* Wall */}
+                    <line x1="20" y1="10" x2="20" y2="100" strokeWidth="3" />
+                    <line x1="10" y1="20" x2="20" y2="10" />
+                    <line x1="10" y1="40" x2="20" y2="30" />
+                    <line x1="10" y1="60" x2="20" y2="50" />
+                    <line x1="10" y1="80" x2="20" y2="70" />
+                    {/* Spring 1 */}
+                    <line x1="20" y1="35" x2="40" y2="35" />
+                    <path d="M40 35 L45 25 L55 45 L65 25 L75 45 L85 25 L95 45 L100 35" />
+                    <line x1="100" y1="35" x2="120" y2="35" />
+                    <circle cx="125" cy="35" r="7" fill="white" strokeWidth="2" />
+                    <text x="122" y="38" fontSize="8" fontFamily="sans-serif">x₀</text>
+                    {/* Spring 2 extended */}
+                    <line x1="20" y1="80" x2="50" y2="80" />
+                    <path d="M50 80 L58 68 L70 92 L82 68 L94 92 L106 68 L118 92 L125 80" />
+                    <line x1="125" y1="80" x2="165" y2="80" />
+                    <circle cx="172" cy="80" r="7" fill="white" strokeWidth="2" />
+                    <text x="170" y="83" fontSize="8" fontFamily="sans-serif">x</text>
+                  </svg>
+
+                  <div className="text-xs font-serif leading-relaxed text-[#2C2C2E] space-y-1">
+                    <p>If m, let x₀ be the equilibrium, or undisturbed, length of the spring. Then force is denoted by:</p>
+                    <p className="font-mono text-[13px] font-bold text-[#1C1C1E] pl-2">f = -k(x - x₀) - bv &nbsp;&nbsp;(Hooke&apos;s Law)</p>
+                    <p className="text-[11px] text-[#8E8E93] italic">negative form implies force is left/position to right</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#3C3C43] mb-3">
+                  k is the force constant of the spring; small k = loose/weak spring; large k = tight/strong spring.
+                </p>
+
+                {/* Equations with Red Reference Numbers from Screenshot 4 */}
+                <div className="space-y-3 font-serif">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
+                    <span className="text-xs font-serif text-[#1C1C1E]">
+                      Newton&apos;s equation with a Hooke&apos;s Law force is: &nbsp;
+                      <span className="font-mono font-bold">m (d²x/dt²) = -k(x - x₀)</span>
+                    </span>
+                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.1)</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
+                    <span className="text-xs font-serif text-[#1C1C1E]">
+                      If we let x&apos; = x - x₀, then we have: &nbsp;
+                      <span className="font-mono font-bold">m (d²x&apos;/dt²) = -kx&apos;</span>
+                    </span>
+                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.2)</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
+                    <span className="text-xs font-serif text-[#1C1C1E]">
+                      General solution to 5.3 is: &nbsp;
+                      <span className="font-mono font-bold">x(t) = C₁ sin(ωt) + C₂ cos(ωt)</span>
+                    </span>
+                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.4)</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. SCREENSHOT 3: Authentic Quantum Mechanics Chapter 1 */}
+            {sampleDocMode === "quantum" && (
               <div className="relative z-12 mx-6 my-4 p-6 sm:p-8 rounded-xl border border-black/10 bg-white/95 shadow-md font-serif text-[#1C1C1E] select-text">
                 <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
                   <div>
@@ -2088,7 +2249,7 @@ export default function NotabilityStealthView({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsSampleDocLoaded(false)}
+                    onClick={() => setSampleDocMode("none")}
                     className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
                   >
                     ✕ Sluit werkblad
@@ -2116,11 +2277,124 @@ export default function NotabilityStealthView({
                   α|photon; x⟩ + β|photon; y⟩, &nbsp; α, β ∈ ℂ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(4.6)
                 </div>
 
-                {/* Poincaré Sphere / Polarization Vector Diagram */}
+                {/* Polarization Vector Diagram matching Screenshot 3 */}
                 <div className="flex items-center justify-center py-2">
-                  <div className="h-28 w-44 rounded-xl border border-dashed border-[#007AFF]/40 bg-[#007AFF]/5 flex flex-col items-center justify-center text-center p-2">
+                  <div className="h-28 w-52 rounded-xl border border-dashed border-[#007AFF]/40 bg-[#007AFF]/5 flex flex-col items-center justify-center text-center p-2">
                     <span className="font-mono text-[10px] text-[#007AFF] font-bold">Figure 5: Parameters defining an elliptically polarized state</span>
                     <span className="text-[9px] text-[#8E8E93] mt-1 font-sans">Polar angles θ and φ in complex vector space</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. SCREENSHOT 5: AP English Essay & Iconic Coral Sticky Notes */}
+            {sampleDocMode === "ap_english" && (
+              <div className="relative z-12 mx-4 my-2 p-6 sm:p-10 rounded-xl font-serif text-[#1C1C1E] select-text">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
+                  <div className="text-xs font-serif text-[#8E8E93]">
+                    MLA Format • AP English Literature Essay (Screenshot 5 Replica)
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSampleDocMode("none")}
+                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
+                  >
+                    ✕ Sluit werkblad
+                  </button>
+                </div>
+
+                <div className="flex justify-between text-xs leading-relaxed font-serif text-[#1C1C1E] mb-6">
+                  <div>
+                    <p>Jamey Holmes</p>
+                    <p>Mrs. Schmidt</p>
+                    <p>AP English</p>
+                    <p>01 May 2022</p>
+                  </div>
+                  <div>
+                    <p>Holmes 1</p>
+                  </div>
+                </div>
+
+                <h2 className="text-center font-serif text-base font-bold text-[#1C1C1E] mb-6">
+                  Reflections on AP Language
+                </h2>
+
+                <div className="relative text-[13.5px] leading-[28px] font-serif text-[#2C2C2E] space-y-4">
+                  <p>
+                    In AP Language we learned about history, science, culture, language, politics, philosophy, and a smattering of other topics. Though English has been my favorite subject{" "}
+                    <span className="line-through decoration-[#FF3B30] decoration-2 text-[#8E8E93]">
+                      since I learned to read, I
+                    </span>{" "}
+                    always considered it simply reading and writing, not a{" "}
+                    <span className="underline decoration-[#FF3B30] decoration-2">
+                      fabric of interwoven people
+                    </span>{" "}
+                    and places that overlapped.
+                  </p>
+
+                  {/* Authentic Coral-Orange Sticky Note (Screenshot 5) */}
+                  <div className="my-2 p-3 sm:p-4 rounded-2xl bg-[#F97316] text-white shadow-md font-sans text-xs sm:text-[13px] leading-relaxed max-w-sm">
+                    Overall a good start - nice use of specific examples
+                  </div>
+
+                  <p>
+                    We wrote a synthesis essay about war immediately following our World War II unit in History, read{" "}
+                    <span className="italic">Aria</span> and discussed speaking Spanish at home, a language I&apos;ve been learning since middle school, but whose cultural associations I never fully appreciated -- the social immobility that comes with only speaking Spanish and the potential loss of home and comfort with the increased fluency in English.
+                  </p>
+
+                  {/* Second Coral-Orange Sticky Note (Screenshot 5) */}
+                  <div className="my-2 p-3 sm:p-4 rounded-2xl bg-[#F97316] text-white shadow-md font-sans text-xs sm:text-[13px] leading-relaxed max-w-xs">
+                    How can we simplify this section and get to the point faster?
+                  </div>
+
+                  <p>
+                    This class allowed me to gather the disparate pieces of information I had accrued in the past year and synthesize them into one medium -- a discussion, a seminar, or an essay. I slowly learned how to connect my historical knowledge with that of my personal life, rather than seeing them as separate entities.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 4. SCREENSHOT 1: Emergent Computing & Turing Machine */}
+            {sampleDocMode === "computing" && (
+              <div className="relative z-12 mx-4 my-2 p-6 sm:p-8 rounded-xl font-sans text-[#1C1C1E] select-text">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
+                  <div className="text-xs font-mono text-[#8E8E93]">
+                    Computer Science Lecture Notes • Emergence &amp; Systems (Screenshot 1 Replica)
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSampleDocMode("none")}
+                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
+                  >
+                    ✕ Sluit werkblad
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="rounded-lg bg-amber-100 px-3 py-1 font-serif text-lg font-bold text-amber-900 shadow-2xs">
+                    Emergent Computing
+                  </span>
+                  <span className="text-xs text-[#8E8E93]">
+                    Highly complex process arising from the cooperation of many simple processes
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4">
+                    <h3 className="font-serif text-base font-bold text-sky-950 mb-1">Turing&apos;s Machine</h3>
+                    <p className="text-xs text-[#3C3C43] leading-relaxed">
+                      Personal computer / isolated computing machine. Models dynamics of a structure of nodes and data exchange.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                    <h3 className="font-serif text-base font-bold text-amber-950 mb-1">Level of Emergence</h3>
+                    <div className="space-y-1 text-xs text-[#3C3C43]">
+                      <p>• Social: Community, inter-action, networks</p>
+                      <p>• Psychological: Semantics, attitudes, feelings</p>
+                      <p>• Informational: Programs, data, bandwidth</p>
+                      <p>• Mechanical: Hardware, motherboard, chips</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2362,7 +2636,7 @@ export default function NotabilityStealthView({
             <aside className="z-30 flex w-full max-w-[480px] sm:w-[440px] md:w-[480px] shrink-0 flex-col border-l border-[#D1D1D6] bg-white shadow-2xl transition-all">
               {/* Header: Dynamic per mode matching Screenshot 3 & 4 */}
               {smartNotesTab === "quiz" ? (
-                /* Authentic Quiz Mode Header (Screenshot 4: [ ← ]  Quiz  [ ☰ ] ) */
+                /* Authentic Quiz Mode Header (Screenshot 4: [ ← ]  Quiz  [ (☰) ] ) */
                 <div className="flex h-12 items-center justify-between border-b border-[#E5E5EA] px-4 bg-white/95 backdrop-blur-xl">
                   <button
                     type="button"
@@ -2370,7 +2644,7 @@ export default function NotabilityStealthView({
                     className="flex h-8 w-8 items-center justify-center rounded-xl text-[#1C1C1E] hover:bg-black/5 active:scale-95 transition"
                     title="Terug naar Smart Notes"
                   >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M15 18l-6-6 6-6" />
                     </svg>
                   </button>
@@ -2379,17 +2653,17 @@ export default function NotabilityStealthView({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setSmartNotesDropdownOpen((v) => !v);
-                    }}
-                    className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 transition"
-                    title="Opties & Modus"
+                    onClick={() => setSmartNotesDropdownOpen((v) => !v)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/5 transition"
+                    title="Menu &amp; Filter"
                   >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="3" y1="12" x2="21" y2="12" />
-                      <line x1="3" y1="6" x2="21" y2="6" />
-                      <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border border-black/25">
+                      <svg className="h-3 w-3 text-[#3C3C43]" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="2" y="3" width="12" height="1.5" rx="0.75" />
+                        <rect x="2" y="7.25" width="12" height="1.5" rx="0.75" />
+                        <rect x="2" y="11.5" width="12" height="1.5" rx="0.75" />
+                      </svg>
+                    </div>
                   </button>
                 </div>
               ) : (
@@ -2478,49 +2752,62 @@ export default function NotabilityStealthView({
                 </div>
               )}
 
-              {/* Content Tab: Smart Notes (Screenshot 3) */}
+              {/* Content Tab: Smart Notes (Screenshot 3 Authentic Replica) */}
               {smartNotesTab === "notes" && (
-                <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-4 font-sans custom-scrollbar">
-                  <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[#1C1C1E] mb-2">Main Takeaway</h2>
-                    <p className="text-[13px] text-[#3C3C43] leading-relaxed">
-                      {isSampleDocLoaded
-                        ? "Quantum mechanics is a rich and elegant extension of classical physics characterized by linearity, probability amplitudes, and quantum superpositions, formulated fundamentally in complex vector spaces."
-                        : currentPage.images.length > 0
-                        ? `Ingevoegde documenten (${currentPage.images.map((i) => i.name).join(", ")}) zijn geanalyseerd. De kernpunten, formules en uitwerkingen zijn hieronder gestructureerd samengevat.`
-                        : noteTitle.trim().length > 0
-                        ? `${noteTitle} behandelt fundamentele theorieën, formules en methodes. De notitie biedt een compleet overzicht van afleidingen en stappenplannen.`
-                        : "Dit is een leeg werkblad. Teken met de pen, laad het Quantum Mechanics voorbeeldblad via ···, of sleep een PDF/foto in om automatisch samenvattingen, kernbegrippen en overhoringen te activeren."}
-                    </p>
-                  </div>
+                <div className="flex-1 overflow-y-auto p-6 text-[#1C1C1E] font-sans custom-scrollbar flex flex-col justify-between">
+                  <div className="space-y-5">
+                    <div>
+                      <h2 className="text-3xl font-bold tracking-tight text-[#1C1C1E] mb-2.5">Main Takeaway</h2>
+                      <p className="text-[14px] leading-relaxed text-[#3C3C43]">
+                        {sampleDocMode === "physics"
+                          ? "Simple harmonic motion describes the periodic oscillation of a mass attached to a spring governed by Hooke's Law and Newton's second law, yielding sinusoidal position solutions with characteristic angular frequency ω."
+                          : sampleDocMode === "ap_english"
+                          ? "Reflections on AP Language demonstrates that writing is an interconnected medium linking historical context with personal experiences, synthesized through critical analysis rather than isolated mechanical exercises."
+                          : "Quantum mechanics is a revolutionary physics framework that fundamentally differs from classical physics, characterized by linearity, probabilistic nature, and quantum superpositions that challenge our classical understanding of reality."}
+                      </p>
+                    </div>
 
-                  <div className="space-y-3 pt-2">
-                    <h3 className="text-base font-bold text-[#1C1C1E]">
-                      1. Belangrijkste Onderwerpen &amp; Kernbegrippen
-                    </h3>
+                    <div className="space-y-3 pt-1">
+                      <h3 className="text-[16px] font-bold text-[#1C1C1E]">
+                        1. Key Features of Quantum Mechanics
+                      </h3>
 
-                    <div className="space-y-2 pl-2 border-l-2 border-[#007AFF]/20">
-                      <div>
-                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Conceptuele Kern</p>
-                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                          Lineariteit van de bewegingsvergelijkingen impliceert dat lineaire combinaties van oplossingen zelf geldige fysische toestanden vormen (superpositie).
-                        </p>
-                      </div>
+                      <div className="space-y-3.5 pl-1">
+                        <div>
+                          <p className="text-[14px] font-bold text-[#1C1C1E]">• Historical Context</p>
+                          <ul className="space-y-1.5 pl-5 pt-1 text-[13px] text-[#3C3C43] list-disc">
+                            <li>Begins in 1925 with discoveries by Schrödinger and Heisenberg</li>
+                            <li>Seeds planted by Planck, Einstein, Bohr, de Broglie, and others</li>
+                            <li>Replaces classical physics as the fundamental description of physical universe</li>
+                          </ul>
+                        </div>
 
-                      <div>
-                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Actieve Herhaling (Study Tape)</p>
-                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                          Tik op de gestreepte tape op het papier om tussenstappen of antwoorden af te dekken en jezelf actief te testen voor examens.
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Zelfoverhoring</p>
-                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                          Schakel over naar de Quiz-modus (20 vragen) om je begrip van operatoren, golffuncties en grondslagen direct te toetsen.
-                        </p>
+                        <div>
+                          <p className="text-[14px] font-bold text-[#1C1C1E]">• Fundamental Characteristics</p>
+                          <ul className="space-y-1.5 pl-5 pt-1 text-[13px] text-[#3C3C43]">
+                            <li><span className="font-bold text-[#1C1C1E]">• Linearity:</span> Solutions can be added to form new solutions</li>
+                            <li><span className="font-bold text-[#1C1C1E]">• Non-deterministic:</span> Cannot precisely predict individual quantum events</li>
+                            <li><span className="font-bold text-[#1C1C1E]">• Complex Numbers:</span> Essential</li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Bottom Generation Indicator (Screenshot 3) */}
+                  <div className="pt-6 border-t border-[#E5E5EA] mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#007AFF]">
+                      <span className="text-sm">✦</span>
+                      <span>Generating Smart Notes...</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSmartNotesTab("quiz")}
+                      className="flex items-center gap-1.5 rounded-full bg-[#007AFF] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-[#0062CC] transition active:scale-95"
+                    >
+                      <span>Oefen Quiz (20)</span>
+                      <span>›</span>
+                    </button>
                   </div>
                 </div>
               )}
@@ -2534,19 +2821,16 @@ export default function NotabilityStealthView({
                 const progressPct = Math.round(((safeIndex + 1) / totalQuestions) * 100);
 
                 return (
-                  <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
+                  <div className="flex-1 overflow-y-auto p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
                     <div>
-                      {/* Progress Header (Screenshot 4: 2/20) */}
-                      <div className="flex items-center justify-between text-xs font-semibold text-[#8E8E93] mb-2">
-                        <span className="text-[#1C1C1E] font-bold tracking-tight">
+                      {/* Progress Header (Screenshot 4: 2/20 in blue) */}
+                      <div className="mb-2">
+                        <span className="font-bold text-sm text-[#007AFF] tracking-tight">
                           {safeIndex + 1}/{totalQuestions}
-                        </span>
-                        <span className="font-mono text-[#007AFF] text-[11px] font-semibold">
-                          {progressPct}% voltooid
                         </span>
                       </div>
 
-                      {/* Progress Bar */}
+                      {/* Progress Bar (Screenshot 4 thin rounded track) */}
                       <div className="h-1.5 w-full rounded-full bg-[#E5E5EA] overflow-hidden mb-6">
                         <div
                           className="h-full bg-[#007AFF] rounded-full transition-all duration-300"
@@ -2554,12 +2838,12 @@ export default function NotabilityStealthView({
                         />
                       </div>
 
-                      {/* Question */}
-                      <h3 className="text-[17px] sm:text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
+                      {/* Question (Screenshot 4) */}
+                      <h3 className="text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
                         {currentQ.question}
                       </h3>
 
-                      {/* Multiple Choice Option Cards */}
+                      {/* Multiple Choice Option Cards (Screenshot 4 Centered Text) */}
                       <div className="space-y-3">
                         {currentQ.options.map((optText, optIdx) => {
                           const isSelected = currentAnswer === optIdx;
@@ -2576,24 +2860,24 @@ export default function NotabilityStealthView({
                                   [safeIndex]: optIdx,
                                 }));
                               }}
-                              className={`w-full rounded-2xl border p-4 text-left text-[14px] leading-snug transition-all flex items-center justify-between shadow-xs ${
+                              className={`w-full rounded-2xl border p-4 text-center text-[15px] font-medium leading-snug transition-all relative flex items-center justify-center shadow-xs bg-white ${
                                 hasAnswered
                                   ? isCorrectOption
-                                    ? "border-emerald-500 bg-emerald-50/70 text-emerald-950 font-bold"
+                                    ? "border-2 border-[#34C759] text-[#1C1C1E] font-bold"
                                     : isSelected
-                                      ? "border-rose-400 bg-rose-50/80 text-rose-950 font-bold"
-                                      : "border-[#E5E5EA] bg-white text-[#3C3C43] opacity-60"
-                                  : "border-[#E5E5EA] bg-white hover:bg-[#F2F2F7] text-[#1C1C1E] active:scale-[0.99]"
+                                      ? "border-2 border-[#FF3B30] text-[#1C1C1E] font-bold"
+                                      : "border-[#E5E5EA] text-[#1C1C1E]"
+                                  : "border-[#E5E5EA] hover:bg-[#F2F2F7] text-[#1C1C1E] active:scale-[0.99]"
                               }`}
                             >
-                              <span className="pr-3">{optText}</span>
+                              <span>{optText}</span>
                               {hasAnswered && isCorrectOption && (
-                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold shadow-xs">
+                                <span className="absolute right-4 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#34C759] text-white text-xs font-bold shadow-xs">
                                   ✓
                                 </span>
                               )}
                               {hasAnswered && isSelected && !isCorrectOption && (
-                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white text-xs font-bold shadow-xs">
+                                <span className="absolute right-4 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FF3B30] text-white text-xs font-bold shadow-xs">
                                   ✕
                                 </span>
                               )}
@@ -2602,8 +2886,8 @@ export default function NotabilityStealthView({
                         })}
                       </div>
 
-                      {/* Feedback Thumb Icons (Screenshot 4) */}
-                      <div className="flex items-center gap-3 mt-6 text-[#8E8E93]">
+                      {/* Feedback Thumb Icons (Screenshot 4 Apple Outline Line Art) */}
+                      <div className="flex items-center gap-4 mt-8 text-[#8E8E93]">
                         <button
                           type="button"
                           onClick={() =>
@@ -2612,12 +2896,14 @@ export default function NotabilityStealthView({
                               [safeIndex]: prev[safeIndex] === "up" ? null : "up",
                             }))
                           }
-                          className={`p-1.5 rounded-lg transition hover:bg-black/5 ${
-                            quizFeedback[safeIndex] === "up" ? "text-[#007AFF] bg-[#007AFF]/10" : ""
+                          className={`hover:text-[#1C1C1E] transition ${
+                            quizFeedback[safeIndex] === "up" ? "text-[#007AFF]" : ""
                           }`}
                           title="Nuttige vraag"
                         >
-                          👍
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                          </svg>
                         </button>
                         <button
                           type="button"
@@ -2627,38 +2913,40 @@ export default function NotabilityStealthView({
                               [safeIndex]: prev[safeIndex] === "down" ? null : "down",
                             }))
                           }
-                          className={`p-1.5 rounded-lg transition hover:bg-black/5 ${
-                            quizFeedback[safeIndex] === "down" ? "text-rose-500 bg-rose-50" : ""
+                          className={`hover:text-[#1C1C1E] transition ${
+                            quizFeedback[safeIndex] === "down" ? "text-[#FF3B30]" : ""
                           }`}
                           title="Verbetering nodig"
                         >
-                          👎
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
+                          </svg>
                         </button>
                       </div>
                     </div>
 
-                    {/* Footer Navigation (Screenshot 4: < Previous and Skip >) */}
-                    <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-xs font-semibold">
+                    {/* Footer Navigation (Screenshot 4: < Previous and Skip > in blue) */}
+                    <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-[15px] font-medium text-[#007AFF]">
                       <button
                         type="button"
                         disabled={safeIndex === 0}
                         onClick={() => setQuizQuestionIndex((i) => Math.max(0, i - 1))}
                         className={`flex items-center gap-1 transition ${
                           safeIndex === 0
-                            ? "text-[#C7C7CC] cursor-not-allowed"
-                            : "text-[#007AFF] hover:underline"
+                            ? "opacity-30 cursor-not-allowed"
+                            : "hover:opacity-75"
                         }`}
                       >
-                        <span>‹</span> Vorige
+                        <span>&lsaquo;</span> Previous
                       </button>
                       <button
                         type="button"
                         onClick={() =>
                           setQuizQuestionIndex((i) => (i + 1) % totalQuestions)
                         }
-                        className="text-[#007AFF] hover:underline flex items-center gap-1"
+                        className="flex items-center gap-1 hover:opacity-75 transition"
                       >
-                        {currentAnswer !== undefined ? "Volgende" : "Overslaan"} <span>›</span>
+                        Skip <span>&rsaquo;</span>
                       </button>
                     </div>
                   </div>
