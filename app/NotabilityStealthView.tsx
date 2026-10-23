@@ -98,65 +98,15 @@ interface SubjectFolder {
   name: string;
   color: string;
   divider: string;
-  defaultTitle: string;
-  defaultContent: string;
 }
 
 const NOTABILITY_SUBJECTS: SubjectFolder[] = [
-  {
-    id: "wiskunde-b",
-    name: "Wiskunde B",
-    color: "#007AFF",
-    divider: "Exacte Vakken",
-    defaultTitle: "H4.3 Kwadratische Vergelijkingen & Parabolen",
-    defaultContent:
-      "§4.3 De ABC-formule en Discriminant\n\nAlgemene vorm: f(x) = ax² + bx + c = 0\nDiscriminant: D = b² - 4ac\n\n• D > 0  ⇒  2 reële oplossingen (snijpunten met x-as): x = (-b ± √D) / 2a\n• D = 0  ⇒  1 raakpunt (top op x-as): x = -b / 2a\n• D < 0  ⇒  Geen reële oplossingen\n\nOpgave 14a:\n2x² - 7x + 3 = 0\nD = (-7)² - 4 · 2 · 3 = 49 - 24 = 25\nx₁ = (7 + 5) / 4 = 3   ∨   x₂ = (7 - 5) / 4 = ½",
-  },
-  {
-    id: "natuurkunde",
-    name: "Natuurkunde",
-    color: "#5856D6",
-    divider: "Exacte Vakken",
-    defaultTitle: "H3 Kracht en Beweging — Wetten van Newton",
-    defaultContent:
-      "§3.2 Tweede Wet van Newton\n\nF_res = m · a\n• F_res : resulterende kracht in Newton (N)\n• m : massa in kilogram (kg)\n• a : versnelling in m/s²\n\nZwaartekracht: F_z = m · g   (g = 9,81 m/s²)\nArbeid: W = F · s · cos(α)",
-  },
-  {
-    id: "scheikunde",
-    name: "Scheikunde",
-    color: "#34C759",
-    divider: "Exacte Vakken",
-    defaultTitle: "H5 Chemisch Rekenen & Molariteit",
-    defaultContent:
-      "§5.1 Molmassa en Concentratie\n\nn = m / M\n• n = aantal mol (mol)\n• m = massa in gram (g)\n• M = molaire massa (g/mol)\n\nMolariteit: [A] = n / V  (in mol/L)",
-  },
-  {
-    id: "nederlands",
-    name: "Nederlands",
-    color: "#AF52DE",
-    divider: "Talen",
-    defaultTitle: "Argumentatiestructuren & Drogredenen",
-    defaultContent:
-      "Overzicht Argumentatieschema's:\n1. Oorzaak en gevolg\n2. Vergelijkingsargumentatie\n3. Kenmerk of symptoom\n\nVeelvoorkomende drogredenen:\n• Persoonlijke aanval (ad hominem)\n• Overhaaste generalisatie\n• Cirkelredenering",
-  },
-  {
-    id: "engels",
-    name: "Engels",
-    color: "#00C7BE",
-    divider: "Talen",
-    defaultTitle: "Grammar — Present Perfect vs. Past Simple",
-    defaultContent:
-      "1. Past Simple: finished actions at a specific time in the past (yesterday, in 2022, last week).\n2. Present Perfect: have/has + past participle. Started in the past and continues now, or result is still visible.",
-  },
-  {
-    id: "economie",
-    name: "Economie",
-    color: "#FF2D55",
-    divider: "Maatschappij",
-    defaultTitle: "H2 Markt, Vraag en Aanbod — Prijselasticiteit",
-    defaultContent:
-      "Prijselasticiteit van de vraag (Ev):\nEv = (% verandering gevraagde hoeveelheid) / (% verandering prijs)\n\nTotale Winst (TW) = TO - TK\nBreak-even punt: TO = TK  (of MO = MK voor maximale winst)",
-  },
+  { id: "wiskunde-b", name: "Wiskunde B", color: "#007AFF", divider: "Exacte Vakken" },
+  { id: "natuurkunde", name: "Natuurkunde", color: "#5856D6", divider: "Exacte Vakken" },
+  { id: "scheikunde", name: "Scheikunde", color: "#34C759", divider: "Exacte Vakken" },
+  { id: "nederlands", name: "Nederlands", color: "#AF52DE", divider: "Talen" },
+  { id: "engels", name: "Engels", color: "#FF9500", divider: "Talen" },
+  { id: "economie", name: "Economie", color: "#FF2D55", divider: "Maatschappij" },
 ];
 
 const PEN_COLORS = [
@@ -424,8 +374,6 @@ export default function NotabilityStealthView({
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({ 1: 1 }); // Q2 option 1 (Complex vector spaces) pre-selected!
   const [quizFeedback, setQuizFeedback] = useState<Record<number, "up" | "down" | null>>({});
   const [smartNotesDropdownOpen, setSmartNotesDropdownOpen] = useState<boolean>(false);
-  const [sampleDocMode, setSampleDocMode] = useState<"none" | "physics" | "quantum" | "ap_english" | "computing">("none");
-  const isSampleDocLoaded = sampleDocMode !== "none";
 
   // Multi-page state
   const [pages, setPages] = useState<NotePageData[]>([
@@ -1252,90 +1200,19 @@ export default function NotabilityStealthView({
                   ))}
                 </div>
 
-                {/* Authentic iPadOS Screenshot Documents Selector */}
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93] mb-2">
-                  Werkblad &amp; Documenten (Screenshots 1-5)
-                </p>
-                <div className="space-y-1 mb-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSampleDocMode("none");
-                      setShowTemplateMenu(false);
-                      showToast("Schoon blanco blad geactiveerd");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                      sampleDocMode === "none" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
-                    }`}
-                  >
-                    <span>📄 Puur Blanco Werkblad (Leeg)</span>
-                    {sampleDocMode === "none" && <span>✓</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSampleDocMode("physics");
-                      setPaperGrid("lined");
-                      setShowTemplateMenu(false);
-                      showToast("Screenshot 4: Physics Hooke's Law & Oscillator geladen");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                      sampleDocMode === "physics" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
-                    }`}
-                  >
-                    <span>⚙️ Screenshot 4: Physics &amp; Hooke&apos;s Law</span>
-                    {sampleDocMode === "physics" && <span>✓</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSampleDocMode("quantum");
-                      setShowTemplateMenu(false);
-                      showToast("Screenshot 3: Quantum Mechanics Chapter 1 geladen");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                      sampleDocMode === "quantum" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
-                    }`}
-                  >
-                    <span>⚛️ Screenshot 3: Quantum Mechanics Ch. 1</span>
-                    {sampleDocMode === "quantum" && <span>✓</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSampleDocMode("ap_english");
-                      setShowTemplateMenu(false);
-                      showToast("Screenshot 5: AP English Essay & Oranje Sticky Notes geladen");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                      sampleDocMode === "ap_english" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
-                    }`}
-                  >
-                    <span>📝 Screenshot 5: AP English Essay &amp; Sticky Notes</span>
-                    {sampleDocMode === "ap_english" && <span>✓</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSampleDocMode("computing");
-                      setShowTemplateMenu(false);
-                      showToast("Screenshot 1: Emergent Computing & Turing Machine geladen");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                      sampleDocMode === "computing" ? "bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/30" : "bg-black/[0.03] text-[#1C1C1E] hover:bg-black/5"
-                    }`}
-                  >
-                    <span>💻 Screenshot 1: Emergent Computing</span>
-                    {sampleDocMode === "computing" && <span>✓</span>}
-                  </button>
-                </div>
-
                 {/* Actions */}
-                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white">
+                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-xl border border-[#E5E5EA] bg-white mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      docUploadInputRef.current?.click();
+                      setShowTemplateMenu(false);
+                    }}
+                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] font-semibold text-[#007AFF] hover:bg-[#F2F2F7] transition"
+                  >
+                    <span>Document of Afbeelding Toevoegen</span>
+                    <span>📂</span>
+                  </button>
 
                   <button
                     type="button"
@@ -2148,258 +2025,6 @@ export default function NotabilityStealthView({
               </div>
             )}
 
-            {/* =====================================================================
-                AUTHENTIC NOTABILITY SAMPLE DOCUMENTS (Screenshots 1, 3, 4, 5)
-               ===================================================================== */}
-
-            {/* 1. SCREENSHOT 4: Physics Hooke's Law & Oscillator Worksheet */}
-            {sampleDocMode === "physics" && (
-              <div className="relative z-12 mx-4 my-2 p-6 sm:p-8 rounded-xl font-serif text-[#1C1C1E] select-text">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
-                  <div className="text-xs font-mono text-[#8E8E93]">
-                    Spherical Coordinates (Review): See textbook for graphical representation
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSampleDocMode("none")}
-                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
-                  >
-                    ✕ Sluit werkblad
-                  </button>
-                </div>
-
-                <p className="font-serif italic text-sm text-[#1C1C1E] mb-3">
-                  Consider a mass m connected to a wall w/ no gravitational force.
-                </p>
-
-                {/* Spring & Mass System Diagram from Screenshot 4 */}
-                <div className="my-3 flex flex-col sm:flex-row items-center gap-6 p-3 bg-white/70 rounded-xl border border-black/5">
-                  <svg className="w-56 h-28 shrink-0 text-[#1C1C1E]" viewBox="0 0 220 110" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    {/* Wall */}
-                    <line x1="20" y1="10" x2="20" y2="100" strokeWidth="3" />
-                    <line x1="10" y1="20" x2="20" y2="10" />
-                    <line x1="10" y1="40" x2="20" y2="30" />
-                    <line x1="10" y1="60" x2="20" y2="50" />
-                    <line x1="10" y1="80" x2="20" y2="70" />
-                    {/* Spring 1 */}
-                    <line x1="20" y1="35" x2="40" y2="35" />
-                    <path d="M40 35 L45 25 L55 45 L65 25 L75 45 L85 25 L95 45 L100 35" />
-                    <line x1="100" y1="35" x2="120" y2="35" />
-                    <circle cx="125" cy="35" r="7" fill="white" strokeWidth="2" />
-                    <text x="122" y="38" fontSize="8" fontFamily="sans-serif">x₀</text>
-                    {/* Spring 2 extended */}
-                    <line x1="20" y1="80" x2="50" y2="80" />
-                    <path d="M50 80 L58 68 L70 92 L82 68 L94 92 L106 68 L118 92 L125 80" />
-                    <line x1="125" y1="80" x2="165" y2="80" />
-                    <circle cx="172" cy="80" r="7" fill="white" strokeWidth="2" />
-                    <text x="170" y="83" fontSize="8" fontFamily="sans-serif">x</text>
-                  </svg>
-
-                  <div className="text-xs font-serif leading-relaxed text-[#2C2C2E] space-y-1">
-                    <p>If m, let x₀ be the equilibrium, or undisturbed, length of the spring. Then force is denoted by:</p>
-                    <p className="font-mono text-[13px] font-bold text-[#1C1C1E] pl-2">f = -k(x - x₀) - bv &nbsp;&nbsp;(Hooke&apos;s Law)</p>
-                    <p className="text-[11px] text-[#8E8E93] italic">negative form implies force is left/position to right</p>
-                  </div>
-                </div>
-
-                <p className="text-xs text-[#3C3C43] mb-3">
-                  k is the force constant of the spring; small k = loose/weak spring; large k = tight/strong spring.
-                </p>
-
-                {/* Equations with Red Reference Numbers from Screenshot 4 */}
-                <div className="space-y-3 font-serif">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
-                    <span className="text-xs font-serif text-[#1C1C1E]">
-                      Newton&apos;s equation with a Hooke&apos;s Law force is: &nbsp;
-                      <span className="font-mono font-bold">m (d²x/dt²) = -k(x - x₀)</span>
-                    </span>
-                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.1)</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
-                    <span className="text-xs font-serif text-[#1C1C1E]">
-                      If we let x&apos; = x - x₀, then we have: &nbsp;
-                      <span className="font-mono font-bold">m (d²x&apos;/dt²) = -kx&apos;</span>
-                    </span>
-                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.2)</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/[0.02]">
-                    <span className="text-xs font-serif text-[#1C1C1E]">
-                      General solution to 5.3 is: &nbsp;
-                      <span className="font-mono font-bold">x(t) = C₁ sin(ωt) + C₂ cos(ωt)</span>
-                    </span>
-                    <span className="font-mono text-xs font-bold text-[#FF3B30]">(5.4)</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 2. SCREENSHOT 3: Authentic Quantum Mechanics Chapter 1 */}
-            {sampleDocMode === "quantum" && (
-              <div className="relative z-12 mx-6 my-4 p-6 sm:p-8 rounded-xl border border-black/10 bg-white/95 shadow-md font-serif text-[#1C1C1E] select-text">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#1C1C1E]">
-                      Chapter 1: Key Features of Quantum Mechanics
-                    </h2>
-                    <p className="text-xs text-[#8E8E93] italic font-sans mt-0.5">
-                      February 3, 2018
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSampleDocMode("none")}
-                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
-                  >
-                    ✕ Sluit werkblad
-                  </button>
-                </div>
-
-                <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-[#2C2C2E] italic mb-4">
-                  Quantum mechanics is now almost one hundred years old, but we are still discovering some of its surprising features and it remains the subject of much investigation and speculation. The framework of quantum mechanics is a rich and elegant extension of the framework of classical physics. It is also counterintuitive and almost paradoxical.
-                </p>
-
-                <p className="text-[12px] sm:text-[12.5px] leading-relaxed text-[#3C3C43] mb-4">
-                  Quantum physics has replaced classical physics as the correct fundamental description of our physical universe. It is used routinely to describe most phenomena that occur at short distances. Quantum physics is the result of applying the framework of quantum mechanics to different physical phenomena. We thus have Quantum Electrodynamics, when quantum mechanics is applied to electromagnetism, Quantum Optics, when it is applied to light and optical devices, or Quantum Gravity, when it is applied to gravitation.
-                </p>
-
-                <h3 className="text-sm font-bold font-serif text-[#1C1C1E] mt-4 mb-2">
-                  1 Linearity of the equations of motion
-                </h3>
-
-                <p className="text-[12px] sm:text-[12.5px] leading-relaxed text-[#3C3C43] mb-3">
-                  In physics a theory is usually described by a set of equations for some quantities called the <span className="font-bold">dynamical variables</span> of the theory. After writing a theory, the most important task is finding solutions of the equations. A solution of the equations describes a possible reality, according to the theory.
-                </p>
-
-                {/* Mathematical Equation matching Screenshot 3 */}
-                <div className="my-4 py-3 px-4 bg-[#F2F2F7]/60 rounded-xl border border-black/5 text-center font-mono text-xs sm:text-sm text-[#1C1C1E]">
-                  α|photon; x⟩ + β|photon; y⟩, &nbsp; α, β ∈ ℂ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(4.6)
-                </div>
-
-                {/* Polarization Vector Diagram matching Screenshot 3 */}
-                <div className="flex items-center justify-center py-2">
-                  <div className="h-28 w-52 rounded-xl border border-dashed border-[#007AFF]/40 bg-[#007AFF]/5 flex flex-col items-center justify-center text-center p-2">
-                    <span className="font-mono text-[10px] text-[#007AFF] font-bold">Figure 5: Parameters defining an elliptically polarized state</span>
-                    <span className="text-[9px] text-[#8E8E93] mt-1 font-sans">Polar angles θ and φ in complex vector space</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 3. SCREENSHOT 5: AP English Essay & Iconic Coral Sticky Notes */}
-            {sampleDocMode === "ap_english" && (
-              <div className="relative z-12 mx-4 my-2 p-6 sm:p-10 rounded-xl font-serif text-[#1C1C1E] select-text">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
-                  <div className="text-xs font-serif text-[#8E8E93]">
-                    MLA Format • AP English Literature Essay (Screenshot 5 Replica)
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSampleDocMode("none")}
-                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
-                  >
-                    ✕ Sluit werkblad
-                  </button>
-                </div>
-
-                <div className="flex justify-between text-xs leading-relaxed font-serif text-[#1C1C1E] mb-6">
-                  <div>
-                    <p>Jamey Holmes</p>
-                    <p>Mrs. Schmidt</p>
-                    <p>AP English</p>
-                    <p>01 May 2022</p>
-                  </div>
-                  <div>
-                    <p>Holmes 1</p>
-                  </div>
-                </div>
-
-                <h2 className="text-center font-serif text-base font-bold text-[#1C1C1E] mb-6">
-                  Reflections on AP Language
-                </h2>
-
-                <div className="relative text-[13.5px] leading-[28px] font-serif text-[#2C2C2E] space-y-4">
-                  <p>
-                    In AP Language we learned about history, science, culture, language, politics, philosophy, and a smattering of other topics. Though English has been my favorite subject{" "}
-                    <span className="line-through decoration-[#FF3B30] decoration-2 text-[#8E8E93]">
-                      since I learned to read, I
-                    </span>{" "}
-                    always considered it simply reading and writing, not a{" "}
-                    <span className="underline decoration-[#FF3B30] decoration-2">
-                      fabric of interwoven people
-                    </span>{" "}
-                    and places that overlapped.
-                  </p>
-
-                  {/* Authentic Coral-Orange Sticky Note (Screenshot 5) */}
-                  <div className="my-2 p-3 sm:p-4 rounded-2xl bg-[#F97316] text-white shadow-md font-sans text-xs sm:text-[13px] leading-relaxed max-w-sm">
-                    Overall a good start - nice use of specific examples
-                  </div>
-
-                  <p>
-                    We wrote a synthesis essay about war immediately following our World War II unit in History, read{" "}
-                    <span className="italic">Aria</span> and discussed speaking Spanish at home, a language I&apos;ve been learning since middle school, but whose cultural associations I never fully appreciated -- the social immobility that comes with only speaking Spanish and the potential loss of home and comfort with the increased fluency in English.
-                  </p>
-
-                  {/* Second Coral-Orange Sticky Note (Screenshot 5) */}
-                  <div className="my-2 p-3 sm:p-4 rounded-2xl bg-[#F97316] text-white shadow-md font-sans text-xs sm:text-[13px] leading-relaxed max-w-xs">
-                    How can we simplify this section and get to the point faster?
-                  </div>
-
-                  <p>
-                    This class allowed me to gather the disparate pieces of information I had accrued in the past year and synthesize them into one medium -- a discussion, a seminar, or an essay. I slowly learned how to connect my historical knowledge with that of my personal life, rather than seeing them as separate entities.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* 4. SCREENSHOT 1: Emergent Computing & Turing Machine */}
-            {sampleDocMode === "computing" && (
-              <div className="relative z-12 mx-4 my-2 p-6 sm:p-8 rounded-xl font-sans text-[#1C1C1E] select-text">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
-                  <div className="text-xs font-mono text-[#8E8E93]">
-                    Computer Science Lecture Notes • Emergence &amp; Systems (Screenshot 1 Replica)
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSampleDocMode("none")}
-                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
-                  >
-                    ✕ Sluit werkblad
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="rounded-lg bg-amber-100 px-3 py-1 font-serif text-lg font-bold text-amber-900 shadow-2xs">
-                    Emergent Computing
-                  </span>
-                  <span className="text-xs text-[#8E8E93]">
-                    Highly complex process arising from the cooperation of many simple processes
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4">
-                    <h3 className="font-serif text-base font-bold text-sky-950 mb-1">Turing&apos;s Machine</h3>
-                    <p className="text-xs text-[#3C3C43] leading-relaxed">
-                      Personal computer / isolated computing machine. Models dynamics of a structure of nodes and data exchange.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-                    <h3 className="font-serif text-base font-bold text-amber-950 mb-1">Level of Emergence</h3>
-                    <div className="space-y-1 text-xs text-[#3C3C43]">
-                      <p>• Social: Community, inter-action, networks</p>
-                      <p>• Psychological: Semantics, attitudes, feelings</p>
-                      <p>• Informational: Programs, data, bandwidth</p>
-                      <p>• Mechanical: Hardware, motherboard, chips</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* 1. Uploaded Documents / Worksheets Layer */}
             {currentPage.images.map((img) => (
               <div
@@ -2759,11 +2384,11 @@ export default function NotabilityStealthView({
                     <div>
                       <h2 className="text-3xl font-bold tracking-tight text-[#1C1C1E] mb-2.5">Main Takeaway</h2>
                       <p className="text-[14px] leading-relaxed text-[#3C3C43]">
-                        {sampleDocMode === "physics"
-                          ? "Simple harmonic motion describes the periodic oscillation of a mass attached to a spring governed by Hooke's Law and Newton's second law, yielding sinusoidal position solutions with characteristic angular frequency ω."
-                          : sampleDocMode === "ap_english"
-                          ? "Reflections on AP Language demonstrates that writing is an interconnected medium linking historical context with personal experiences, synthesized through critical analysis rather than isolated mechanical exercises."
-                          : "Quantum mechanics is a revolutionary physics framework that fundamentally differs from classical physics, characterized by linearity, probabilistic nature, and quantum superpositions that challenge our classical understanding of reality."}
+                        {currentPage.typedText.trim()
+                          ? currentPage.typedText.slice(0, 200) + (currentPage.typedText.length > 200 ? "..." : "")
+                          : noteTitle.trim()
+                          ? `Overzicht en kernpunten voor notitie: "${noteTitle}".`
+                          : "Maak notities of voeg een document toe om direct live AI-samenvattingen en quizvragen te bekijken."}
                       </p>
                     </div>
 

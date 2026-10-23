@@ -3921,6 +3921,19 @@ export default function ZytronSharePage() {
 
           {/* Luxury Tactile Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Link naar Zytron Hoofd App */}
+            <a
+              href="https://zytron.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-luxury-glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-sky-300 border-sky-400/40 hover:border-sky-400 hover:bg-sky-500/15 transition shadow-[0_0_15px_-3px_rgba(56,189,248,0.25)]"
+              title="Ga naar Zytron Hoofd App (zytron.vercel.app)"
+            >
+              <Globe className="h-3.5 w-3.5 text-sky-400" />
+              <span>Hoofd App</span>
+              <ArrowUpRight className="h-3 w-3 text-sky-400/80" />
+            </a>
+
             {/* School Notability Camouflage Quick Toggle */}
             <button
               type="button"
@@ -4826,6 +4839,27 @@ export default function ZytronSharePage() {
             </div>
           </div>
         </section>
+
+        {/* Subtle Footer with Hoofd App Link */}
+        <footer className="mt-12 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/50">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-white/80">Zytron Share</span>
+            <span>•</span>
+            <span>Lokale P2P Data Layer</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://zytron.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-bold text-sky-400 hover:text-sky-300 transition"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span>Zytron Hoofd App Openen</span>
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+        </footer>
       </main>
 
       {/* ──────────────────────────────────────────────────────────────────────
