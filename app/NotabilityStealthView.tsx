@@ -189,6 +189,156 @@ const TAPE_COLORS = [
   "#4ADE80", // Mint
 ];
 
+export interface QuizQuestionItem {
+  id: number;
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export const NOTABILITY_QUIZ_QUESTIONS: QuizQuestionItem[] = [
+  {
+    id: 1,
+    question: "Who introduced the quantum hypothesis in 1900, postulating that electromagnetic energy is emitted in quantized packets?",
+    options: ["Max Planck", "Albert Einstein", "Niels Bohr", "Louis de Broglie"],
+    correctIndex: 0,
+  },
+  {
+    id: 2,
+    question: "What mathematical framework is required to express the laws of quantum mechanics?",
+    options: ["Real vector spaces", "Complex vector spaces", "Euclidean geometry", "Non-linear algebra"],
+    correctIndex: 1,
+  },
+  {
+    id: 3,
+    question: "Which differential equation describes the deterministic time-evolution of a quantum wave function?",
+    options: ["Maxwell-Boltzmann equation", "Schrödinger equation", "Navier-Stokes equation", "Lorentz force law"],
+    correctIndex: 1,
+  },
+  {
+    id: 4,
+    question: "What does Born's statistical rule assert regarding the modulus squared |ψ(x)|²?",
+    options: [
+      "Total kinetic energy density",
+      "Probability density of finding a particle at position x",
+      "Gravitational potential gradient",
+      "Local electric charge displacement",
+    ],
+    correctIndex: 1,
+  },
+  {
+    id: 5,
+    question: "What fundamental principle states that canonically conjugate observables cannot be simultaneously measured with arbitrary precision?",
+    options: [
+      "Heisenberg Uncertainty Principle",
+      "Pauli Exclusion Principle",
+      "No-Cloning Theorem",
+      "Correspondence Principle",
+    ],
+    correctIndex: 0,
+  },
+  {
+    id: 6,
+    question: "What quantum phenomenon describes two or more particles possessing correlated states regardless of spatial distance?",
+    options: [
+      "Quantum Entanglement",
+      "Wave packet dispersion",
+      "Compton scattering",
+      "Quantum tunneling",
+    ],
+    correctIndex: 0,
+  },
+  {
+    id: 7,
+    question: "Which linear Hermitian operator corresponds to the total mechanical energy of a quantum system?",
+    options: ["Hamiltonian operator Ĥ", "Momentum operator p̂", "Position operator x̂", "Angular momentum operator L̂"],
+    correctIndex: 0,
+  },
+  {
+    id: 8,
+    question: "What is the physical significance of the Pauli Exclusion Principle in atomic systems?",
+    options: [
+      "No two identical fermions may occupy the same quantum state simultaneously",
+      "Photons cannot occupy identical spatial orbitals",
+      "All observables must possess purely imaginary eigenvalues",
+      "Energy states are continuous in bound systems",
+    ],
+    correctIndex: 0,
+  },
+  {
+    id: 9,
+    question: "What experimental observation confirmed the wave-particle duality of electrons via nickel crystal diffraction?",
+    options: ["Davisson-Germer experiment", "Michelson-Morley experiment", "Cavendish experiment", "Millikan oil-drop experiment"],
+    correctIndex: 0,
+  },
+  {
+    id: 10,
+    question: "In quantum optics, what term refers to a quantum state that cannot be decomposed into a statistical mixture?",
+    options: ["Pure state", "Thermal mixed state", "Classical coherent state", "Density matrix state"],
+    correctIndex: 0,
+  },
+  {
+    id: 11,
+    question: "What mathematical property ensures that quantum probability amplitudes sum to unity over all possible outcomes?",
+    options: ["Unitary evolution", "Orthogonal projection", "Commutativity", "Idempotency"],
+    correctIndex: 0,
+  },
+  {
+    id: 12,
+    question: "What theorem proves that an unknown arbitrary quantum state cannot be replicated identically?",
+    options: ["No-Cloning Theorem", "Bell's Theorem", "CPT Theorem", "Ehrenfest Theorem"],
+    correctIndex: 0,
+  },
+  {
+    id: 13,
+    question: "What type of particle obeys Bose-Einstein statistics and possesses integer spin (0, 1, 2)?",
+    options: ["Bosons", "Fermions", "Quarks", "Leptons"],
+    correctIndex: 0,
+  },
+  {
+    id: 14,
+    question: "What type of particle obeys Fermi-Dirac statistics and has half-integer spin (1/2, 3/2)?",
+    options: ["Fermions", "Bosons", "Gluons", "Photons"],
+    correctIndex: 0,
+  },
+  {
+    id: 15,
+    question: "Which famous thought experiment illustrates the paradox of quantum superposition in macroscopic systems?",
+    options: ["Schrödinger's Cat", "Maxwell's Demon", "Einstein's Elevator", "Twin Paradox"],
+    correctIndex: 0,
+  },
+  {
+    id: 16,
+    question: "What quantity does the Planck constant h divided by 2π (ħ) represent in quantum mechanics?",
+    options: ["Reduced Planck constant", "Boltzmann constant", "Fine-structure constant", "Rydberg constant"],
+    correctIndex: 0,
+  },
+  {
+    id: 17,
+    question: "What happens to a quantum state vector upon measurement according to the Copenhagen interpretation?",
+    options: ["Wave function collapse", "Continuous unitary drift", "Phase reversal", "Dimensional expansion"],
+    correctIndex: 0,
+  },
+  {
+    id: 18,
+    question: "Which inequality provides an experimental criterion to test local hidden-variable theories against quantum entanglement?",
+    options: ["Bell's Inequality", "Cauchy-Schwarz Inequality", "Triangle Inequality", "Heisenberg-Weyl Inequality"],
+    correctIndex: 0,
+  },
+  {
+    id: 19,
+    question: "What is the quantum mechanical phenomenon where a particle penetrates a potential energy barrier higher than its kinetic energy?",
+    options: ["Quantum Tunneling", "Photoelectric Effect", "Pair Production", "Bremsstrahlung"],
+    correctIndex: 0,
+  },
+  {
+    id: 20,
+    question: "Which principle establishes that quantum mechanics reproduces classical physics in the limit of large quantum numbers?",
+    options: ["Correspondence Principle", "Equivalence Principle", "Mach's Principle", "Gauge Invariance"],
+    correctIndex: 0,
+  },
+];
+
 export default function NotabilityStealthView({
   onExitStealth,
   quickText,
@@ -199,12 +349,12 @@ export default function NotabilityStealthView({
   onUploadFileToZytron,
   showToast,
 }: NotabilityStealthViewProps) {
-  // Active Subject & Note Title
+  // Active Subject & Note Title (Starts pure clean blank!)
   const [activeSubjectId, setActiveSubjectId] = useState<string>("wiskunde-b");
   const activeSubject =
     NOTABILITY_SUBJECTS.find((s) => s.id === activeSubjectId) || NOTABILITY_SUBJECTS[0];
 
-  const [noteTitle, setNoteTitle] = useState<string>("Naamloze notitie");
+  const [noteTitle, setNoteTitle] = useState<string>("");
   const [showLibrarySidebar, setShowLibrarySidebar] = useState<boolean>(false);
   const [showPagesSidebar, setShowPagesSidebar] = useState<boolean>(false);
   const [showTemplateMenu, setShowTemplateMenu] = useState<boolean>(false);
@@ -224,7 +374,7 @@ export default function NotabilityStealthView({
   // Zoom level (Notability zoom pill: 75%, 100%, 125%, 150%)
   const [zoomLevel, setZoomLevel] = useState<number>(1);
 
-  // Paper appearance
+  // Paper appearance (Default pure blank sheet)
   const [paperGrid, setPaperGrid] = useState<PaperGridType>("blank");
   const [paperColor, setPaperColor] = useState<PaperColorType>("white");
 
@@ -268,10 +418,13 @@ export default function NotabilityStealthView({
     boxY: 0,
   });
 
-  // Authentic Notability Smart Notes / Quiz Split Screen State
+  // Authentic Notability Smart Notes / Quiz Split Screen State (Defaults to Q2/20 matching Screenshot 4!)
   const [smartNotesTab, setSmartNotesTab] = useState<"notes" | "quiz" | "chat">("notes");
-  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
+  const [quizQuestionIndex, setQuizQuestionIndex] = useState<number>(1); // Question 2/20
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({ 1: 1 }); // Q2 option 1 (Complex vector spaces) pre-selected!
+  const [quizFeedback, setQuizFeedback] = useState<Record<number, "up" | "down" | null>>({});
   const [smartNotesDropdownOpen, setSmartNotesDropdownOpen] = useState<boolean>(false);
+  const [isSampleDocLoaded, setIsSampleDocLoaded] = useState<boolean>(false);
 
   // Multi-page state
   const [pages, setPages] = useState<NotePageData[]>([
@@ -1103,6 +1256,19 @@ export default function NotabilityStealthView({
                   <button
                     type="button"
                     onClick={() => {
+                      setIsSampleDocLoaded((v) => !v);
+                      setShowTemplateMenu(false);
+                      showToast(isSampleDocLoaded ? "Voorbeeld werkblad gesloten" : "Quantum Mechanics werkblad geladen (Screenshot 3)");
+                    }}
+                    className="flex w-full items-center justify-between bg-white px-3 py-2.5 text-[13px] text-[#007AFF] hover:bg-[#F2F2F7] transition font-semibold"
+                  >
+                    <span>{isSampleDocLoaded ? "Verberg Quantum Mechanics" : "⚛️ Laad Quantum Mechanics (Screenshot 3)"}</span>
+                    <span>📄</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
                       handleExportNote();
                       setShowTemplateMenu(false);
                     }}
@@ -1137,18 +1303,25 @@ export default function NotabilityStealthView({
             )}
           </div>
 
-          {/* Smart Notes (✨) */}
+          {/* Smart Notes (Folded Document with ✨ - Screenshot 2 & 3) */}
           <button
             type="button"
-            onClick={() => setShowNotabilityAiDrawer((v) => !v)}
+            onClick={() => {
+              setShowNotabilityAiDrawer((v) => !v);
+              if (!showNotabilityAiDrawer) setSmartNotesTab("notes");
+            }}
             className={`flex h-8 items-center gap-1 rounded-xl px-2.5 text-xs font-semibold transition ${
               showNotabilityAiDrawer
-                ? "bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-xs"
-                : "text-[#6366F1] hover:bg-[#6366F1]/10"
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
-            title="Smart Notes / Zytron AI"
+            title="Smart Notes & Quiz Flashcards (iPadOS Split-Screen)"
           >
-            <span className="text-sm">✨</span>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M10 11.5l.5 1.5L12 13.5l-1.5.5L10 15.5l-.5-1.5L8 13.5l1.5-.5L10 11.5z" fill="currentColor" stroke="none" />
+            </svg>
             <span className="hidden sm:inline font-sans text-[11px] font-bold">Smart Notes</span>
             {incomingNotes.length > 0 && (
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
@@ -1254,12 +1427,12 @@ export default function NotabilityStealthView({
                 transform: "none",
               }
             : {
-                left: showNotabilityAiDrawer ? "calc(25% + 20px)" : "50%",
+                left: showNotabilityAiDrawer ? "calc((100vw - 480px) / 2)" : "50%",
                 top: "12px",
                 transform: "translateX(-50%)",
               }
         }
-        className="fixed z-40 transition-all select-none"
+        className="fixed z-40 transition-all select-none pointer-events-auto"
       >
         <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
           {/* Draggable Gripper Handle (⋮⋮) */}
@@ -1588,53 +1761,58 @@ export default function NotabilityStealthView({
               </button>
 
               {/* 7. INSERT MEDIA (+ / Photo Button) */}
-              <button
-                type="button"
-                onClick={() => docUploadInputRef.current?.click()}
-                className="flex h-10 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition"
-                title="Voeg foto, werkblad of document in"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <rect x="3" y="3" width="18" height="18" rx="3"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => docUploadInputRef.current?.click()}
+                  className="flex h-10 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition"
+                  title="Voeg foto, werkblad of PDF in (of sleep direct op het blad)"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </button>
+              </div>
 
-              {/* 8. AUDIO RECORDER (Integrated right in the capsule!) */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isRecordingAudio) {
-                    setIsRecordingAudio(true);
-                    setRecordingSeconds(0);
-                  } else {
+              {/* 8. AUDIO RECORDER (Screenshot 3 authentic red capsule recording timer) */}
+              {isRecordingAudio ? (
+                <button
+                  type="button"
+                  onClick={() => {
                     setIsRecordingAudio(false);
                     setHasRecordedAudio(true);
-                    showToast("Spraakopname gesynchroniseerd met notitietijdlijn");
-                  }
-                }}
-                className="flex h-10 items-center justify-center rounded-xl px-1.5 transition text-[#3C3C43] hover:bg-black/[0.05]"
-                title="Audio-opname (Note Replay)"
-              >
-                {isRecordingAudio ? (
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-xs animate-pulse">
-                      <div className="h-2 w-2 rounded-2xs bg-white" />
-                    </div>
-                    <span className="font-mono text-[8px] font-bold text-rose-600 leading-none mt-0.5">
-                      {formatTimer(recordingSeconds)}
-                    </span>
-                  </div>
-                ) : (
+                    showToast("Audio-opname gesynchroniseerd met notitie");
+                  }}
+                  className="flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-1 text-rose-600 shadow-xs hover:bg-rose-100 transition animate-pulse"
+                  title="Stop audio-opname"
+                >
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-white shadow-2xs">
+                    <span className="h-1.5 w-1.5 rounded-2xs bg-white" />
+                  </span>
+                  <span className="font-mono text-[10px] font-bold text-rose-600">
+                    {formatTimer(recordingSeconds || 7)}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRecordingAudio(true);
+                    setRecordingSeconds(0);
+                  }}
+                  className="flex h-10 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition"
+                  title="Audio-opname starten (Note Replay)"
+                >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                     <line x1="12" y1="19" x2="12" y2="23" />
                     <line x1="8" y1="23" x2="16" y2="23" />
                   </svg>
-                )}
-              </button>
+                </button>
+              )}
 
               {/* 9. HAND TOOL (Pan / Scroll) */}
               <button
@@ -1658,7 +1836,7 @@ export default function NotabilityStealthView({
                 </svg>
               </button>
 
-              {/* 10. NOTABILITY TAPE TOOL (Study Answer Cover) */}
+              {/* 10. NOTABILITY STUDY TAPE TOOL (Active Recall) */}
               <div className="relative">
                 <button
                   type="button"
@@ -1675,9 +1853,9 @@ export default function NotabilityStealthView({
                       ? "bg-black/[0.08]"
                       : "text-[#3C3C43] hover:bg-black/[0.04]"
                   }`}
-                  title="Studie Tape (Antwoorden afdekken om te leren)"
+                  title="Studie Tape (Antwoorden afdekken om actief te leren)"
                 >
-                  <div className="h-3 w-4.5 rounded-xs border border-dashed border-amber-600 bg-amber-200" />
+                  <div className="h-3 w-5 rounded-xs border border-dashed border-amber-600 bg-[repeating-linear-gradient(45deg,#FEF08A,#FEF08A_4px,#FACC15_4px,#FACC15_8px)]" />
                 </button>
 
                 {openPopoverTool === "tape" && (
@@ -1717,29 +1895,16 @@ export default function NotabilityStealthView({
                 </svg>
               </button>
 
-              <div className="mx-0.5 h-6 w-px bg-[#E5E5EA]" />
-
-              {/* 10. STICKY NOTE */}
+              {/* 12. RIGHT CHEVRON (Expand tools indicator - Screenshot 1 & 3) */}
               <button
                 type="button"
-                onClick={handleAddStickyNote}
-                className="flex h-10 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.04] transition"
-                title="Plaknotitie toevoegen"
+                onClick={() => showToast("Notability v14.8 Gereedschappen gereed")}
+                className="flex h-10 w-5 items-center justify-center text-[#8E8E93] hover:text-[#1C1C1E] transition"
+                title="Meer opties"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#FEF08A" stroke="#3C3C43" strokeWidth="1.8">
-                  <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" />
-                  <path d="M15 3v6h6" fill="#FDE047" />
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6" />
                 </svg>
-              </button>
-
-              {/* 11. INSERT MEDIA (+ Button) */}
-              <button
-                type="button"
-                onClick={() => docUploadInputRef.current?.click()}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.05] transition text-xl font-light"
-                title="Foto, PDF of Werkblad uploaden op papier"
-              >
-                +
               </button>
             </>
           ) : (
@@ -1892,8 +2057,8 @@ export default function NotabilityStealthView({
             }}
             className="relative w-full max-w-[880px] min-h-[1200px] rounded-sm shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-black/[0.08] transition-transform duration-150"
           >
-            {/* Subtle Title Area (Clean & blank if untitled) */}
-            {noteTitle !== "Naamloze notitie" && (
+            {/* Subtle Title Area (Pure blank if untitled) */}
+            {noteTitle.trim().length > 0 && (
               <div className="flex items-center justify-between px-8 sm:px-14 pt-5 pb-1 border-b border-black/[0.05]">
                 <input
                   type="text"
@@ -1906,6 +2071,58 @@ export default function NotabilityStealthView({
                 <span className="shrink-0 font-mono text-[10px] text-[#8E8E93] ml-4">
                   p.{currentPageIndex + 1}
                 </span>
+              </div>
+            )}
+
+            {/* Authentic Quantum Mechanics Document Worksheet (Screenshot 3 Replica) */}
+            {isSampleDocLoaded && (
+              <div className="relative z-12 mx-6 my-4 p-6 sm:p-8 rounded-xl border border-black/10 bg-white/95 shadow-md font-serif text-[#1C1C1E] select-text">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-4">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#1C1C1E]">
+                      Chapter 1: Key Features of Quantum Mechanics
+                    </h2>
+                    <p className="text-xs text-[#8E8E93] italic font-sans mt-0.5">
+                      February 3, 2018
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsSampleDocLoaded(false)}
+                    className="text-xs font-sans text-[#8E8E93] hover:text-red-500 font-bold px-2 py-1 rounded-lg border border-[#E5E5EA]"
+                  >
+                    ✕ Sluit werkblad
+                  </button>
+                </div>
+
+                <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-[#2C2C2E] italic mb-4">
+                  Quantum mechanics is now almost one hundred years old, but we are still discovering some of its surprising features and it remains the subject of much investigation and speculation. The framework of quantum mechanics is a rich and elegant extension of the framework of classical physics. It is also counterintuitive and almost paradoxical.
+                </p>
+
+                <p className="text-[12px] sm:text-[12.5px] leading-relaxed text-[#3C3C43] mb-4">
+                  Quantum physics has replaced classical physics as the correct fundamental description of our physical universe. It is used routinely to describe most phenomena that occur at short distances. Quantum physics is the result of applying the framework of quantum mechanics to different physical phenomena. We thus have Quantum Electrodynamics, when quantum mechanics is applied to electromagnetism, Quantum Optics, when it is applied to light and optical devices, or Quantum Gravity, when it is applied to gravitation.
+                </p>
+
+                <h3 className="text-sm font-bold font-serif text-[#1C1C1E] mt-4 mb-2">
+                  1 Linearity of the equations of motion
+                </h3>
+
+                <p className="text-[12px] sm:text-[12.5px] leading-relaxed text-[#3C3C43] mb-3">
+                  In physics a theory is usually described by a set of equations for some quantities called the <span className="font-bold">dynamical variables</span> of the theory. After writing a theory, the most important task is finding solutions of the equations. A solution of the equations describes a possible reality, according to the theory.
+                </p>
+
+                {/* Mathematical Equation matching Screenshot 3 */}
+                <div className="my-4 py-3 px-4 bg-[#F2F2F7]/60 rounded-xl border border-black/5 text-center font-mono text-xs sm:text-sm text-[#1C1C1E]">
+                  α|photon; x⟩ + β|photon; y⟩, &nbsp; α, β ∈ ℂ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(4.6)
+                </div>
+
+                {/* Poincaré Sphere / Polarization Vector Diagram */}
+                <div className="flex items-center justify-center py-2">
+                  <div className="h-28 w-44 rounded-xl border border-dashed border-[#007AFF]/40 bg-[#007AFF]/5 flex flex-col items-center justify-center text-center p-2">
+                    <span className="font-mono text-[10px] text-[#007AFF] font-bold">Figure 5: Parameters defining an elliptically polarized state</span>
+                    <span className="text-[9px] text-[#8E8E93] mt-1 font-sans">Polar angles θ and φ in complex vector space</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1983,7 +2200,7 @@ export default function NotabilityStealthView({
                     prev.map((pg, idx) => (idx === currentPageIndex ? { ...pg, typedText: val } : pg))
                   );
                 }}
-                placeholder="Typ hier je aantekeningen of teken direct met de pen op het papier…"
+                placeholder={activeTool === "text" ? "Typ hier je aantekeningen…" : ""}
                 rows={12}
                 className={`w-full resize-none bg-transparent font-sans text-sm sm:text-[15px] leading-[30px] focus:outline-none ${
                   isDarkPaper ? "text-gray-100 placeholder-gray-600" : "text-[#1C1C1E] placeholder-[#AEAEB2]"
@@ -2136,215 +2353,317 @@ export default function NotabilityStealthView({
 
         {/* RIGHT DRAWER 1: Authentic Notability Smart Notes & Quiz Split Screen (Screenshot 3 & 4) */}
         {showNotabilityAiDrawer && (
-          <aside className="z-30 flex w-full max-w-[480px] sm:w-[440px] md:w-[480px] shrink-0 flex-col border-l border-[#D1D1D6] bg-white shadow-2xl transition-all">
-            {/* Header: [ ← ]  Smart Notes ∨  [ ⛶ ] */}
-            <div className="flex h-12 items-center justify-between border-b border-[#E5E5EA] px-4 bg-white/95 backdrop-blur-xl">
-              <button
-                type="button"
-                onClick={() => setShowNotabilityAiDrawer(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 active:scale-95 transition"
-                title="Sluit Smart Notes"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-
-              {/* Mode Dropdown: Smart Notes ∨ */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setSmartNotesDropdownOpen((v) => !v)}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold text-[#1C1C1E] hover:bg-black/5 transition"
-                >
-                  <span>{smartNotesTab === "notes" ? "Smart Notes" : smartNotesTab === "quiz" ? "Quiz" : "Klasgenoten"}</span>
-                  <svg className="h-3.5 w-3.5 text-[#8E8E93]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-
-                {smartNotesDropdownOpen && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-9 z-50 w-48 rounded-2xl border border-black/10 bg-white/98 p-1.5 shadow-xl backdrop-blur-xl">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSmartNotesTab("notes");
-                        setSmartNotesDropdownOpen(false);
-                      }}
-                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                        smartNotesTab === "notes" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
-                      }`}
-                    >
-                      <span>✨</span>
-                      <span>Smart Notes</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSmartNotesTab("quiz");
-                        setSmartNotesDropdownOpen(false);
-                      }}
-                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                        smartNotesTab === "quiz" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
-                      }`}
-                    >
-                      <span>📝</span>
-                      <span>Quiz Flashcards</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSmartNotesTab("chat");
-                        setSmartNotesDropdownOpen(false);
-                      }}
-                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                        smartNotesTab === "chat" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
-                      }`}
-                    >
-                      <span>💬</span>
-                      <span>Klasgenoten Chat</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Action / Expand */}
-              <button
-                type="button"
-                onClick={() => setShowNotabilityAiDrawer(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 transition"
-                title="Minimaliseren"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                </svg>
-              </button>
+          <>
+            {/* iPadOS Split-Screen Resizing / Dividing Handle */}
+            <div className="hidden sm:flex z-30 w-2.5 shrink-0 items-center justify-center bg-[#E5E5EA]/70 hover:bg-[#D1D1D6] cursor-col-resize select-none transition-colors border-l border-[#D1D1D6]">
+              <div className="h-9 w-1 rounded-full bg-[#8E8E93]/70" />
             </div>
 
-            {/* Content Tab: Smart Notes (Screenshot 3) */}
-            {smartNotesTab === "notes" && (
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-4 font-sans custom-scrollbar">
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight text-[#1C1C1E] mb-2">Main Takeaway</h2>
-                  <p className="text-[13px] text-[#3C3C43] leading-relaxed">
-                    {currentPage.images.length > 0
-                      ? `Ingevoegde documenten (${currentPage.images.map(i => i.name).join(", ")}) zijn geanalyseerd. De kernpunten, formules en uitwerkingen zijn hieronder gestructureerd samengevat.`
-                      : noteTitle !== "Naamloze notitie"
-                      ? `${noteTitle} behandelt fundamentele theorieën, formules en methodes. De notitie biedt een compleet overzicht van afleidingen en stappenplannen.`
-                      : "Deze notitie is een leeg werkblad. Teken met de pen of sleep een PDF/foto in om automatisch samenvattingen, kernbegrippen en wiskundige oplossingen te genereren."}
-                  </p>
+            <aside className="z-30 flex w-full max-w-[480px] sm:w-[440px] md:w-[480px] shrink-0 flex-col border-l border-[#D1D1D6] bg-white shadow-2xl transition-all">
+              {/* Header: Dynamic per mode matching Screenshot 3 & 4 */}
+              {smartNotesTab === "quiz" ? (
+                /* Authentic Quiz Mode Header (Screenshot 4: [ ← ]  Quiz  [ ☰ ] ) */
+                <div className="flex h-12 items-center justify-between border-b border-[#E5E5EA] px-4 bg-white/95 backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => setSmartNotesTab("notes")}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-[#1C1C1E] hover:bg-black/5 active:scale-95 transition"
+                    title="Terug naar Smart Notes"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+
+                  <h3 className="text-base font-bold text-[#1C1C1E] tracking-tight">Quiz</h3>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSmartNotesDropdownOpen((v) => !v);
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 transition"
+                    title="Opties & Modus"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                      <line x1="3" y1="6" x2="21" y2="6" />
+                      <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                  </button>
                 </div>
+              ) : (
+                /* Authentic Smart Notes Header (Screenshot 3: [ ← ]  Smart Notes ∨  [ ⛶ ] ) */
+                <div className="flex h-12 items-center justify-between border-b border-[#E5E5EA] px-4 bg-white/95 backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => setShowNotabilityAiDrawer(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 active:scale-95 transition"
+                    title="Sluit Smart Notes"
+                  >
+                    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
 
-                <div className="space-y-3 pt-2">
-                  <h3 className="text-base font-bold text-[#1C1C1E]">
-                    1. Belangrijkste Onderwerpen &amp; Kernbegrippen
-                  </h3>
-                  
-                  <div className="space-y-2 pl-2 border-l-2 border-[#007AFF]/20">
-                    <div>
-                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Conceptuele Kern</p>
-                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                        Formules en stellingen sluiten direct aan op de lesstof. Alle uitwerkingen behouden wiskundige precisie.
-                      </p>
-                    </div>
+                  {/* Mode Dropdown: Smart Notes ∨ */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setSmartNotesDropdownOpen((v) => !v)}
+                      className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold text-[#1C1C1E] hover:bg-black/5 transition"
+                    >
+                      <span>{smartNotesTab === "notes" ? "Smart Notes" : "Klasgenoten"}</span>
+                      <svg className="h-3.5 w-3.5 text-[#8E8E93]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
 
-                    <div>
-                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Praktische Toepassing</p>
-                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                        Gebruik de Study Tape om tussenstappen af te dekken en jezelf actief te overhoren voor tentamens.
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-[13px] font-bold text-[#1C1C1E]">• Examen Tips</p>
-                      <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
-                        Controleer altijd randvoorwaarden (zoals D &ge; 0 bij wortels of noemer &ne; 0 bij breuken).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Content Tab: Quiz Flashcards (Screenshot 4) */}
-            {smartNotesTab === "quiz" && (
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#8E8E93] mb-2">
-                    <span>Vraag 2 van 20</span>
-                    <span className="font-mono text-[#007AFF]">10% voltooid</span>
-                  </div>
-                  {/* Progress Bar */}
-                  <div className="h-1.5 w-full rounded-full bg-[#E5E5EA] overflow-hidden mb-6">
-                    <div className="h-full w-[10%] bg-[#007AFF] rounded-full transition-all duration-300" />
-                  </div>
-
-                  {/* Question */}
-                  <h3 className="text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
-                    {currentPage.images.length > 0
-                      ? `Wat is het primaire doel van de bewerking in "${currentPage.images[0].name}"?`
-                      : "Welk wiskundig kader is vereist om de fundamentele wetten correct te formuleren?"}
-                  </h3>
-
-                  {/* Multiple Choice Options */}
-                  <div className="space-y-2.5">
-                    {[
-                      { id: 0, text: "Reële vectorruimten" },
-                      { id: 1, text: "Complexe vectorruimten", isCorrect: true },
-                      { id: 2, text: "Euclidische meetkunde" },
-                      { id: 3, text: "Niet-lineaire algebra" },
-                    ].map((opt) => {
-                      const isSelected = selectedQuizAnswer === opt.id;
-                      return (
+                    {smartNotesDropdownOpen && (
+                      <div className="absolute left-1/2 -translate-x-1/2 top-9 z-50 w-48 rounded-2xl border border-black/10 bg-white/98 p-1.5 shadow-xl backdrop-blur-xl">
                         <button
-                          key={opt.id}
                           type="button"
-                          onClick={() => setSelectedQuizAnswer(opt.id)}
-                          className={`w-full rounded-2xl border p-3.5 text-left text-[13.5px] font-medium transition flex items-center justify-between ${
-                            isSelected
-                              ? opt.isCorrect
-                                ? "border-emerald-500 bg-emerald-50/60 text-emerald-950 font-bold shadow-xs"
-                                : "border-red-400 bg-red-50 text-red-950 font-bold"
-                              : "border-[#E5E5EA] bg-white hover:bg-[#F2F2F7] text-[#1C1C1E]"
+                          onClick={() => {
+                            setSmartNotesTab("notes");
+                            setSmartNotesDropdownOpen(false);
+                          }}
+                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                            smartNotesTab === "notes" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
                           }`}
                         >
-                          <span>{opt.text}</span>
-                          {isSelected && opt.isCorrect && (
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs">
-                              ✓
-                            </span>
-                          )}
+                          <span>✨</span>
+                          <span>Smart Notes</span>
                         </button>
-                      );
-                    })}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSmartNotesTab("quiz");
+                            setSmartNotesDropdownOpen(false);
+                          }}
+                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                            (smartNotesTab as string) === "quiz" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
+                          }`}
+                        >
+                          <span>📝</span>
+                          <span>Quiz Flashcards</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSmartNotesTab("chat");
+                            setSmartNotesDropdownOpen(false);
+                          }}
+                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                            smartNotesTab === "chat" ? "bg-[#007AFF]/10 text-[#007AFF]" : "text-[#1C1C1E] hover:bg-black/5"
+                          }`}
+                        >
+                          <span>💬</span>
+                          <span>Klasgenoten Chat</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Feedback Thumb Icons */}
-                  <div className="flex items-center gap-3 mt-4 text-[#8E8E93]">
-                    <button type="button" className="hover:text-[#1C1C1E] transition">👍</button>
-                    <button type="button" className="hover:text-[#1C1C1E] transition">👎</button>
+                  {/* Right Action / Expand */}
+                  <button
+                    type="button"
+                    onClick={() => setShowNotabilityAiDrawer(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/5 transition"
+                    title="Minimaliseren"
+                  >
+                    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {/* Content Tab: Smart Notes (Screenshot 3) */}
+              {smartNotesTab === "notes" && (
+                <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-4 font-sans custom-scrollbar">
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#1C1C1E] mb-2">Main Takeaway</h2>
+                    <p className="text-[13px] text-[#3C3C43] leading-relaxed">
+                      {isSampleDocLoaded
+                        ? "Quantum mechanics is a rich and elegant extension of classical physics characterized by linearity, probability amplitudes, and quantum superpositions, formulated fundamentally in complex vector spaces."
+                        : currentPage.images.length > 0
+                        ? `Ingevoegde documenten (${currentPage.images.map((i) => i.name).join(", ")}) zijn geanalyseerd. De kernpunten, formules en uitwerkingen zijn hieronder gestructureerd samengevat.`
+                        : noteTitle.trim().length > 0
+                        ? `${noteTitle} behandelt fundamentele theorieën, formules en methodes. De notitie biedt een compleet overzicht van afleidingen en stappenplannen.`
+                        : "Dit is een leeg werkblad. Teken met de pen, laad het Quantum Mechanics voorbeeldblad via ···, of sleep een PDF/foto in om automatisch samenvattingen, kernbegrippen en overhoringen te activeren."}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <h3 className="text-base font-bold text-[#1C1C1E]">
+                      1. Belangrijkste Onderwerpen &amp; Kernbegrippen
+                    </h3>
+
+                    <div className="space-y-2 pl-2 border-l-2 border-[#007AFF]/20">
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Conceptuele Kern</p>
+                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                          Lineariteit van de bewegingsvergelijkingen impliceert dat lineaire combinaties van oplossingen zelf geldige fysische toestanden vormen (superpositie).
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Actieve Herhaling (Study Tape)</p>
+                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                          Tik op de gestreepte tape op het papier om tussenstappen of antwoorden af te dekken en jezelf actief te testen voor examens.
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[13px] font-bold text-[#1C1C1E]">• Zelfoverhoring</p>
+                        <p className="text-[12px] text-[#48484A] pl-3 leading-relaxed">
+                          Schakel over naar de Quiz-modus (20 vragen) om je begrip van operatoren, golffuncties en grondslagen direct te toetsen.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Footer Navigation */}
-                <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-xs font-semibold text-[#007AFF]">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedQuizAnswer(null)}
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    <span>‹</span> Vorige
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedQuizAnswer(null)}
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    Overslaan <span>›</span>
-                  </button>
-                </div>
-              </div>
-            )}
+              {/* Content Tab: Quiz Flashcards (Screenshot 4 Authentic Replica) */}
+              {smartNotesTab === "quiz" && (() => {
+                const totalQuestions = NOTABILITY_QUIZ_QUESTIONS.length;
+                const safeIndex = Math.min(Math.max(0, quizQuestionIndex), totalQuestions - 1);
+                const currentQ = NOTABILITY_QUIZ_QUESTIONS[safeIndex] || NOTABILITY_QUIZ_QUESTIONS[0];
+                const currentAnswer = quizAnswers[safeIndex];
+                const progressPct = Math.round(((safeIndex + 1) / totalQuestions) * 100);
+
+                return (
+                  <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
+                    <div>
+                      {/* Progress Header (Screenshot 4: 2/20) */}
+                      <div className="flex items-center justify-between text-xs font-semibold text-[#8E8E93] mb-2">
+                        <span className="text-[#1C1C1E] font-bold tracking-tight">
+                          {safeIndex + 1}/{totalQuestions}
+                        </span>
+                        <span className="font-mono text-[#007AFF] text-[11px] font-semibold">
+                          {progressPct}% voltooid
+                        </span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="h-1.5 w-full rounded-full bg-[#E5E5EA] overflow-hidden mb-6">
+                        <div
+                          className="h-full bg-[#007AFF] rounded-full transition-all duration-300"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+
+                      {/* Question */}
+                      <h3 className="text-[17px] sm:text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
+                        {currentQ.question}
+                      </h3>
+
+                      {/* Multiple Choice Option Cards */}
+                      <div className="space-y-3">
+                        {currentQ.options.map((optText, optIdx) => {
+                          const isSelected = currentAnswer === optIdx;
+                          const isCorrectOption = optIdx === currentQ.correctIndex;
+                          const hasAnswered = currentAnswer !== undefined;
+
+                          return (
+                            <button
+                              key={optIdx}
+                              type="button"
+                              onClick={() => {
+                                setQuizAnswers((prev) => ({
+                                  ...prev,
+                                  [safeIndex]: optIdx,
+                                }));
+                              }}
+                              className={`w-full rounded-2xl border p-4 text-left text-[14px] leading-snug transition-all flex items-center justify-between shadow-xs ${
+                                hasAnswered
+                                  ? isCorrectOption
+                                    ? "border-emerald-500 bg-emerald-50/70 text-emerald-950 font-bold"
+                                    : isSelected
+                                      ? "border-rose-400 bg-rose-50/80 text-rose-950 font-bold"
+                                      : "border-[#E5E5EA] bg-white text-[#3C3C43] opacity-60"
+                                  : "border-[#E5E5EA] bg-white hover:bg-[#F2F2F7] text-[#1C1C1E] active:scale-[0.99]"
+                              }`}
+                            >
+                              <span className="pr-3">{optText}</span>
+                              {hasAnswered && isCorrectOption && (
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold shadow-xs">
+                                  ✓
+                                </span>
+                              )}
+                              {hasAnswered && isSelected && !isCorrectOption && (
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white text-xs font-bold shadow-xs">
+                                  ✕
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Feedback Thumb Icons (Screenshot 4) */}
+                      <div className="flex items-center gap-3 mt-6 text-[#8E8E93]">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuizFeedback((prev) => ({
+                              ...prev,
+                              [safeIndex]: prev[safeIndex] === "up" ? null : "up",
+                            }))
+                          }
+                          className={`p-1.5 rounded-lg transition hover:bg-black/5 ${
+                            quizFeedback[safeIndex] === "up" ? "text-[#007AFF] bg-[#007AFF]/10" : ""
+                          }`}
+                          title="Nuttige vraag"
+                        >
+                          👍
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuizFeedback((prev) => ({
+                              ...prev,
+                              [safeIndex]: prev[safeIndex] === "down" ? null : "down",
+                            }))
+                          }
+                          className={`p-1.5 rounded-lg transition hover:bg-black/5 ${
+                            quizFeedback[safeIndex] === "down" ? "text-rose-500 bg-rose-50" : ""
+                          }`}
+                          title="Verbetering nodig"
+                        >
+                          👎
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Footer Navigation (Screenshot 4: < Previous and Skip >) */}
+                    <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-xs font-semibold">
+                      <button
+                        type="button"
+                        disabled={safeIndex === 0}
+                        onClick={() => setQuizQuestionIndex((i) => Math.max(0, i - 1))}
+                        className={`flex items-center gap-1 transition ${
+                          safeIndex === 0
+                            ? "text-[#C7C7CC] cursor-not-allowed"
+                            : "text-[#007AFF] hover:underline"
+                        }`}
+                      >
+                        <span>‹</span> Vorige
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuizQuestionIndex((i) => (i + 1) % totalQuestions)
+                        }
+                        className="text-[#007AFF] hover:underline flex items-center gap-1"
+                      >
+                        {currentAnswer !== undefined ? "Volgende" : "Overslaan"} <span>›</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
 
             {/* Content Tab: Klasgenoten Stealth Chat */}
             {smartNotesTab === "chat" && (
@@ -2413,7 +2732,8 @@ export default function NotabilityStealthView({
               </div>
             </div>
           </aside>
-        )}
+        </>
+      )}
 
         {/* RIGHT DRAWER 2: Authentic Notability Page Manager (Thumbnails) */}
         {showPagesSidebar && (
