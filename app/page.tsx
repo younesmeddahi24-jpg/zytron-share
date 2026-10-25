@@ -3872,31 +3872,50 @@ export default function ZytronSharePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#07080d] text-[#f1f5f9] pb-20 selection:bg-[#9b72cf] selection:text-white">
-      {/* Ambient Spatial Aurora Backdrop - Google Gemini Cosmic Blue & Violet Spark */}
+    <div className="relative min-h-screen overflow-x-clip bg-[#030408] text-[#f8fafc] pb-20 selection:bg-indigo-500 selection:text-white">
+      {/* Ambient Spatial Aurora Backdrop & Architectural 64px Grid (Aligned with zytron-phi.vercel.app) */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-20 overflow-hidden">
-        <div className="absolute -left-[12%] -top-[18%] h-[62vh] w-[62vw] rounded-full bg-[radial-gradient(closest-side,rgba(66,133,244,0.20),transparent)] blur-3xl" />
-        <div className="absolute -right-[12%] top-[12%] h-[58vh] w-[54vw] rounded-full bg-[radial-gradient(closest-side,rgba(155,114,207,0.18),transparent)] blur-3xl" />
-        <div className="absolute bottom-[-22%] left-[22%] h-[55vh] w-[60vw] rounded-full bg-[radial-gradient(closest-side,rgba(56,189,248,0.16),transparent)] blur-3xl" />
+        <div className="zytron-grid-bg absolute inset-0" />
+        <div className="absolute left-1/2 -top-[22%] h-[68vh] w-[85vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(79,70,229,0.22),rgba(56,189,248,0.08),transparent)] blur-3xl" />
+        <div className="absolute -left-[12%] top-[18%] h-[56vh] w-[52vw] rounded-full bg-[radial-gradient(closest-side,rgba(66,133,244,0.16),transparent)] blur-3xl" />
+        <div className="absolute -right-[10%] top-[24%] h-[56vh] w-[50vw] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.16),transparent)] blur-3xl" />
+        <div className="absolute bottom-[-22%] left-[22%] h-[55vh] w-[60vw] rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.11),transparent)] blur-3xl" />
       </div>
 
       {/* Sleek Floating Dynamic Island Top Bar */}
       <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
-        <div className="luxury-glass-card mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-full px-4 py-2.5 sm:px-6 sm:py-3">
-          {/* Brand Logo - Gemini Cosmic Squircle */}
-          <div className="flex items-center gap-3.5">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-400/40 bg-gradient-to-br from-[#4285f4]/35 via-[#6366f1]/25 to-[#9b72cf]/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.45),0_0_25px_-3px_rgba(66,133,244,0.6)]">
-              <Radar className="h-5 w-5 text-[#93c5fd]" />
-              <span className="pulse-ring absolute inset-0 rounded-2xl border border-indigo-400/40" />
+        <div className="luxury-glass-card mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-full px-4 py-2.5 sm:px-5 sm:py-3">
+          {/* Top Specular Highlight Line */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent" />
+
+          {/* Brand Logo - Authentic Zytron Geometric 'Z' Mark + Live Radar */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-gradient-to-b from-white/[0.12] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_0_25px_-3px_rgba(99,102,241,0.55)]">
+              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
+                <path
+                  d="M5 5h14L5 19h14"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="pulse-ring absolute inset-0 rounded-xl border border-indigo-400/35" />
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#030408] bg-indigo-500 text-white shadow-[0_0_8px_#6366f1]">
+                <Radar className="h-2 w-2" />
+              </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-extrabold tracking-tight text-white sm:text-base">
-                  Zytron Share
+                <span className="text-sm font-black tracking-[0.14em] text-white sm:text-[15px]">
+                  ZYTRON
+                </span>
+                <span className="rounded-md border border-indigo-400/35 bg-indigo-500/15 px-1.5 py-0.5 font-mono text-[9.5px] font-extrabold uppercase tracking-wider text-indigo-300">
+                  SHARE
                 </span>
               </div>
-              <p className="hidden font-mono text-[10.5px] text-[#94a3b8] sm:block">
-                Lokale P2P Bestandsoverdracht
+              <p className="hidden font-mono text-[10.5px] text-zinc-400 sm:block">
+                Directe P2P AirDrop &amp; Quick Share Studio
               </p>
             </div>
           </div>
@@ -3921,17 +3940,27 @@ export default function ZytronSharePage() {
 
           {/* Luxury Tactile Action Buttons */}
           <div className="flex items-center gap-2">
-            {/* Link naar Zytron Hoofd App */}
+            {/* Link naar echte Zytron Hoofd App (zytron-phi.vercel.app) */}
             <a
-              href="https://zytron.vercel.app"
+              href="https://zytron-phi.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-luxury-glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-sky-300 border-sky-400/40 hover:border-sky-400 hover:bg-sky-500/15 transition shadow-[0_0_15px_-3px_rgba(56,189,248,0.25)]"
-              title="Ga naar Zytron Hoofd App (zytron.vercel.app)"
+              className="group relative inline-flex items-center gap-2 rounded-full border border-sky-400/45 bg-gradient-to-r from-sky-500/20 via-indigo-500/20 to-purple-500/20 px-3.5 py-2 text-xs font-extrabold text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.28),0_0_20px_-4px_rgba(56,189,248,0.45)] transition hover:scale-[1.03] hover:border-sky-300 hover:shadow-[0_0_28px_-2px_rgba(56,189,248,0.65)]"
+              title="Open Zytron Hoofd App (zytron-phi.vercel.app)"
             >
-              <Globe className="h-3.5 w-3.5 text-sky-400" />
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#030408]">
+                <svg viewBox="0 0 24 24" fill="none" className="h-2.5 w-2.5">
+                  <path
+                    d="M5 5h14L5 19h14"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
               <span>Hoofd App</span>
-              <ArrowUpRight className="h-3 w-3 text-sky-400/80" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-sky-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
 
             {/* School Notability Camouflage Quick Toggle */}
@@ -3939,10 +3968,10 @@ export default function ZytronSharePage() {
               type="button"
               onClick={() => setIsNotabilityStealth(true)}
               className="btn-luxury-glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-[#c7d2fe] border-indigo-400/40 hover:border-indigo-400 transition"
-              title="School Notability Camouflage (Paniek-knop of druk op Esc)"
+              title="School Notability 15 Camouflage (Paniek-knop of druk op Esc)"
             >
               <PenTool className="h-3.5 w-3.5 text-[#93c5fd]" />
-              <span className="hidden sm:inline">Notability Modus</span>
+              <span className="hidden sm:inline">Notability 15</span>
             </button>
 
             <button
@@ -4090,6 +4119,9 @@ export default function ZytronSharePage() {
             isDraggingOver ? "ring-2 ring-indigo-400 shadow-[0_0_80px_rgba(99,102,241,0.5)]" : ""
           }`}
         >
+          {/* Specular Top Edge Rim */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
+
           {/* Subtle Ambient Radial Glow - Gemini Cosmic Aurora */}
           <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="h-[520px] w-[520px] rounded-full bg-gradient-to-tr from-[#4285f4]/15 via-[#6366f1]/10 to-[#9b72cf]/15 blur-3xl" />
@@ -4098,19 +4130,31 @@ export default function ZytronSharePage() {
           {/* Top Hero Section: Title + Primary CTA Buttons */}
           <div className="relative z-10 flex flex-col justify-between gap-6 border-b border-white/[0.08] pb-8 lg:flex-row lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3.5 py-1">
-                <Sparkles className="h-3.5 w-3.5 text-[#93c5fd]" />
-                <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#c7d2fe]">
-                  {primaryShortLabel} Studio
-                </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3.5 py-1">
+                  <Sparkles className="h-3.5 w-3.5 text-[#93c5fd]" />
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#c7d2fe]">
+                    {primaryShortLabel} Studio
+                  </span>
+                </div>
+                <a
+                  href="https://zytron-phi.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/35 bg-sky-500/10 px-3 py-1 font-mono text-[11px] font-bold text-sky-300 transition hover:border-sky-400 hover:bg-sky-500/20"
+                >
+                  <Globe className="h-3 w-3 text-sky-400" />
+                  <span>zytron-phi.vercel.app</span>
+                  <ArrowUpRight className="h-3 w-3" />
+                </a>
               </div>
-              <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              <h1 className="mt-3 bg-gradient-to-r from-white via-white to-indigo-200 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
                 {queuedFiles.length > 0
                   ? `${queuedFiles.length} bestand(en) klaar voor verzending`
-                  : "Deel razendsnel tussen Telefoon & PC"}
+                  : "Deel razendsnel tussen Telefoon, iPad & PC"}
               </h1>
               <p className="mt-1.5 text-xs text-[#94a3b8] sm:text-sm">
-                Kies een bestand of gebruik een snelle functie en tik op een toestel hieronder.
+                Kies een bestand of gebruik een snelle functie en tik op een toestel hieronder. Druk op <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-white">Esc</kbd> voor directe Notability 15 modus.
               </p>
             </div>
 
@@ -4842,20 +4886,31 @@ export default function ZytronSharePage() {
 
         {/* Subtle Footer with Hoofd App Link */}
         <footer className="mt-12 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/50">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-white/80">Zytron Share</span>
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md border border-white/15 bg-white/5 text-white">
+              <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3">
+                <path
+                  d="M5 5h14L5 19h14"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            <span className="font-bold tracking-wider text-white/90">ZYTRON SHARE</span>
             <span>•</span>
             <span>Lokale P2P Data Layer</span>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://zytron.vercel.app"
+              href="https://zytron-phi.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-bold text-sky-400 hover:text-sky-300 transition"
+              className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/35 bg-sky-500/10 px-3.5 py-1.5 font-bold text-sky-300 hover:border-sky-400 hover:bg-sky-500/20 hover:text-white transition"
             >
-              <Globe className="h-3.5 w-3.5" />
-              <span>Zytron Hoofd App Openen</span>
+              <Globe className="h-3.5 w-3.5 text-sky-400" />
+              <span>Zytron Hoofd App (zytron-phi.vercel.app)</span>
               <ArrowUpRight className="h-3 w-3" />
             </a>
           </div>
