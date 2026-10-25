@@ -3972,6 +3972,7 @@ export default function ZytronSharePage() {
             >
               <PenTool className="h-3.5 w-3.5 text-[#93c5fd]" />
               <span className="hidden sm:inline">Notability 15</span>
+              <kbd className="hidden md:inline rounded bg-white/15 px-1 py-0.2 font-mono text-[9px] text-white/80">Esc</kbd>
             </button>
 
             <button

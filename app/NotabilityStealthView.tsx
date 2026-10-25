@@ -100,6 +100,8 @@ type ToolboxDock = "top" | "bottom" | "left";
 interface StrokePoint {
   x: number;
   y: number;
+  pressure?: number;
+  time?: number;
 }
 
 interface InkStroke {
@@ -380,10 +382,115 @@ export default function NotabilityStealthView({
   const [audioSeconds, setAudioSeconds] = useState<number>(0);
   const [showAudioBar, setShowAudioBar] = useState<boolean>(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  const [liveWaveform, setLiveWaveform] = useState<number[]>(new Array(36).fill(8));
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+
+  // ─── Real Audio & Media Refs ───
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   // ─── Refs ───
   const canvasRefs = useRef<Record<number, HTMLCanvasElement | null>>({});
   const fileUploadInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Synthesized Sound Effects (0-latency Web Audio)
+  const playTapePeelSound = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.09);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch {}
+  }, []);
+
+  const triggerHaptic = useCallback((ms: number = 8) => {
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate(ms);
+      } catch {}
+    }
+  }, []);
+
+  // Real Microphone Recording
+  const startRealRecording = async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setIsRecordingAudio(true);
+        setShowAudioBar(true);
+        setAudioSeconds(0);
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const audioCtx = new AudioCtx();
+      audioCtxRef.current = audioCtx;
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        setRecordedAudioUrl(url);
+        stream.getTracks().forEach((track) => track.stop());
+        try {
+          audioCtx.close();
+        } catch {}
+      };
+
+      recorder.start(250);
+      mediaRecorderRef.current = recorder;
+      setIsRecordingAudio(true);
+      setShowAudioBar(true);
+      setAudioSeconds(0);
+
+      // Live waveform visualizer
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const interval = setInterval(() => {
+        if (recorder.state !== "recording") {
+          clearInterval(interval);
+          return;
+        }
+        analyser.getByteFrequencyData(dataArray);
+        const heights = Array.from({ length: 36 }).map((_, i) => {
+          const val = dataArray[i % dataArray.length] || 0;
+          return Math.max(6, Math.min(26, Math.round((val / 255) * 26)));
+        });
+        setLiveWaveform(heights);
+      }, 70);
+    } catch {
+      // Fallback to simulated audio recording if mic denied
+      setIsRecordingAudio(true);
+      setShowAudioBar(true);
+      setAudioSeconds(0);
+    }
+  };
+
+  const stopRealRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    setIsRecordingAudio(false);
+  };
 
   // Audio recording timer
   useEffect(() => {
@@ -399,6 +506,84 @@ export default function NotabilityStealthView({
     const s = sec % 60;
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
+
+  // Keyboard Shortcuts for Instant Stealth & Quick Tool Switching
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        if (e.key === "Escape") {
+          (document.activeElement as HTMLElement)?.blur();
+        }
+        return;
+      }
+
+      if (e.key === "Escape") {
+        onToggleNotability();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+        e.preventDefault();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "y") {
+        handleRedo();
+        e.preventDefault();
+        return;
+      }
+
+      switch (e.key.toLowerCase()) {
+        case "1":
+        case "p":
+          setActiveTool("pen");
+          triggerHaptic(6);
+          break;
+        case "2":
+          setActiveTool("pencil");
+          triggerHaptic(6);
+          break;
+        case "3":
+        case "h":
+          setActiveTool("highlighter");
+          triggerHaptic(6);
+          break;
+        case "4":
+        case "e":
+          setActiveTool("eraser");
+          triggerHaptic(6);
+          break;
+        case "5":
+        case "l":
+          setActiveTool("lasso");
+          triggerHaptic(6);
+          break;
+        case "6":
+        case "t":
+          setActiveTool("text");
+          triggerHaptic(6);
+          break;
+        case "7":
+        case "s":
+          setActiveTool("tape");
+          triggerHaptic(6);
+          break;
+        case "r":
+          setShowRuler((v) => !v);
+          triggerHaptic(6);
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onToggleNotability]);
 
   // ─── Helper Mutators for Current Note ───
   const updateActiveNote = useCallback(
@@ -504,11 +689,19 @@ export default function NotabilityStealthView({
         ctx.stroke();
 
         // Draw striped Notability Study Tape pattern
-        if (stroke.tool === "tape" && !stroke.revealed) {
-          ctx.strokeStyle = "#FFFFFF";
-          ctx.lineWidth = 2;
-          ctx.setLineDash([4, 6]);
-          ctx.stroke();
+        if (stroke.tool === "tape") {
+          if (!stroke.revealed) {
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 6]);
+            ctx.stroke();
+          } else {
+            // Revealed answer state
+            const centerPt = stroke.points[Math.floor(stroke.points.length / 2)];
+            ctx.fillStyle = "#34C759";
+            ctx.font = "bold 13px sans-serif";
+            ctx.fillText("✓", centerPt.x - 5, centerPt.y + 4);
+          }
         }
         ctx.restore();
       }
@@ -554,6 +747,8 @@ export default function NotabilityStealthView({
     return {
       x: ((e.clientX - rect.left) / rect.width) * canvas.width,
       y: ((e.clientY - rect.top) / rect.height) * canvas.height,
+      pressure: e.pressure > 0 ? e.pressure : undefined,
+      time: Date.now(),
     };
   };
 
@@ -567,14 +762,16 @@ export default function NotabilityStealthView({
 
     const pt = getCanvasPoint(e, pageIdx);
 
-    // Tap on Study Tape to toggle reveal/cover
+    // Tap on Study Tape to toggle reveal/cover with audio feedback
     const hitTape = strokes.find(
       (s) =>
         s.pageIndex === pageIdx &&
         s.tool === "tape" &&
-        s.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) < 24)
+        s.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) < 28)
     );
     if (hitTape && activeTool !== "eraser") {
+      playTapePeelSound();
+      triggerHaptic(12);
       setStrokesForActiveNote((prev) =>
         prev.map((s) => (s.id === hitTape.id ? { ...s, revealed: !s.revealed } : s))
       );
@@ -1493,15 +1690,18 @@ export default function NotabilityStealthView({
             <button
               type="button"
               onClick={() => {
-                setIsRecordingAudio((v) => !v);
-                setShowAudioBar(true);
+                if (isRecordingAudio) {
+                  stopRealRecording();
+                } else {
+                  startRealRecording();
+                }
               }}
               className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition ${
                 isRecordingAudio
-                  ? "bg-[#FF3B30] text-white shadow-xs"
+                  ? "bg-[#FF3B30] text-white shadow-xs animate-pulse"
                   : "text-[#3C3C43] hover:bg-black/[0.06]"
               }`}
-              title="Audio opnemen (Notability Note Replay)"
+              title="Echte Notability Audio Replay opname"
             >
               {isRecordingAudio ? (
                 <Square className="h-3 w-3 fill-white" />
@@ -1792,39 +1992,73 @@ export default function NotabilityStealthView({
         </div>
       </header>
 
-      {/* 3. OPTIONAL AUDIO TIMELINE / NOTE REPLAY BAR */}
+      {/* 3. REAL AUDIO TIMELINE / NOTE REPLAY BAR */}
       {showAudioBar && (
-        <div className="z-30 flex h-10 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-white px-4 text-xs">
+        <div className="z-30 flex h-11 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-white px-4 text-xs shadow-xs">
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setIsPlayingAudio((v) => !v)}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white"
+              onClick={() => {
+                if (recordedAudioUrl && audioPlayerRef.current) {
+                  if (isPlayingAudio) {
+                    audioPlayerRef.current.pause();
+                    setIsPlayingAudio(false);
+                  } else {
+                    audioPlayerRef.current.play();
+                    setIsPlayingAudio(true);
+                  }
+                } else {
+                  setIsPlayingAudio((v) => !v);
+                }
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white shadow-2xs hover:bg-[#0062CC]"
             >
               {isPlayingAudio ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
             </button>
             <span className="font-mono text-[11px] font-bold text-[#1C1C1E]">
               {formatTimer(audioSeconds)}
             </span>
-            <span className="text-[11px] text-[#8E8E93]">Notability Audio Replay</span>
+            <span className="text-[11px] font-medium text-[#8E8E93]">
+              {isRecordingAudio
+                ? "Live Opname bezig..."
+                : recordedAudioUrl
+                  ? "Note Replay (Opname klaar om af te spelen)"
+                  : "Notability Note Replay"}
+            </span>
           </div>
 
-          {/* Simulated Waveform Bars */}
+          {/* Real Live Waveform Bars */}
           <div className="hidden flex-1 items-center justify-center gap-1 px-6 sm:flex">
-            {Array.from({ length: 36 }).map((_, i) => (
+            {liveWaveform.map((h, i) => (
               <span
                 key={i}
-                className={`w-1 rounded-full transition-all ${
-                  i < (audioSeconds % 36) ? "bg-[#007AFF]" : "bg-[#D1D1D6]"
+                className={`w-1 rounded-full transition-all duration-75 ${
+                  isRecordingAudio
+                    ? "bg-[#FF3B30]"
+                    : i < (audioSeconds % 36)
+                      ? "bg-[#007AFF]"
+                      : "bg-[#D1D1D6]"
                 }`}
-                style={{ height: `${8 + ((i * 7) % 16)}px` }}
+                style={{ height: `${isRecordingAudio ? h : 8 + ((i * 7) % 16)}px` }}
               />
             ))}
           </div>
 
+          {recordedAudioUrl && (
+            <audio
+              ref={audioPlayerRef}
+              src={recordedAudioUrl}
+              onEnded={() => setIsPlayingAudio(false)}
+              className="hidden"
+            />
+          )}
+
           <button
             type="button"
-            onClick={() => setShowAudioBar(false)}
+            onClick={() => {
+              if (isRecordingAudio) stopRealRecording();
+              setShowAudioBar(false);
+            }}
             className="rounded-lg p-1 text-[#8E8E93] hover:bg-black/5"
           >
             <X className="h-4 w-4" />
@@ -2391,6 +2625,60 @@ export default function NotabilityStealthView({
            ================================================================== */}
         <div
           className="relative flex-1 overflow-y-auto px-3 pt-16 pb-20 sm:px-8"
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              const files = e.dataTransfer.files;
+              onUploadFileToZytron(files);
+              showToast(`${files.length} bestand(en) op Notability-blad geplaatst`);
+              Array.from(files).forEach((file, idx) => {
+                if (file.type.startsWith("image/")) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    if (typeof reader.result === "string") {
+                      setImagesForActiveNote((prev) => [
+                        ...prev,
+                        {
+                          id: `img-${Date.now()}-${idx}`,
+                          pageIndex: activePageIndex,
+                          x: 65 + idx * 24,
+                          y: 75 + idx * 24,
+                          width: 520,
+                          src: reader.result as string,
+                          name: file.name,
+                        },
+                      ]);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                } else {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const textContent =
+                      typeof reader.result === "string"
+                        ? reader.result.slice(0, 5000)
+                        : `[Document: ${file.name}]`;
+                    updateActiveNote((n) => ({
+                      ...n,
+                      title: file.name.replace(/\.[^/.]+$/, ""),
+                      typedContentByPage: {
+                        ...n.typedContentByPage,
+                        [activePageIndex]:
+                          (n.typedContentByPage[activePageIndex]
+                            ? n.typedContentByPage[activePageIndex] + "\n\n"
+                            : "") + textContent,
+                      },
+                    }));
+                  };
+                  reader.readAsText(file);
+                }
+              });
+            }
+          }}
           onPointerMove={(e) => {
             if (!draggingObject) return;
             if (draggingObject.type === "sticky") {
@@ -3124,17 +3412,36 @@ export default function NotabilityStealthView({
                         className={`cursor-pointer rounded-xl border bg-white p-2 transition ${
                           activePageIndex === idx
                             ? "border-[#007AFF] ring-2 ring-[#007AFF]/25"
-                            : "border-black/10"
+                            : "border-black/10 hover:border-black/25"
                         }`}
                       >
                         <div
-                          className="h-28 w-full rounded border border-black/[0.06]"
+                          className="relative flex h-28 w-full flex-col justify-between overflow-hidden rounded border border-black/[0.06] p-2"
                           style={getPaperBackgroundStyle(
                             activeNote.template,
                             activeNote.paperColor,
                             "small"
                           )}
-                        />
+                        >
+                          {activeNote.typedContentByPage[idx] ? (
+                            <p className="line-clamp-4 text-[7.5px] leading-tight text-[#3C3C43]">
+                              {activeNote.typedContentByPage[idx]}
+                            </p>
+                          ) : strokes.filter((s) => s.pageIndex === idx).length > 0 ? (
+                            <div className="flex h-full items-center justify-center">
+                              <span className="rounded bg-black/[0.05] px-1.5 py-0.5 text-[8.5px] font-bold text-[#007AFF]">
+                                {strokes.filter((s) => s.pageIndex === idx).length} lijnen
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <span className="text-[8.5px] font-medium text-[#8E8E93]/60">Leeg blad</span>
+                            </div>
+                          )}
+                          <span className="self-end rounded bg-white/90 px-1 text-[8.5px] font-mono font-bold text-[#8E8E93] shadow-2xs">
+                            {idx + 1}
+                          </span>
+                        </div>
                         <div className="mt-1.5 flex items-center justify-between text-[11px] font-bold">
                           <span>Pag. {idx + 1}</span>
                           {activeNote.pages.length > 1 && (
