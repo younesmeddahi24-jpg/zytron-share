@@ -56,6 +56,7 @@ import {
   Sliders,
   MessageSquare,
   CreditCard,
+  PenTool,
 } from "lucide-react";
 
 // ============================================================================
