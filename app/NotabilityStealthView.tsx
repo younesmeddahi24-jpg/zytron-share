@@ -289,7 +289,6 @@ export default function NotabilityStealthView({
   // ─── Active Page & View Settings ───
   const [activePageIndex, setActivePageIndex] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"seamless" | "single">("seamless");
-  const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
   const [zoomPercent, setZoomPercent] = useState<number>(100);
   const [showZoomLoupe, setShowZoomLoupe] = useState<boolean>(false);
 
@@ -382,36 +381,9 @@ export default function NotabilityStealthView({
   const [showAudioBar, setShowAudioBar] = useState<boolean>(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
 
-  // ─── Clock State ───
-  const [clockText, setClockText] = useState<string>("09:41");
-  const [dateText, setDateText] = useState<string>("Zo 25 okt");
-
   // ─── Refs ───
   const canvasRefs = useRef<Record<number, HTMLCanvasElement | null>>({});
   const fileUploadInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Update clock
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      setClockText(
-        now.toLocaleTimeString("nl-NL", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-      setDateText(
-        now.toLocaleDateString("nl-NL", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-        })
-      );
-    };
-    updateClock();
-    const timer = setInterval(updateClock, 15000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Audio recording timer
   useEffect(() => {
@@ -917,25 +889,6 @@ export default function NotabilityStealthView({
           className="hidden"
         />
 
-        {/* iPadOS 26.5 Top Status Bar */}
-        {showStatusBar && (
-          <div className="flex h-7 shrink-0 items-center justify-between bg-[#F2F2F7] px-5 text-[11.5px] font-semibold text-[#1C1C1E]/80 border-b border-black/[0.05]">
-            <div className="flex items-center gap-2.5">
-              <span>{clockText}</span>
-              <span className="text-[#8E8E93] font-medium">{dateText}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-1 w-8 rounded-full bg-black/20" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium">100%</span>
-              <div className="flex h-3 w-6 items-center rounded-[4px] border border-black/40 p-0.5">
-                <div className="h-full w-full rounded-[2px] bg-[#34C759]" />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Main Split View: Left Subjects Sidebar + Right Notes Grid/List */}
         <div className="flex flex-1 overflow-hidden">
           {/* LEFT SIDEBAR: Authentic Notability Library Sidebar */}
@@ -1409,38 +1362,7 @@ export default function NotabilityStealthView({
         className="hidden"
       />
 
-      {/* 1. iPadOS 26.5 Top System Status Bar */}
-      {showStatusBar && (
-        <div className="flex h-6 shrink-0 items-center justify-between bg-[#F2F2F7]/95 px-5 text-[11px] font-semibold text-[#1C1C1E]/80 border-b border-black/[0.05]">
-          <div className="flex items-center gap-2.5">
-            <span>{clockText}</span>
-            <span className="text-[#8E8E93] font-medium">{dateText}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="h-1 w-7 rounded-full bg-black/20" />
-          </div>
-          <div className="flex items-center gap-2">
-            {incomingNotes.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setRightDrawer("content");
-                  setContentTab("transcript");
-                }}
-                className="rounded-full bg-[#007AFF]/15 px-2 py-0.5 text-[10px] font-bold text-[#007AFF]"
-              >
-                {incomingNotes.length} nieuw
-              </button>
-            )}
-            <span className="text-[11px]">100%</span>
-            <div className="flex h-3 w-5.5 items-center rounded-[4px] border border-black/40 p-0.5">
-              <div className="h-full w-full rounded-[2px] bg-[#34C759]" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. AUTHENTIC NOTABILITY TOP NAVIGATION HEADER BAR */}
+      {/* AUTHENTIC NOTABILITY TOP NAVIGATION HEADER BAR */}
       <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-[#F9F9FB]/95 px-3 backdrop-blur-xl sm:px-4">
         {/* LEFT CLUSTER: < Back to Library, Note Switcher, Undo, Redo */}
         <div className="flex items-center gap-1">
@@ -1846,17 +1768,6 @@ export default function NotabilityStealthView({
                       Enkele pagina
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowStatusBar((v) => !v)}
-                    className="flex w-full items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2 text-xs font-semibold text-[#1C1C1E]"
-                  >
-                    <span>iPadOS Statusbalk tonen</span>
-                    <span className="font-bold text-[#007AFF]">
-                      {showStatusBar ? "Aan" : "Uit"}
-                    </span>
-                  </button>
                 </div>
               </div>
             )}
