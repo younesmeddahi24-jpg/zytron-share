@@ -3883,38 +3883,38 @@ export default function ZytronSharePage() {
       </div>
 
       {/* Sleek Floating Dynamic Island Top Bar */}
-      <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
-        <div className="luxury-glass-card mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-full px-4 py-2.5 sm:px-5 sm:py-3">
+      <header className="sticky top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
+        <div className="zytron-island-bar mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-2.5 sm:rounded-full sm:px-5 sm:py-2.5">
           {/* Top Specular Highlight Line */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent" />
+          <div aria-hidden className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
 
           {/* Brand Logo - Authentic Zytron Geometric 'Z' Mark + Live Radar */}
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-gradient-to-b from-white/[0.12] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_0_25px_-3px_rgba(99,102,241,0.55)]">
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-gradient-to-b from-white/[0.16] to-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_0_20px_-2px_rgba(56,189,248,0.5)]">
+              <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5 text-white">
                 <path
                   d="M5 5h14L5 19h14"
                   stroke="currentColor"
-                  strokeWidth="2.4"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
-              <span className="pulse-ring absolute inset-0 rounded-xl border border-indigo-400/35" />
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#030408] bg-indigo-500 text-white shadow-[0_0_8px_#6366f1]">
+              <span className="pulse-ring absolute inset-0 rounded-xl border border-cyan-400/40" />
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full border border-[#030408] bg-cyan-400 text-[#030408] shadow-[0_0_8px_#38bdf8]">
                 <Radar className="h-2 w-2" />
               </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-black tracking-[0.14em] text-white sm:text-[15px]">
+                <span className="text-sm font-black tracking-[0.16em] text-white">
                   ZYTRON
                 </span>
-                <span className="rounded-md border border-indigo-400/35 bg-indigo-500/15 px-1.5 py-0.5 font-mono text-[9.5px] font-extrabold uppercase tracking-wider text-indigo-300">
+                <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-cyan-300 shadow-[0_0_10px_-2px_rgba(56,189,248,0.4)]">
                   SHARE
                 </span>
               </div>
-              <p className="hidden font-mono text-[10.5px] text-zinc-400 sm:block">
+              <p className="hidden font-mono text-[10px] text-zinc-400 sm:block">
                 Directe P2P AirDrop &amp; Quick Share Studio
               </p>
             </div>
@@ -3924,28 +3924,29 @@ export default function ZytronSharePage() {
           <button
             type="button"
             onClick={() => syncRadarPresence(true)}
-            className="btn-luxury-glass flex items-center gap-2.5 rounded-full px-4 py-2 font-mono text-xs text-white/95"
+            className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 font-mono text-xs text-white/90 shadow-inner backdrop-blur-xl transition hover:border-cyan-400/40 hover:bg-white/[0.09]"
+            title="Vernieuw radar &amp; scan naar apparaten"
           >
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-80" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]" />
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
             </span>
-            <span className="font-semibold">
+            <span className="font-semibold text-[11.5px]">
               {uniqueNearbyDevices.length > 0
-                ? `${uniqueNearbyDevices.length} toestel dichtbij (${uniqueNearbyDevices[0].name})`
-                : "Live Radar Actief"}
+                ? `${uniqueNearbyDevices.length} dichtbij (${uniqueNearbyDevices[0].name})`
+                : "Radar Actief"}
             </span>
-            <RefreshCw className={`h-3 w-3 text-[#93c5fd] ${isScanningDevice ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3 w-3 text-cyan-300 transition-transform ${isScanningDevice ? "animate-spin" : "group-hover:rotate-45"}`} />
           </button>
 
-          {/* Luxury Tactile Action Buttons */}
+          {/* Luxury Tactile Action Buttons Toolbar */}
           <div className="flex items-center gap-2">
             {/* Link naar echte Zytron Hoofd App (zytron-phi.vercel.app) */}
             <a
               href="https://zytron-phi.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex items-center gap-2 rounded-full border border-sky-400/45 bg-gradient-to-r from-sky-500/20 via-indigo-500/20 to-purple-500/20 px-3.5 py-2 text-xs font-extrabold text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.28),0_0_20px_-4px_rgba(56,189,248,0.45)] transition hover:scale-[1.03] hover:border-sky-300 hover:shadow-[0_0_28px_-2px_rgba(56,189,248,0.65)]"
+              className="group relative inline-flex h-8.5 items-center gap-1.5 rounded-full border border-sky-400/40 bg-gradient-to-r from-sky-500/20 via-indigo-500/20 to-purple-500/20 px-3 text-xs font-bold text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_0_16px_-3px_rgba(56,189,248,0.4)] transition hover:scale-[1.02] hover:border-sky-300 hover:shadow-[0_0_24px_-2px_rgba(56,189,248,0.6)]"
               title="Open Zytron Hoofd App (zytron-phi.vercel.app)"
             >
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#030408]">
@@ -3953,7 +3954,7 @@ export default function ZytronSharePage() {
                   <path
                     d="M5 5h14L5 19h14"
                     stroke="currentColor"
-                    strokeWidth="3"
+                    strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -3967,35 +3968,37 @@ export default function ZytronSharePage() {
             <button
               type="button"
               onClick={() => setIsNotabilityStealth(true)}
-              className="btn-luxury-glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-[#c7d2fe] border-indigo-400/40 hover:border-indigo-400 transition"
-              title="School Notability 15 Camouflage (Paniek-knop of druk op Esc)"
+              className="group inline-flex h-8.5 items-center gap-1.5 rounded-full border border-indigo-400/35 bg-white/[0.06] px-3 text-xs font-bold text-indigo-200 transition hover:border-indigo-400 hover:bg-white/[0.1] hover:text-white"
+              title="Notability 15 School Camouflage (Paniek-knop of druk op Esc)"
             >
-              <PenTool className="h-3.5 w-3.5 text-[#93c5fd]" />
+              <PenTool className="h-3.5 w-3.5 text-indigo-300 transition-transform group-hover:-rotate-12" />
               <span className="hidden sm:inline">Notability 15</span>
               <kbd className="hidden md:inline rounded bg-white/15 px-1 py-0.2 font-mono text-[9px] text-white/80">Esc</kbd>
             </button>
 
+            {/* Notifications background */}
             <button
               type="button"
               onClick={() => setShowBackgroundPermissionModal(true)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition ${
+              className={`inline-flex h-8.5 items-center gap-1.5 rounded-full px-3 text-xs font-bold transition ${
                 bgPermissionGranted
-                  ? "btn-luxury-glass border-emerald-400/40 text-emerald-300"
-                  : "btn-luxury-glass border-indigo-400/40 text-[#c7d2fe]"
+                  ? "border border-emerald-400/40 bg-emerald-500/15 text-emerald-300"
+                  : "border border-white/10 bg-white/[0.05] text-zinc-300 hover:border-white/20 hover:bg-white/[0.09]"
               }`}
               title="Achtergrond-Ontvangst & Systeemnotificaties"
             >
-              <Bell className="h-3.5 w-3.5 text-[#93c5fd]" />
-              <span className="hidden md:inline">{bgPermissionGranted ? "Achtergrond Aan" : "Meldingen"}</span>
+              <Bell className="h-3.5 w-3.5 text-zinc-300" />
+              <span className="hidden md:inline">{bgPermissionGranted ? "Aan" : "Meldingen"}</span>
             </button>
 
+            {/* PWA Install */}
             <button
               type="button"
               onClick={installZytronDropPwa}
-              className="btn-gemini-primary inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-extrabold"
+              className="btn-gemini-primary inline-flex h-8.5 items-center gap-1.5 rounded-full px-3.5 text-xs font-extrabold"
             >
               <Download className="h-3.5 w-3.5" />
-              <span>{isInstalledPwa ? "Geïnstalleerd" : "Installeer App"}</span>
+              <span>{isInstalledPwa ? "Geïnstalleerd" : "Installeer"}</span>
             </button>
           </div>
         </div>

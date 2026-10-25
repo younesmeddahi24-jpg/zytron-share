@@ -1280,7 +1280,7 @@ export default function NotabilityStealthView({
           {/* RIGHT MAIN AREA: Subject Header + Search + Grid/List of Note Cards */}
           <main className="flex flex-1 flex-col bg-white overflow-hidden">
             {/* Top Library Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E5EA] px-6 py-4">
+            <div className="apple-toolbar-glass flex flex-wrap items-center justify-between gap-3 px-6 py-3.5">
               <div className="flex items-center gap-3">
                 {currentSubjectObj && (
                   <span
@@ -1560,18 +1560,18 @@ export default function NotabilityStealthView({
       />
 
       {/* AUTHENTIC NOTABILITY TOP NAVIGATION HEADER BAR */}
-      <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-[#F9F9FB]/95 px-3 backdrop-blur-xl sm:px-4">
+      <header className="apple-toolbar-glass relative z-40 flex h-12.5 shrink-0 items-center justify-between px-3 sm:px-4">
         {/* LEFT CLUSTER: < Back to Library, Note Switcher, Undo, Redo */}
         <div className="flex items-center gap-1">
           {/* < Back to Full Notability Library */}
           <button
             type="button"
             onClick={() => setScreenMode("library")}
-            className="flex items-center gap-0.5 rounded-xl px-2 py-1.5 text-[13px] font-semibold text-[#007AFF] hover:bg-[#007AFF]/10 transition"
-            title="Terug naar Notability Bibliotheek (Alle Vakken & Notities)"
+            className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold text-[#007AFF] hover:bg-[#007AFF]/10 active:scale-95 transition"
+            title="Terug naar Notability Bibliotheek (Alle Vakken &amp; Notities)"
           >
-            <ChevronLeft className="h-5 w-5 stroke-[2.4]" />
-            <span className="hidden sm:inline">Bibliotheek</span>
+            <ChevronLeft className="h-4.5 w-4.5 stroke-[2.5]" />
+            <span className="hidden sm:inline font-medium">Bibliotheek</span>
           </button>
 
           {/* Note Switcher Icon (Two overlapping rectangles) */}
@@ -1584,7 +1584,7 @@ export default function NotabilityStealthView({
               className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
                 activePopover === "noteSwitcher"
                   ? "bg-[#007AFF]/15 text-[#007AFF]"
-                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06] active:scale-95"
               }`}
               title="Notitie-wisselaar (Recente notities)"
             >
@@ -1650,7 +1650,7 @@ export default function NotabilityStealthView({
             type="button"
             onClick={handleUndo}
             disabled={strokes.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] disabled:opacity-30 transition"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] active:scale-95 disabled:opacity-25 transition"
             title="Ongedaan maken (Undo)"
           >
             <Undo2 className="h-4 w-4" />
@@ -1659,34 +1659,37 @@ export default function NotabilityStealthView({
             type="button"
             onClick={handleRedo}
             disabled={redoStack.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] disabled:opacity-30 transition"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] active:scale-95 disabled:opacity-25 transition"
             title="Opnieuw uitvoeren (Redo)"
           >
             <Redo2 className="h-4 w-4" />
           </button>
         </div>
 
-        {/* CENTER: Editable Note Title + Subject Badge */}
-        <div className="flex min-w-0 items-center gap-2 px-2">
-          <span
-            className="hidden h-2.5 w-2.5 shrink-0 rounded-full sm:inline-block"
-            style={{ backgroundColor: activeSubject.color }}
-          />
-          <input
-            type="text"
-            value={activeNote.title}
-            onChange={(e) =>
-              updateActiveNote((n) => ({ ...n, title: e.target.value }))
-            }
-            className="w-36 sm:w-56 md:w-72 truncate rounded-lg bg-transparent px-1.5 py-0.5 text-center text-[13.5px] font-bold text-[#1C1C1E] outline-none focus:bg-white focus:ring-1 focus:ring-[#007AFF]"
-            aria-label="Notitietitel"
-          />
+        {/* CENTER: Editable Note Title in Apple Document Capsule */}
+        <div className="flex min-w-0 items-center justify-center px-2">
+          <div className="group flex items-center gap-2 rounded-full border border-black/[0.06] bg-black/[0.03] px-3.5 py-1 hover:border-black/15 hover:bg-black/[0.05] focus-within:border-[#007AFF] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#007AFF]/20 transition-all">
+            <span
+              className="h-2 w-2 shrink-0 rounded-full"
+              style={{ backgroundColor: activeSubject.color }}
+            />
+            <input
+              type="text"
+              value={activeNote.title}
+              onChange={(e) =>
+                updateActiveNote((n) => ({ ...n, title: e.target.value }))
+              }
+              className="w-32 sm:w-52 md:w-64 truncate bg-transparent text-center text-[13px] font-bold text-[#1C1C1E] outline-none"
+              aria-label="Notitietitel"
+            />
+            <PenTool className="h-3 w-3 text-black/30 group-hover:text-black/60 transition-colors" />
+          </div>
         </div>
 
         {/* RIGHT CLUSTER: Audio Mic, Share/Export, Learn AI, Options (•••), Content Manager (Pages) */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {/* 1. Audio Recording / Note Replay Button */}
-          <div className="flex items-center rounded-xl bg-black/[0.04] px-1 py-0.5">
+          <div className="flex items-center rounded-full bg-black/[0.04] p-0.5">
             <button
               type="button"
               onClick={() => {
@@ -1696,7 +1699,7 @@ export default function NotabilityStealthView({
                   startRealRecording();
                 }
               }}
-              className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition ${
                 isRecordingAudio
                   ? "bg-[#FF3B30] text-white shadow-xs animate-pulse"
                   : "text-[#3C3C43] hover:bg-black/[0.06]"
@@ -1704,19 +1707,19 @@ export default function NotabilityStealthView({
               title="Echte Notability Audio Replay opname"
             >
               {isRecordingAudio ? (
-                <Square className="h-3 w-3 fill-white" />
+                <Square className="h-2.5 w-2.5 fill-white" />
               ) : (
-                <Mic className="h-4 w-4 text-[#007AFF]" />
+                <Mic className="h-3.5 w-3.5 text-[#007AFF]" />
               )}
               {(isRecordingAudio || audioSeconds > 0) && (
-                <span className="font-mono text-[11px]">{formatTimer(audioSeconds)}</span>
+                <span className="font-mono text-[11px] font-semibold">{formatTimer(audioSeconds)}</span>
               )}
             </button>
             {audioSeconds > 0 && (
               <button
                 type="button"
                 onClick={() => setShowAudioBar((v) => !v)}
-                className="px-1 text-[#8E8E93] hover:text-[#1C1C1E]"
+                className="px-1.5 text-[#8E8E93] hover:text-[#1C1C1E]"
                 title="Toon/verberg audiobalk"
               >
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -1732,7 +1735,7 @@ export default function NotabilityStealthView({
               className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
                 activePopover === "share"
                   ? "bg-[#007AFF]/15 text-[#007AFF]"
-                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06] active:scale-95"
               }`}
               title="Deel of Exporteer Notitie"
             >
@@ -1796,12 +1799,12 @@ export default function NotabilityStealthView({
           <button
             type="button"
             onClick={() => setRightDrawer(rightDrawer === "learn" ? null : "learn")}
-            className={`relative flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold transition ${
+            className={`relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
               rightDrawer === "learn"
                 ? "bg-[#007AFF] text-white shadow-xs"
-                : "text-[#007AFF] hover:bg-[#007AFF]/10"
+                : "border border-[#007AFF]/25 bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF]/20"
             }`}
-            title="Notability Learn (Samenvatting, Flashcards, Quiz & Chat)"
+            title="Notability Learn (Samenvatting, Flashcards, Quiz &amp; Chat)"
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Learn</span>
@@ -1820,9 +1823,9 @@ export default function NotabilityStealthView({
               className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
                 activePopover === "options"
                   ? "bg-[#007AFF]/15 text-[#007AFF]"
-                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06] active:scale-95"
               }`}
-              title="Notitie-opties (Sjablonen, Papierkleur & Weergave)"
+              title="Notitie-opties (Sjablonen, Papierkleur &amp; Weergave)"
             >
               <MoreHorizontal className="h-4.5 w-4.5" />
             </button>
@@ -1977,12 +1980,12 @@ export default function NotabilityStealthView({
           <button
             type="button"
             onClick={() => setRightDrawer(rightDrawer === "content" ? null : "content")}
-            className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${
               rightDrawer === "content"
-                ? "bg-[#1C1C1E] text-white"
-                : "bg-black/[0.05] text-[#1C1C1E] hover:bg-black/10"
+                ? "bg-[#1C1C1E] text-white shadow-xs"
+                : "border border-black/[0.08] bg-black/[0.04] text-[#1C1C1E] hover:bg-black/[0.08]"
             }`}
-            title="Pagina- & Inhoudsbeheer"
+            title="Pagina- &amp; Inhoudsbeheer"
           >
             <BookOpen className="h-3.5 w-3.5" />
             <span className="font-mono text-[11px]">
@@ -2159,7 +2162,7 @@ export default function NotabilityStealthView({
       <div className="relative flex flex-1 overflow-hidden">
         {/* AUTHENTIC NOTABILITY 15 FLOATING TOOLBOX (PENCIL CASE) */}
         <div
-          className={`z-30 flex items-center gap-1 rounded-[22px] border border-black/[0.09] bg-white/95 p-1.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] backdrop-blur-2xl transition-all ${
+          className={`apple-floating-dock z-30 flex items-center gap-1 rounded-full p-1.5 transition-all ${
             toolboxDock === "top"
               ? "absolute left-1/2 top-3 -translate-x-1/2 flex-row"
               : toolboxDock === "bottom"
@@ -2175,13 +2178,13 @@ export default function NotabilityStealthView({
                 d === "top" ? "left" : d === "left" ? "bottom" : "top"
               )
             }
-            className="flex h-8 w-5 items-center justify-center rounded-lg text-[#C7C7CC] hover:bg-black/5 hover:text-[#8E8E93]"
+            className="flex h-9 w-6 items-center justify-center rounded-full text-[#8E8E93] hover:bg-black/5 hover:text-[#1C1C1E] active:scale-95 transition"
             title="Verplaats Notability Toolbox (Boven / Links / Onder)"
           >
-            <span className="text-[11px] font-bold leading-none">⋮⋮</span>
+            <span className="text-[12px] font-bold leading-none select-none tracking-tight">⠿</span>
           </button>
 
-          {/* 1. PEN TOOL (Realistic Apple Pencil Nib SVG) */}
+          {/* 1. PEN TOOL (Authentic Apple Pencil Nib) */}
           <div className="relative">
             <button
               type="button"
@@ -2193,23 +2196,33 @@ export default function NotabilityStealthView({
                   setActivePopover(null);
                 }
               }}
-              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+              className={`apple-tool-btn group relative flex h-10 w-10 flex-col items-center justify-center rounded-full transition-all ${
                 activeTool === "pen"
-                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  ? "bg-[#007AFF]/12 ring-2 ring-[#007AFF] -translate-y-0.5 shadow-xs"
                   : "hover:bg-black/[0.05]"
               }`}
-              title="Pen (Tik nogmaals voor dikte, lijnstijl & kleur)"
+              title="Pen (Tik nogmaals voor dikte, lijnstijl &amp; kleur)"
             >
-              <svg viewBox="0 0 28 36" className="h-7 w-6">
-                <path d="M9 34L10 14L14 4L18 14L19 34Z" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
+              <svg viewBox="0 0 28 36" className="h-7 w-6 transition-transform group-hover:scale-105">
+                <defs>
+                  <linearGradient id="penBodyGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="50%" stopColor="#F2F2F7" />
+                    <stop offset="100%" stopColor="#E5E5EA" />
+                  </linearGradient>
+                </defs>
+                <path d="M9 34L10 14L14 4L18 14L19 34Z" fill="url(#penBodyGrad)" stroke="#C7C7CC" strokeWidth="1" />
                 <path d="M12.2 8.5L14 4L15.8 8.5Z" fill={penColor} />
-                <rect x="9.5" y="15" width="9" height="4" rx="1" fill={penColor} />
+                <rect x="9.5" y="15" width="9" height="3" rx="0.5" fill={penColor} />
               </svg>
+              {activeTool === "pen" && (
+                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-[#007AFF]" />
+              )}
             </button>
 
             {/* Pen Tray Popover */}
             {activePopover === "pen" && (
-              <div className="absolute left-1/2 top-13 z-50 w-68 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-xl">
+              <div className="absolute left-1/2 top-13 z-50 w-72 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-xl">
                 {/* Stroke Style: Solid / Dashed / Dotted */}
                 <div className="mb-3 grid grid-cols-3 gap-1.5 rounded-xl bg-[#F2F2F7] p-1">
                   {(
@@ -2223,7 +2236,7 @@ export default function NotabilityStealthView({
                       key={st.id}
                       type="button"
                       onClick={() => setPenStyle(st.id)}
-                      className={`rounded-lg py-1 text-[10.5px] font-bold ${
+                      className={`rounded-lg py-1.5 text-[11px] font-bold transition ${
                         penStyle === st.id
                           ? "bg-white text-[#007AFF] shadow-2xs"
                           : "text-[#6C6C70]"
@@ -2235,14 +2248,14 @@ export default function NotabilityStealthView({
                 </div>
 
                 {/* 5 Stroke Weights */}
-                <div className="mb-3 flex items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2">
+                <div className="mb-3 flex items-center justify-between rounded-xl bg-[#F2F2F7] px-3.5 py-2">
                   {[1.5, 2.5, 4, 6, 9].map((w) => (
                     <button
                       key={w}
                       type="button"
                       onClick={() => setPenWidth(w)}
-                      className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                        penWidth === w ? "bg-white ring-2 ring-[#007AFF] shadow-2xs" : ""
+                      className={`flex h-7 w-7 items-center justify-center rounded-full transition ${
+                        penWidth === w ? "bg-white ring-2 ring-[#007AFF] shadow-2xs scale-110" : ""
                       }`}
                     >
                       <span
@@ -2274,7 +2287,7 @@ export default function NotabilityStealthView({
             )}
           </div>
 
-          {/* 2. PENCIL TOOL */}
+          {/* 2. PENCIL TOOL (Hexagonal Graphite Apple Pencil) */}
           <div className="relative">
             <button
               type="button"
@@ -2286,22 +2299,26 @@ export default function NotabilityStealthView({
                   setActivePopover(null);
                 }
               }}
-              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+              className={`apple-tool-btn group relative flex h-10 w-10 flex-col items-center justify-center rounded-full transition-all ${
                 activeTool === "pencil"
-                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  ? "bg-[#007AFF]/12 ring-2 ring-[#007AFF] -translate-y-0.5 shadow-xs"
                   : "hover:bg-black/[0.05]"
               }`}
               title="Potlood"
             >
-              <svg viewBox="0 0 28 36" className="h-7 w-6">
-                <path d="M9.5 34L10.5 15L14 4.5L17.5 15L18.5 34Z" fill="#F9F9FB" stroke="#8E8E93" strokeWidth="1.3" />
+              <svg viewBox="0 0 28 36" className="h-7 w-6 transition-transform group-hover:scale-105">
+                <path d="M9.5 34L10.5 15L14 4.5L17.5 15L18.5 34Z" fill="#FDF8E4" stroke="#D1C49D" strokeWidth="1" />
                 <path d="M12.2 9.5L14 4.5L15.8 9.5Z" fill={pencilColor} />
                 <rect x="10" y="16" width="8" height="3" fill={pencilColor} opacity="0.65" />
+                <rect x="9.5" y="30" width="9" height="4" fill="#E5E5EA" stroke="#C7C7CC" strokeWidth="0.8" />
               </svg>
+              {activeTool === "pencil" && (
+                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-[#007AFF]" />
+              )}
             </button>
 
             {activePopover === "pencil" && (
-              <div className="absolute left-1/2 top-13 z-50 w-60 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl">
+              <div className="absolute left-1/2 top-13 z-50 w-64 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl backdrop-blur-xl">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
                   Potloodkleur
                 </p>
@@ -2314,8 +2331,8 @@ export default function NotabilityStealthView({
                         setPencilColor(c);
                         setActivePopover(null);
                       }}
-                      className={`h-6 w-6 rounded-full border ${
-                        pencilColor === c ? "ring-2 ring-[#007AFF]" : "border-black/15"
+                      className={`h-6 w-6 rounded-full border transition-transform ${
+                        pencilColor === c ? "scale-115 ring-2 ring-[#007AFF]" : "border-black/15"
                       }`}
                       style={{ backgroundColor: c }}
                     />
@@ -2325,7 +2342,7 @@ export default function NotabilityStealthView({
             )}
           </div>
 
-          {/* 3. HIGHLIGHTER TOOL */}
+          {/* 3. HIGHLIGHTER TOOL (Chisel-Tip Neon Marker) */}
           <div className="relative">
             <button
               type="button"
@@ -2337,22 +2354,25 @@ export default function NotabilityStealthView({
                   setActivePopover(null);
                 }
               }}
-              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+              className={`apple-tool-btn group relative flex h-10 w-10 flex-col items-center justify-center rounded-full transition-all ${
                 activeTool === "highlighter"
-                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  ? "bg-[#007AFF]/12 ring-2 ring-[#007AFF] -translate-y-0.5 shadow-xs"
                   : "hover:bg-black/[0.05]"
               }`}
               title="Markeerstift"
             >
-              <svg viewBox="0 0 28 36" className="h-7 w-6">
-                <path d="M7.5 34L8.5 14L19.5 14L20.5 34Z" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
-                <polygon points="9.5,14 11,5 18,7.5 18.5,14" fill={highlighterColor} opacity="0.88" />
+              <svg viewBox="0 0 28 36" className="h-7 w-6 transition-transform group-hover:scale-105">
+                <path d="M7.5 34L8.5 14L19.5 14L20.5 34Z" fill="#F2F2F7" stroke="#C7C7CC" strokeWidth="1" />
+                <polygon points="9.5,14 11,5 18,7.5 18.5,14" fill={highlighterColor} opacity="0.9" />
                 <rect x="8.2" y="16" width="11.6" height="4.5" rx="1" fill={highlighterColor} />
               </svg>
+              {activeTool === "highlighter" && (
+                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-[#007AFF]" />
+              )}
             </button>
 
             {activePopover === "highlighter" && (
-              <div className="absolute left-1/2 top-13 z-50 w-60 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl">
+              <div className="absolute left-1/2 top-13 z-50 w-64 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl backdrop-blur-xl">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
                   Markeerkleur
                 </p>
@@ -2366,7 +2386,7 @@ export default function NotabilityStealthView({
                           setHighlighterColor(c);
                           setActivePopover(null);
                         }}
-                        className={`h-7 w-7 rounded-full border ${
+                        className={`h-7 w-7 rounded-full border transition-transform ${
                           highlighterColor === c ? "ring-2 ring-[#007AFF] scale-110" : "border-black/10"
                         }`}
                         style={{ backgroundColor: c }}
@@ -2378,7 +2398,7 @@ export default function NotabilityStealthView({
             )}
           </div>
 
-          {/* 4. ERASER TOOL */}
+          {/* 4. ERASER TOOL (Precision Dual-Tone Eraser) */}
           <div className="relative">
             <button
               type="button"
@@ -2390,26 +2410,29 @@ export default function NotabilityStealthView({
                   setActivePopover(null);
                 }
               }}
-              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+              className={`apple-tool-btn group relative flex h-10 w-10 flex-col items-center justify-center rounded-full transition-all ${
                 activeTool === "eraser"
-                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  ? "bg-[#007AFF]/12 ring-2 ring-[#007AFF] -translate-y-0.5 shadow-xs"
                   : "hover:bg-black/[0.05]"
               }`}
               title="Gum (Hele lijn of Gedeeltelijk)"
             >
-              <svg viewBox="0 0 28 36" className="h-7 w-6">
-                <rect x="8" y="13" width="12" height="21" rx="2" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
-                <path d="M8 15V9C8 6.8 9.8 5 12 5H16C18.2 5 20 6.8 20 9V15Z" fill="#FF959E" stroke="#8E8E93" strokeWidth="1.3" />
+              <svg viewBox="0 0 28 36" className="h-7 w-6 transition-transform group-hover:scale-105">
+                <rect x="8" y="13" width="12" height="21" rx="2" fill="#FFFFFF" stroke="#C7C7CC" strokeWidth="1" />
+                <path d="M8 15V9C8 6.8 9.8 5 12 5H16C18.2 5 20 6.8 20 9V15Z" fill="#FF8389" stroke="#E06D73" strokeWidth="1" />
               </svg>
+              {activeTool === "eraser" && (
+                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-[#007AFF]" />
+              )}
             </button>
 
             {activePopover === "eraser" && (
-              <div className="absolute left-1/2 top-13 z-50 w-56 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl space-y-2.5">
+              <div className="absolute left-1/2 top-13 z-50 w-56 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl backdrop-blur-xl space-y-2.5">
                 <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#F2F2F7] p-1">
                   <button
                     type="button"
                     onClick={() => setEraserMode("whole")}
-                    className={`rounded-lg py-1 text-[11px] font-bold ${
+                    className={`rounded-lg py-1.5 text-[11px] font-bold transition ${
                       eraserMode === "whole" ? "bg-white text-[#007AFF] shadow-2xs" : "text-[#6C6C70]"
                     }`}
                   >
@@ -2418,7 +2441,7 @@ export default function NotabilityStealthView({
                   <button
                     type="button"
                     onClick={() => setEraserMode("partial")}
-                    className={`rounded-lg py-1 text-[11px] font-bold ${
+                    className={`rounded-lg py-1.5 text-[11px] font-bold transition ${
                       eraserMode === "partial" ? "bg-white text-[#007AFF] shadow-2xs" : "text-[#6C6C70]"
                     }`}
                   >
@@ -2451,9 +2474,9 @@ export default function NotabilityStealthView({
               setActiveTool("lasso");
               setActivePopover(null);
             }}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full transition ${
               activeTool === "lasso"
-                ? "bg-[#007AFF] text-white shadow-xs"
+                ? "bg-[#007AFF] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Lasso Selectie"
@@ -2471,9 +2494,9 @@ export default function NotabilityStealthView({
               setActiveTool("text");
               setActivePopover(null);
             }}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl font-serif text-[15px] font-bold transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full font-serif text-[15px] font-bold transition ${
               activeTool === "text"
-                ? "bg-[#007AFF] text-white shadow-xs"
+                ? "bg-[#007AFF] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Tekstvak (T)"
@@ -2488,15 +2511,15 @@ export default function NotabilityStealthView({
               setActiveTool("laser");
               setActivePopover(null);
             }}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full transition ${
               activeTool === "laser"
-                ? "bg-[#FF3B30] text-white shadow-xs"
+                ? "bg-[#FF3B30] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Laser Pointer"
           >
             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-current">
-              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              <span className="h-1.5 w-1.5 rounded-full bg-current animate-ping" />
             </span>
           </button>
 
@@ -2507,14 +2530,14 @@ export default function NotabilityStealthView({
               setActiveTool("tape");
               setActivePopover(null);
             }}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full transition ${
               activeTool === "tape"
-                ? "bg-[#FF9500] text-white shadow-xs"
+                ? "bg-[#FF9500] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Studiestrook (Tape om antwoorden af te dekken en met 1 tik te onthullen)"
           >
-            <span className="rounded border border-current px-1 py-0.5 text-[9px] font-extrabold">
+            <span className="rounded border border-current px-1 py-0.2 text-[8.5px] font-extrabold tracking-tighter">
               TAPE
             </span>
           </button>
@@ -2523,9 +2546,9 @@ export default function NotabilityStealthView({
           <button
             type="button"
             onClick={() => setShowRuler((v) => !v)}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full transition ${
               showRuler
-                ? "bg-[#007AFF] text-white shadow-xs"
+                ? "bg-[#007AFF] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Liniaal tonen/verbergen"
@@ -2537,9 +2560,9 @@ export default function NotabilityStealthView({
           <button
             type="button"
             onClick={() => setShowZoomLoupe((v) => !v)}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+            className={`apple-tool-btn relative flex h-9 w-9 items-center justify-center rounded-full transition ${
               showZoomLoupe
-                ? "bg-[#007AFF] text-white shadow-xs"
+                ? "bg-[#007AFF] text-white shadow-xs scale-105"
                 : "text-[#3C3C43] hover:bg-black/[0.05]"
             }`}
             title="Zoom-loep venster"
@@ -2554,14 +2577,14 @@ export default function NotabilityStealthView({
             <button
               type="button"
               onClick={() => setActivePopover(activePopover === "insert" ? null : "insert")}
-              className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              className={`apple-tool-btn flex h-9 w-9 items-center justify-center rounded-full transition ${
                 activePopover === "insert"
-                  ? "bg-[#007AFF] text-white shadow-xs"
-                  : "bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20"
+                  ? "bg-[#007AFF] text-white shadow-xs scale-105"
+                  : "bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/22"
               }`}
               title="Invoegen (+ Media, Document, Sticky Note)"
             >
-              <Plus className="h-5 w-5 stroke-[2.4]" />
+              <Plus className="h-4.5 w-4.5 stroke-[2.6]" />
             </button>
 
             {activePopover === "insert" && (
