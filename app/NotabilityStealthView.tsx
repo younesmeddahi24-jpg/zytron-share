@@ -1,22 +1,81 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Undo2,
+  Redo2,
+  Mic,
+  Square,
+  Plus,
+  MoreHorizontal,
+  Share,
+  Sparkles,
+  BookOpen,
+  Layers,
+  Check,
+  X,
+  Search,
+  Trash2,
+  Copy,
+  Send,
+  FileText,
+  Image as ImageIcon,
+  Folder,
+  Star,
+  Clock,
+  Users,
+  Grid,
+  List as ListIcon,
+  Settings,
+  Volume2,
+  Play,
+  Pause,
+  Bookmark,
+  HelpCircle,
+  Maximize2,
+  Minimize2,
+  Eye,
+  EyeOff,
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  CheckSquare,
+  ZoomIn,
+  ZoomOut,
+  Move,
+  Globe,
+  ArrowUpRight,
+  Download,
+  Printer,
+  Sliders,
+  MessageSquare,
+  CreditCard,
+} from "lucide-react";
 
-export interface NotabilityIncomingNote {
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+export interface IncomingStealthNote {
   id: string;
-  text: string;
   sender: string;
-  time: string;
+  text: string;
+  time: string | number;
 }
 
-interface NotabilityStealthViewProps {
+export interface NotabilityStealthViewProps {
   onExitStealth: () => void;
   quickText: string;
-  setQuickText: (val: string) => void;
+  setQuickText: (text: string) => void;
   onSendNote: (customText?: string) => void;
-  incomingNotes: NotabilityIncomingNote[];
+  incomingNotes: IncomingStealthNote[];
   connectedCount: number;
-  onUploadFileToZytron?: (files: FileList) => void;
+  onUploadFileToZytron: (files: FileList | File[]) => void;
   showToast: (msg: string) => void;
 }
 
@@ -25,333 +84,343 @@ type ToolType =
   | "pencil"
   | "highlighter"
   | "eraser"
-  | "lasso"
   | "text"
+  | "lasso"
+  | "laser"
   | "tape"
-  | "hand"
-  | "laser";
+  | "hand";
 
-type PaperGridType = "grid" | "lined" | "dotted" | "blank";
-type PaperColorType = "white" | "cream" | "dark" | "blue";
+type EraserMode = "whole" | "partial";
+type PenStyle = "solid" | "dashed" | "dotted";
+type PaperTemplate = "grid" | "lined" | "dotted" | "blank";
+type PaperColor = "#FFFFFF" | "#FBF8F1" | "#FFFBEB" | "#F0F7FF" | "#F2FBF4" | "#1C1C1E";
+type GridSpacing = "small" | "medium" | "large";
+type ToolboxDock = "top" | "bottom" | "left";
 
 interface StrokePoint {
   x: number;
   y: number;
-  pressure?: number;
-  time?: number;
 }
 
-interface DrawStroke {
+interface InkStroke {
   id: string;
-  tool: "pen" | "pencil" | "highlighter" | "eraser" | "laser";
+  pageIndex: number;
+  tool: "pen" | "pencil" | "highlighter" | "tape";
   color: string;
-  size: number;
-  dash: "solid" | "dashed" | "dotted";
-  points: StrokePoint[];
-  isShape?: boolean;
-  shapeType?: "line" | "rect" | "circle";
-  createdAt?: number;
-}
-
-interface TapeStrip {
-  id: string;
-  x: number;
-  y: number;
   width: number;
-  height: number;
-  color: string;
-  isRevealed: boolean;
+  style?: PenStyle;
+  points: StrokePoint[];
+  revealed?: boolean;
 }
 
 interface StickyNoteItem {
   id: string;
+  pageIndex: number;
   x: number;
   y: number;
   width: number;
   height: number;
+  color: "#FFF9C4" | "#FFE4E6" | "#E0F2FE" | "#DCFCE7" | "#FFFFFF";
+  pattern: "blank" | "lined" | "grid";
   text: string;
-  color: "yellow" | "blue" | "green" | "grid";
 }
 
-interface UploadedDocImage {
+interface UploadedImageItem {
   id: string;
-  name: string;
-  dataUrl: string;
+  pageIndex: number;
   x: number;
   y: number;
   width: number;
-  height: number;
+  src: string;
+  name: string;
 }
 
-interface NotePageData {
-  id: string;
-  strokes: DrawStroke[];
-  redoStack: DrawStroke[];
-  typedText: string;
-  tapes: TapeStrip[];
-  stickies: StickyNoteItem[];
-  images: UploadedDocImage[];
-}
-
-interface SubjectFolder {
+interface SubjectItem {
   id: string;
   name: string;
   color: string;
   divider: string;
 }
 
-const NOTABILITY_SUBJECTS: SubjectFolder[] = [
-  { id: "wiskunde-b", name: "Wiskunde B", color: "#007AFF", divider: "Exacte Vakken" },
-  { id: "natuurkunde", name: "Natuurkunde", color: "#5856D6", divider: "Exacte Vakken" },
-  { id: "scheikunde", name: "Scheikunde", color: "#34C759", divider: "Exacte Vakken" },
-  { id: "nederlands", name: "Nederlands", color: "#AF52DE", divider: "Talen" },
-  { id: "engels", name: "Engels", color: "#FF9500", divider: "Talen" },
-  { id: "economie", name: "Economie", color: "#FF2D55", divider: "Maatschappij" },
-];
-
-const PEN_COLORS = [
-  "#1C1C1E", // Notability Charcoal Black
-  "#007AFF", // Classic iOS Blue
-  "#0A84FF", // Sky Blue
-  "#5856D6", // Indigo
-  "#AF52DE", // Purple
-  "#FF2D55", // Rose Pink
-  "#FF3B30", // Crimson Red
-  "#34C759", // Emerald Green
-  "#00C7BE", // Mint Teal
-  "#8E8E93", // Slate Gray
-];
-
-const QUICK_INK_SWATCHES = ["#1C1C1E", "#007AFF", "#FF3B30", "#34C759"];
-
-const HIGHLIGHTER_COLORS = [
-  "#FACC15", // Neon Yellow
-  "#4ADE80", // Pastel Green
-  "#60A5FA", // Ice Blue
-  "#C084FC", // Soft Violet
-  "#F472B6", // Highlighter Pink
-  "#2DD4BF", // Aqua
-];
-
-const TAPE_COLORS = [
-  "#FACC15", // Classic Yellow Caution Tape
-  "#38BDF8", // Sky Blue
-  "#F472B6", // Bubblegum Pink
-  "#A78BFA", // Lavender
-  "#4ADE80", // Mint
-];
-
-export interface QuizQuestionItem {
-  id: number;
-  question: string;
-  options: string[];
-  correctIndex: number;
+interface NoteDocument {
+  id: string;
+  title: string;
+  subjectId: string;
+  updatedAt: string;
+  createdAt: string;
+  favorite: boolean;
+  template: PaperTemplate;
+  paperColor: PaperColor;
+  spacing: GridSpacing;
+  pages: number[];
+  bookmarkedPages: number[];
+  typedContentByPage: Record<number, string>;
 }
 
-export const NOTABILITY_QUIZ_QUESTIONS: QuizQuestionItem[] = [
+const NOTABILITY_SUBJECTS: SubjectItem[] = [
+  { id: "wis-b", name: "Wiskunde B", color: "#007AFF", divider: "Exacte Vakken" },
+  { id: "nat", name: "Natuurkunde", color: "#5856D6", divider: "Exacte Vakken" },
+  { id: "sch", name: "Scheikunde", color: "#34C759", divider: "Exacte Vakken" },
+  { id: "bio", name: "Biologie", color: "#FF9500", divider: "Exacte Vakken" },
+  { id: "ned", name: "Nederlands", color: "#AF52DE", divider: "Talen & Maatschappij" },
+  { id: "eng", name: "Engels", color: "#FF2D55", divider: "Talen & Maatschappij" },
+  { id: "eco", name: "Economie", color: "#5AC8FA", divider: "Talen & Maatschappij" },
+  { id: "ges", name: "Geschiedenis", color: "#FFCC00", divider: "Talen & Maatschappij" },
+];
+
+const NOTABILITY_INK_COLORS = [
+  "#1C1C1E",
+  "#007AFF",
+  "#FF3B30",
+  "#34C759",
+  "#FF9500",
+  "#AF52DE",
+  "#5856D6",
+  "#5AC8FA",
+  "#FF2D55",
+  "#FFCC00",
+  "#8E8E93",
+  "#A2845E",
+  "#00C7BE",
+  "#30B0C7",
+  "#INDIGO",
+  "#6366F1",
+].map((c) => (c === "#INDIGO" ? "#4F46E5" : c));
+
+const PAPER_COLORS: { color: PaperColor; label: string; border: string }[] = [
+  { color: "#FFFFFF", label: "Wit", border: "#D1D1D6" },
+  { color: "#FBF8F1", label: "Crème", border: "#E5DEC9" },
+  { color: "#FFFBEB", label: "Geel", border: "#FDE68A" },
+  { color: "#F0F7FF", label: "Blauw", border: "#BFDBFE" },
+  { color: "#F2FBF4", label: "Mint", border: "#BBF7D0" },
+  { color: "#1C1C1E", label: "Donker", border: "#3A3A3C" },
+];
+
+const INITIAL_NOTES: NoteDocument[] = [
   {
-    id: 1,
-    question: "Wie introduceerde de kwantumhypothese in 1900, waarbij elektromagnetische energie in gekwantiseerde pakketjes wordt uitgezonden?",
-    options: ["Max Planck", "Albert Einstein", "Niels Bohr", "Louis de Broglie"],
-    correctIndex: 0,
+    id: "note-1",
+    title: "Nieuwe Notitie",
+    subjectId: "wis-b",
+    updatedAt: "Zojuist",
+    createdAt: "25 okt 2026",
+    favorite: true,
+    template: "grid",
+    paperColor: "#FFFFFF",
+    spacing: "medium",
+    pages: [1],
+    bookmarkedPages: [],
+    typedContentByPage: { 0: "" },
   },
   {
-    id: 2,
-    question: "Welk wiskundig kader is vereist om de wetten van de kwantummechanica te formuleren?",
-    options: ["Reële vectorruimtes", "Complexe vectorruimtes (Hilbertruimte)", "Euclidische meetkunde", "Niet-lineaire algebra"],
-    correctIndex: 1,
+    id: "note-2",
+    title: "Hoofdstuk 4 — Differentiaalrekening",
+    subjectId: "wis-b",
+    updatedAt: "Gisteren",
+    createdAt: "24 okt 2026",
+    favorite: false,
+    template: "grid",
+    paperColor: "#FBF8F1",
+    spacing: "medium",
+    pages: [1, 2],
+    bookmarkedPages: [0],
+    typedContentByPage: { 0: "", 1: "" },
   },
   {
-    id: 3,
-    question: "Welke differentiaalvergelijking beschrijft de tijdsontwikkeling van een kwantummechanische golffunctie?",
-    options: ["Maxwell-Boltzmann vergelijking", "Schrödingervergelijking", "Navier-Stokes vergelijking", "Lorentzkrachtwet"],
-    correctIndex: 1,
+    id: "note-3",
+    title: "Practicum Verslag Kracht & Beweging",
+    subjectId: "nat",
+    updatedAt: "23 okt",
+    createdAt: "23 okt 2026",
+    favorite: true,
+    template: "lined",
+    paperColor: "#FFFFFF",
+    spacing: "medium",
+    pages: [1],
+    bookmarkedPages: [],
+    typedContentByPage: { 0: "" },
   },
   {
-    id: 4,
-    question: "Wat stelt de statistische interpretatie van Born over het kwadraat van de modulus |ψ(x)|²?",
-    options: [
-      "Totale kinetische energiedichtheid",
-      "Kansdichtheid om een deeltje op positie x aan te treffen",
-      "Gravitatiepotentiaalgradiënt",
-      "Lokale elektrische ladingsverplaatsing",
-    ],
-    correctIndex: 1,
-  },
-  {
-    id: 5,
-    question: "Welk fundamenteel principe stelt dat plaats en impuls niet tegelijkertijd met willekeurige precisie bepaald kunnen worden?",
-    options: [
-      "Onzekerheidsrelatie van Heisenberg",
-      "Uitsluitingsprincipe van Pauli",
-      "No-Cloning theorema",
-      "Correspondentieprincipe",
-    ],
-    correctIndex: 0,
-  },
-  {
-    id: 6,
-    question: "Welk verschijnsel beschrijft twee of meer deeltjes met gecorreleerde toestanden ongeacht hun onderlinge afstand?",
-    options: [
-      "Kwantumverstrengeling (Entanglement)",
-      "Golfpakketdispersie",
-      "Comptonverstrooiing",
-      "Kwantumtunneling",
-    ],
-    correctIndex: 0,
-  },
-  {
-    id: 7,
-    question: "Welke lineaire Hermitische operator komt overeen met de totale energie van een kwantumsysteem?",
-    options: ["Hamiltoniaan Ĥ", "Impulsoperator p̂", "Positieoperator x̂", "Impulsmomentoperator L̂"],
-    correctIndex: 0,
-  },
-  {
-    id: 8,
-    question: "Wat is de fysische betekenis van het uitsluitingsprincipe van Pauli in atomaire systemen?",
-    options: [
-      "Geen twee identieke fermionen kunnen tegelijk dezelfde kwantumtoestand bezetten",
-      "Fotonen kunnen geen identieke ruimtelijke orbitalen bezetten",
-      "Alle observabelen hebben zuiver imaginaire eigenwaarden",
-      "Energieniveaus zijn continu in gebonden systemen",
-    ],
-    correctIndex: 0,
+    id: "note-4",
+    title: "Samenvatting Organische Chemie",
+    subjectId: "sch",
+    updatedAt: "21 okt",
+    createdAt: "21 okt 2026",
+    favorite: false,
+    template: "dotted",
+    paperColor: "#FFFFFF",
+    spacing: "medium",
+    pages: [1],
+    bookmarkedPages: [],
+    typedContentByPage: { 0: "" },
   },
 ];
 
+// ============================================================================
+// MAIN NOTABILITY 15/16 REPLICA COMPONENT
+// ============================================================================
 export default function NotabilityStealthView({
   onExitStealth,
-  quickText,
-  setQuickText,
   onSendNote,
   incomingNotes,
   connectedCount,
   onUploadFileToZytron,
   showToast,
 }: NotabilityStealthViewProps) {
-  // Active Subject & Note Title (Starts pure clean blank!)
-  const [activeSubjectId, setActiveSubjectId] = useState<string>("wiskunde-b");
-  const activeSubject =
-    NOTABILITY_SUBJECTS.find((s) => s.id === activeSubjectId) || NOTABILITY_SUBJECTS[0];
-
-  const [noteTitle, setNoteTitle] = useState<string>("");
-  const [showLibrarySidebar, setShowLibrarySidebar] = useState<boolean>(false);
-  const [showPagesSidebar, setShowPagesSidebar] = useState<boolean>(false);
-  const [showTemplateMenu, setShowTemplateMenu] = useState<boolean>(false);
-  const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
-  const [searchOrBeamInput, setSearchOrBeamInput] = useState<string>("");
-
-  // Secret Notability AI Chat & Math Solver Drawer (Camouflaged Classmate Messenger!)
-  const [showNotabilityAiDrawer, setShowNotabilityAiDrawer] = useState<boolean>(false);
-  const [aiChatInput, setAiChatInput] = useState<string>("");
-
-  // Audio Recording state (Notability iconic voice memo with waveform)
-  const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false);
-  const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
-  const [hasRecordedAudio, setHasRecordedAudio] = useState<boolean>(false);
-  const [isPlayingRecordedAudio, setIsPlayingRecordedAudio] = useState<boolean>(false);
-
-  // Zoom level (Notability zoom pill: 75%, 100%, 125%, 150%)
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-
-  // Paper appearance (Default pure blank sheet)
-  const [paperGrid, setPaperGrid] = useState<PaperGridType>("blank");
-  const [paperColor, setPaperColor] = useState<PaperColorType>("white");
-
-  // Toolbox state
-  const [activeTool, setActiveTool] = useState<ToolType>("pen");
-  const [openPopoverTool, setOpenPopoverTool] = useState<
-    "pen" | "pencil" | "highlighter" | "eraser" | "tape" | "insert" | null
-  >(null);
-  const [penColor, setPenColor] = useState<string>("#007AFF");
-  const [penSize, setPenSize] = useState<number>(2.5);
-  const [penDash, setPenDash] = useState<"solid" | "dashed" | "dotted">("solid");
-
-  const [pencilColor, setPencilColor] = useState<string>("#1C1C1E");
-  const [pencilSize, setPencilSize] = useState<number>(3);
-
-  const [highlighterColor, setHighlighterColor] = useState<string>("#FACC15");
-  const [highlighterSize, setHighlighterSize] = useState<number>(18);
-
-  const [eraserSize, setEraserSize] = useState<number>(22);
-  const [eraserMode, setEraserMode] = useState<"whole" | "partial">("partial");
-
-  const [selectedTapeColor, setSelectedTapeColor] = useState<string>("#FACC15");
-
-  // Ruler overlay
-  const [showRuler, setShowRuler] = useState<boolean>(false);
-  const [rulerPos, setRulerPos] = useState<{ x: number; y: number }>({
-    x: 160,
-    y: 280,
-  });
-  const isDraggingRulerRef = useRef<boolean>(false);
-  const rulerDragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
-  // Sticky Note dragging state
-  const draggingStickyRef = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
-  // Uploaded Image dragging state
-  const draggingImageRef = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
-
-  // Floating Toolbox position & drag state (freely draggable anywhere or docked in header!)
-  const [customToolboxPos, setCustomToolboxPos] = useState<{ x: number; y: number } | null>(null);
-  const [isToolboxMinimized, setIsToolboxMinimized] = useState<boolean>(false);
-  const isDraggingToolboxRef = useRef<boolean>(false);
-  const toolboxDragStartRef = useRef<{ mouseX: number; mouseY: number; boxX: number; boxY: number }>({
-    mouseX: 0,
-    mouseY: 0,
-    boxX: 0,
-    boxY: 0,
-  });
-
-  // Authentic Notability Smart Notes / Quiz Split Screen State
-  const [smartNotesTab, setSmartNotesTab] = useState<"notes" | "quiz" | "chat">("notes");
-  const [quizQuestionIndex, setQuizQuestionIndex] = useState<number>(1);
-  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({ 1: 1 });
-  const [quizFeedback, setQuizFeedback] = useState<Record<number, "up" | "down" | null>>({});
-  const [smartNotesDropdownOpen, setSmartNotesDropdownOpen] = useState<boolean>(false);
-
-  // Multi-page state
-  const [pages, setPages] = useState<NotePageData[]>([
-    {
-      id: "page-1",
-      strokes: [],
-      redoStack: [],
-      typedText: "",
-      tapes: [],
-      stickies: [],
-      images: [],
-    },
-  ]);
-  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
-  const currentPage = pages[currentPageIndex] || pages[0];
-
-  // Canvas & Drawing Refs
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const paperContainerRef = useRef<HTMLDivElement | null>(null);
-  const isDrawingRef = useRef<boolean>(false);
-  const currentStrokeRef = useRef<DrawStroke | null>(null);
-  const laserStrokesRef = useRef<DrawStroke[]>([]);
-  const docUploadInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Shape Recognition Timer (Hold pointer still for 400ms at stroke end to auto-snap!)
-  const shapeHoldTimerRef = useRef<number | null>(null);
-  const lastPointRef = useRef<StrokePoint | null>(null);
-
-  // Switch subject handler
-  const handleSelectSubject = (subj: SubjectFolder) => {
-    setActiveSubjectId(subj.id);
-    setShowLibrarySidebar(false);
-    showToast(`Vak geselecteerd: ${subj.name}`);
+  const onToggleNotability = onExitStealth;
+  const onSendQuickNote = (text: string) => {
+    onSendNote(text);
   };
+  // ─── Core Screen Mode: "editor" (Note Editor) vs "library" (Full Library Home Screen) ───
+  const [screenMode, setScreenMode] = useState<"editor" | "library">("editor");
 
-  // Audio Recording Timer
+  // ─── Library State ───
+  const [notes, setNotes] = useState<NoteDocument[]>(INITIAL_NOTES);
+  const [activeNoteId, setActiveNoteId] = useState<string>("note-1");
+  const [selectedLibraryFilter, setSelectedLibraryFilter] = useState<string>("wis-b");
+  const [libraryViewMode, setLibraryViewMode] = useState<"grid" | "list">("grid");
+  const [librarySearchQuery, setLibrarySearchQuery] = useState<string>("");
+  const [collapsedDividers, setCollapsedDividers] = useState<Record<string, boolean>>({});
+  const [showNewNoteMenu, setShowNewNoteMenu] = useState<boolean>(false);
+
+  const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
+  const activeSubject =
+    NOTABILITY_SUBJECTS.find((s) => s.id === activeNote.subjectId) || NOTABILITY_SUBJECTS[0];
+
+  // ─── Active Page & View Settings ───
+  const [activePageIndex, setActivePageIndex] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<"seamless" | "single">("seamless");
+  const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
+  const [zoomPercent, setZoomPercent] = useState<number>(100);
+  const [showZoomLoupe, setShowZoomLoupe] = useState<boolean>(false);
+
+  // ─── Toolbox & Drawing State ───
+  const [toolboxDock, setToolboxDock] = useState<ToolboxDock>("top");
+  const [activeTool, setActiveTool] = useState<ToolType>("pen");
+  const [activePopover, setActivePopover] = useState<
+    | null
+    | "pen"
+    | "pencil"
+    | "highlighter"
+    | "eraser"
+    | "insert"
+    | "options"
+    | "share"
+    | "noteSwitcher"
+    | "toolboxSettings"
+  >(null);
+
+  const [penColor, setPenColor] = useState<string>("#1C1C1E");
+  const [penWidth, setPenWidth] = useState<number>(2.5);
+  const [penStyle, setPenStyle] = useState<PenStyle>("solid");
+
+  const [pencilColor, setPencilColor] = useState<string>("#3A3A3C");
+  const [pencilWidth, setPencilWidth] = useState<number>(3.5);
+
+  const [highlighterColor, setHighlighterColor] = useState<string>("#FFCC00");
+  const [highlighterWidth, setHighlighterWidth] = useState<number>(18);
+
+  const [eraserMode, setEraserMode] = useState<EraserMode>("whole");
+  const [eraserWidth, setEraserWidth] = useState<number>(20);
+
+  const [laserColor, setLaserColor] = useState<string>("#FF3B30");
+  const [laserTrail, setLaserTrail] = useState<StrokePoint[]>([]);
+
+  // ─── Text Formatting State (when Text tool is active) ───
+  const [fontSize, setFontSize] = useState<number>(16);
+  const [fontBold, setFontBold] = useState<boolean>(false);
+  const [fontItalic, setFontItalic] = useState<boolean>(false);
+  const [fontUnderline, setFontUnderline] = useState<boolean>(false);
+  const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
+
+  // ─── Canvas Content State (Strokes, Sticky Notes, Uploaded Images, Ruler) ───
+  const [strokesByNote, setStrokesByNote] = useState<Record<string, InkStroke[]>>({});
+  const [redoByNote, setRedoByNote] = useState<Record<string, InkStroke[]>>({});
+  const [stickyNotesByNote, setStickyNotesByNote] = useState<Record<string, StickyNoteItem[]>>({});
+  const [imagesByNote, setImagesByNote] = useState<Record<string, UploadedImageItem[]>>({});
+
+  const strokes = strokesByNote[activeNote.id] || [];
+  const redoStack = redoByNote[activeNote.id] || [];
+  const stickyNotes = stickyNotesByNote[activeNote.id] || [];
+  const uploadedImages = imagesByNote[activeNote.id] || [];
+
+  const [currentStroke, setCurrentStroke] = useState<InkStroke | null>(null);
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+
+  // ─── Interactive Ruler State ───
+  const [showRuler, setShowRuler] = useState<boolean>(false);
+  const [rulerPos, setRulerPos] = useState<{ x: number; y: number; angle: number }>({
+    x: 160,
+    y: 260,
+    angle: 0,
+  });
+
+  // ─── Dragging State for Sticky Notes / Images / Ruler ───
+  const [draggingObject, setDraggingObject] = useState<{
+    type: "sticky" | "image" | "ruler";
+    id: string;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
+
+  // ─── Right-Hand Side Drawers: "learn" (Notability Learn AI) & "content" (Content Manager) ───
+  const [rightDrawer, setRightDrawer] = useState<null | "learn" | "content">(null);
+  const [learnTab, setLearnTab] = useState<"summary" | "flashcards" | "quiz" | "chat">("summary");
+  const [contentTab, setContentTab] = useState<"pages" | "bookmarks" | "search" | "transcript">(
+    "pages"
+  );
+
+  // ─── Interactive Learn State (Flashcards, Quiz, Chat / P2P) ───
+  const [flashcardIndex, setFlashcardIndex] = useState<number>(0);
+  const [flashcardFlipped, setFlashcardFlipped] = useState<boolean>(false);
+  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
+  const [stealthInputText, setStealthInputText] = useState<string>("");
+  const [searchInNoteQuery, setSearchInNoteQuery] = useState<string>("");
+
+  // ─── Audio Recording & Note Replay Bar State ───
+  const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false);
+  const [audioSeconds, setAudioSeconds] = useState<number>(0);
+  const [showAudioBar, setShowAudioBar] = useState<boolean>(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+
+  // ─── Clock State ───
+  const [clockText, setClockText] = useState<string>("09:41");
+  const [dateText, setDateText] = useState<string>("Zo 25 okt");
+
+  // ─── Refs ───
+  const canvasRefs = useRef<Record<number, HTMLCanvasElement | null>>({});
+  const fileUploadInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Update clock
   useEffect(() => {
-    if (!isRecordingAudio) return;
-    const t = window.setInterval(() => {
-      setRecordingSeconds((s) => s + 1);
+    const updateClock = () => {
+      const now = new Date();
+      setClockText(
+        now.toLocaleTimeString("nl-NL", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+      setDateText(
+        now.toLocaleDateString("nl-NL", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        })
+      );
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Audio recording timer
+  useEffect(() => {
+    if (!isRecordingAudio && !isPlayingAudio) return;
+    const t = setInterval(() => {
+      setAudioSeconds((s) => s + 1);
     }, 1000);
-    return () => window.clearInterval(t);
-  }, [isRecordingAudio]);
+    return () => clearInterval(t);
+  }, [isRecordingAudio, isPlayingAudio]);
 
   const formatTimer = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -359,2718 +428,2916 @@ export default function NotabilityStealthView({
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  // Render all strokes onto the active HTML5 Canvas
-  const renderCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  // ─── Helper Mutators for Current Note ───
+  const updateActiveNote = useCallback(
+    (updater: (note: NoteDocument) => NoteDocument) => {
+      setNotes((prev) => prev.map((n) => (n.id === activeNote.id ? updater(n) : n)));
+    },
+    [activeNote.id]
+  );
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-    }
+  const setStrokesForActiveNote = useCallback(
+    (updater: (prev: InkStroke[]) => InkStroke[]) => {
+      setStrokesByNote((prev) => ({
+        ...prev,
+        [activeNote.id]: updater(prev[activeNote.id] || []),
+      }));
+    },
+    [activeNote.id]
+  );
 
-    ctx.save();
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, rect.width, rect.height);
+  const setRedoForActiveNote = useCallback(
+    (updater: (prev: InkStroke[]) => InkStroke[]) => {
+      setRedoByNote((prev) => ({
+        ...prev,
+        [activeNote.id]: updater(prev[activeNote.id] || []),
+      }));
+    },
+    [activeNote.id]
+  );
 
-    const drawSingleStroke = (stroke: DrawStroke) => {
-      if (stroke.points.length === 0) return;
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = stroke.size;
+  const setStickyNotesForActiveNote = useCallback(
+    (updater: (prev: StickyNoteItem[]) => StickyNoteItem[]) => {
+      setStickyNotesByNote((prev) => ({
+        ...prev,
+        [activeNote.id]: updater(prev[activeNote.id] || []),
+      }));
+    },
+    [activeNote.id]
+  );
 
-      if (stroke.dash === "dashed") {
-        ctx.setLineDash([stroke.size * 3, stroke.size * 2]);
-      } else if (stroke.dash === "dotted") {
-        ctx.setLineDash([stroke.size * 0.5, stroke.size * 2.2]);
-      } else {
-        ctx.setLineDash([]);
-      }
+  const setImagesForActiveNote = useCallback(
+    (updater: (prev: UploadedImageItem[]) => UploadedImageItem[]) => {
+      setImagesByNote((prev) => ({
+        ...prev,
+        [activeNote.id]: updater(prev[activeNote.id] || []),
+      }));
+    },
+    [activeNote.id]
+  );
 
-      if (stroke.tool === "eraser") {
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.strokeStyle = "rgba(0,0,0,1)";
-      } else if (stroke.tool === "highlighter") {
-        ctx.globalCompositeOperation = "multiply";
-        ctx.globalAlpha = 0.36;
-        ctx.strokeStyle = stroke.color;
-        ctx.lineCap = "butt";
-      } else if (stroke.tool === "pencil") {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.globalAlpha = 0.78;
-        ctx.strokeStyle = stroke.color;
-      } else if (stroke.tool === "laser") {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.shadowColor = "#FF3B30";
-        ctx.shadowBlur = 12;
-        ctx.strokeStyle = "#FF3B30";
-      } else {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = stroke.color;
-      }
+  // ─── Render Ink Strokes onto Each Page Canvas ───
+  const renderPageCanvas = useCallback(
+    (pageIdx: number) => {
+      const canvas = canvasRefs.current[pageIdx];
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-      ctx.beginPath();
-      const pts = stroke.points;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (stroke.isShape && stroke.shapeType === "line" && pts.length >= 2) {
-        ctx.moveTo(pts[0].x, pts[0].y);
-        ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-        ctx.stroke();
-      } else if (stroke.isShape && stroke.shapeType === "rect" && pts.length >= 2) {
-        const minX = Math.min(...pts.map((p) => p.x));
-        const maxX = Math.max(...pts.map((p) => p.x));
-        const minY = Math.min(...pts.map((p) => p.y));
-        const maxY = Math.max(...pts.map((p) => p.y));
-        ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
-      } else if (stroke.isShape && stroke.shapeType === "circle" && pts.length >= 2) {
-        const minX = Math.min(...pts.map((p) => p.x));
-        const maxX = Math.max(...pts.map((p) => p.x));
-        const minY = Math.min(...pts.map((p) => p.y));
-        const maxY = Math.max(...pts.map((p) => p.y));
-        const cx = (minX + maxX) / 2;
-        const cy = (minY + maxY) / 2;
-        const rx = Math.abs(maxX - minX) / 2;
-        const ry = Math.abs(maxY - minY) / 2;
-        ctx.ellipse(cx, cy, Math.max(1, rx), Math.max(1, ry), 0, 0, Math.PI * 2);
-        ctx.stroke();
-      } else if (pts.length === 1) {
-        ctx.arc(pts[0].x, pts[0].y, stroke.size / 2, 0, Math.PI * 2);
-        ctx.fillStyle = stroke.tool === "eraser" ? "rgba(0,0,0,1)" : stroke.color;
-        ctx.fill();
-      } else {
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let i = 1; i < pts.length - 1; i++) {
-          const midX = (pts[i].x + pts[i + 1].x) / 2;
-          const midY = (pts[i].y + pts[i + 1].y) / 2;
-          ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
-        }
-        const last = pts[pts.length - 1];
-        ctx.lineTo(last.x, last.y);
-        ctx.stroke();
-      }
-      ctx.restore();
-    };
+      const pageStrokes = strokes.filter((s) => s.pageIndex === pageIdx);
+      const allToDraw =
+        currentStroke && currentStroke.pageIndex === pageIdx
+          ? [...pageStrokes, currentStroke]
+          : pageStrokes;
 
-    for (const s of currentPage.strokes) {
-      drawSingleStroke(s);
-    }
-    if (currentStrokeRef.current) {
-      drawSingleStroke(currentStrokeRef.current);
-    }
-    for (const ls of laserStrokesRef.current) {
-      drawSingleStroke(ls);
-    }
+      for (const stroke of allToDraw) {
+        if (stroke.points.length < 2) continue;
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
 
-    ctx.restore();
-  }, [currentPage.strokes]);
-
-  useEffect(() => {
-    renderCanvas();
-  }, [renderCanvas, currentPageIndex, paperGrid, paperColor, zoomLevel]);
-
-  useEffect(() => {
-    const onResize = () => renderCanvas();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [renderCanvas]);
-
-  // Keyboard shortcuts: Esc for Stealth Exit, Ctrl+Z for Undo, Ctrl+Shift+Z for Redo
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onExitStealth();
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
-        if (e.shiftKey) {
-          e.preventDefault();
-          handleRedo();
+        if (stroke.tool === "highlighter") {
+          ctx.globalAlpha = 0.35;
+          ctx.lineCap = "butt";
+        } else if (stroke.tool === "pencil") {
+          ctx.globalAlpha = 0.78;
+        } else if (stroke.tool === "tape") {
+          ctx.globalAlpha = stroke.revealed ? 0.22 : 0.96;
         } else {
-          const tag = (e.target as HTMLElement)?.tagName;
-          if (tag !== "INPUT" && tag !== "TEXTAREA") {
-            e.preventDefault();
-            handleUndo();
-          }
+          ctx.globalAlpha = 1;
         }
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  });
 
-  // Calculate canvas coordinates
-  const getCanvasPoint = (e: React.PointerEvent<HTMLCanvasElement>): StrokePoint => {
-    const canvas = canvasRef.current!;
+        if (stroke.style === "dashed") {
+          ctx.setLineDash([stroke.width * 3, stroke.width * 2]);
+        } else if (stroke.style === "dotted") {
+          ctx.setLineDash([stroke.width, stroke.width * 2.2]);
+        } else {
+          ctx.setLineDash([]);
+        }
+
+        ctx.strokeStyle = stroke.tool === "tape" ? "#F59E0B" : stroke.color;
+        ctx.lineWidth = stroke.width;
+
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+          const prev = stroke.points[i - 1];
+          const curr = stroke.points[i];
+          const midX = (prev.x + curr.x) / 2;
+          const midY = (prev.y + curr.y) / 2;
+          ctx.quadraticCurveTo(prev.x, prev.y, midX, midY);
+        }
+        ctx.stroke();
+
+        // Draw striped Notability Study Tape pattern
+        if (stroke.tool === "tape" && !stroke.revealed) {
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 6]);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Draw Laser Pointer Trail on active page
+      if (activeTool === "laser" && laserTrail.length > 1 && pageIdx === activePageIndex) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = laserColor;
+        ctx.shadowColor = laserColor;
+        ctx.shadowBlur = 14;
+        ctx.lineWidth = 5;
+        ctx.moveTo(laserTrail[0].x, laserTrail[0].y);
+        for (let i = 1; i < laserTrail.length; i++) {
+          ctx.lineTo(laserTrail[i].x, laserTrail[i].y);
+        }
+        ctx.stroke();
+        const last = laserTrail[laserTrail.length - 1];
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    },
+    [strokes, currentStroke, activeTool, laserTrail, laserColor, activePageIndex]
+  );
+
+  useEffect(() => {
+    activeNote.pages.forEach((_, idx) => renderPageCanvas(idx));
+  }, [activeNote.pages, renderPageCanvas]);
+
+  // ─── Pointer Handlers for Drawing / Erasing / Tape / Laser ───
+  const getCanvasPoint = (
+    e: React.PointerEvent<HTMLCanvasElement>,
+    pageIdx: number
+  ): StrokePoint => {
+    const canvas = canvasRefs.current[pageIdx];
+    if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    let x = (e.clientX - rect.left) / zoomLevel;
-    let y = (e.clientY - rect.top) / zoomLevel;
-
-    // Snap to ruler edge if active and nearby
-    if (showRuler) {
-      const distY = Math.abs(y - rulerPos.y);
-      if (distY < 28) {
-        y = rulerPos.y;
-      }
-    }
-
     return {
-      x,
-      y,
-      pressure: e.pressure || 0.5,
-      time: Date.now(),
+      x: ((e.clientX - rect.left) / rect.width) * canvas.width,
+      y: ((e.clientY - rect.top) / rect.height) * canvas.height,
     };
   };
 
-  // Notability Shape Recognition Detection
-  const detectShape = (pts: StrokePoint[]): { isShape: boolean; shapeType?: "line" | "rect" | "circle" } => {
-    if (pts.length < 12) return { isShape: false };
+  const handleCanvasPointerDown = (
+    e: React.PointerEvent<HTMLCanvasElement>,
+    pageIdx: number
+  ) => {
+    setActivePageIndex(pageIdx);
+    if (activePopover) setActivePopover(null);
+    if (activeTool === "text" || activeTool === "lasso" || activeTool === "hand") return;
 
-    const first = pts[0];
-    const last = pts[pts.length - 1];
-    const startEndDist = Math.hypot(last.x - first.x, last.y - first.y);
+    const pt = getCanvasPoint(e, pageIdx);
 
-    if (startEndDist < 35 && pts.length > 20) {
-      const minX = Math.min(...pts.map((p) => p.x));
-      const maxX = Math.max(...pts.map((p) => p.x));
-      const minY = Math.min(...pts.map((p) => p.y));
-      const maxY = Math.max(...pts.map((p) => p.y));
-      const w = maxX - minX;
-      const h = maxY - minY;
-      const aspectRatio = w / Math.max(1, h);
-
-      if (aspectRatio > 0.75 && aspectRatio < 1.35) {
-        return { isShape: true, shapeType: "circle" };
-      }
-      return { isShape: true, shapeType: "rect" };
-    }
-
-    let maxDeviation = 0;
-    const totalDist = Math.hypot(last.x - first.x, last.y - first.y);
-    if (totalDist > 60) {
-      for (const p of pts) {
-        const num = Math.abs((last.y - first.y) * p.x - (last.x - first.x) * p.y + last.x * first.y - last.y * first.x);
-        const dist = num / totalDist;
-        if (dist > maxDeviation) maxDeviation = dist;
-      }
-      if (maxDeviation < 24) {
-        return { isShape: true, shapeType: "line" };
-      }
-    }
-
-    return { isShape: false };
-  };
-
-  // Drawing event handlers
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (activeTool === "hand" || activeTool === "text" || activeTool === "lasso") return;
-    setOpenPopoverTool(null);
-    setShowTemplateMenu(false);
-
-    const pt = getCanvasPoint(e);
-    lastPointRef.current = pt;
-
-    if (activeTool === "tape") {
-      isDrawingRef.current = true;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-      currentStrokeRef.current = {
-        id: `tape-stroke-${Date.now()}`,
-        tool: "pen",
-        color: selectedTapeColor,
-        size: 24,
-        dash: "solid",
-        points: [pt],
-      };
-      renderCanvas();
+    // Tap on Study Tape to toggle reveal/cover
+    const hitTape = strokes.find(
+      (s) =>
+        s.pageIndex === pageIdx &&
+        s.tool === "tape" &&
+        s.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) < 24)
+    );
+    if (hitTape && activeTool !== "eraser") {
+      setStrokesForActiveNote((prev) =>
+        prev.map((s) => (s.id === hitTape.id ? { ...s, revealed: !s.revealed } : s))
+      );
       return;
     }
 
-    if (activeTool === "eraser" && eraserMode === "whole") {
-      isDrawingRef.current = true;
-      eraseWholeStrokeAt(pt.x, pt.y);
+    if (activeTool === "laser") {
+      setIsDrawing(true);
+      setLaserTrail([pt]);
       return;
     }
 
-    isDrawingRef.current = true;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    if (activeTool === "eraser") {
+      setIsDrawing(true);
+      const radius = eraserMode === "whole" ? 24 : eraserWidth;
+      setStrokesForActiveNote((prev) =>
+        prev.filter(
+          (s) =>
+            s.pageIndex !== pageIdx ||
+            !s.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) < radius)
+        )
+      );
+      return;
+    }
+
+    setIsDrawing(true);
+    const strokeTool =
+      activeTool === "highlighter"
+        ? "highlighter"
+        : activeTool === "pencil"
+          ? "pencil"
+          : activeTool === "tape"
+            ? "tape"
+            : "pen";
 
     const color =
-      activeTool === "pen"
-        ? penColor
-        : activeTool === "pencil"
+      strokeTool === "highlighter"
+        ? highlighterColor
+        : strokeTool === "pencil"
           ? pencilColor
-          : activeTool === "highlighter"
-            ? highlighterColor
-            : "#FF3B30";
+          : penColor;
 
-    const size =
-      activeTool === "pen"
-        ? penSize
-        : activeTool === "pencil"
-          ? pencilSize
-          : activeTool === "highlighter"
-            ? highlighterSize
-            : activeTool === "eraser"
-              ? eraserSize
-              : 4;
+    const width =
+      strokeTool === "highlighter"
+        ? highlighterWidth
+        : strokeTool === "pencil"
+          ? pencilWidth
+          : strokeTool === "tape"
+            ? 24
+            : penWidth;
 
-    currentStrokeRef.current = {
-      id: `stroke-${Date.now()}-${Math.random()}`,
-      tool: activeTool as DrawStroke["tool"],
+    setCurrentStroke({
+      id: `${Date.now()}-${Math.random()}`,
+      pageIndex: pageIdx,
+      tool: strokeTool,
       color,
-      size,
-      dash: activeTool === "pen" ? penDash : "solid",
+      width,
+      style: strokeTool === "pen" ? penStyle : "solid",
       points: [pt],
-      createdAt: Date.now(),
-    };
-    renderCanvas();
+      revealed: false,
+    });
   };
 
-  const eraseWholeStrokeAt = (x: number, y: number) => {
-    const threshold = eraserSize;
-    setPages((prev) =>
-      prev.map((pg, idx) => {
-        if (idx !== currentPageIndex) return pg;
-        const filtered = pg.strokes.filter((s) => {
-          if (s.tool === "eraser") return true;
-          return !s.points.some((p) => Math.hypot(p.x - x, p.y - y) <= threshold);
-        });
-        if (filtered.length === pg.strokes.length) return pg;
-        return { ...pg, strokes: filtered };
-      })
-    );
-  };
+  const handleCanvasPointerMove = (
+    e: React.PointerEvent<HTMLCanvasElement>,
+    pageIdx: number
+  ) => {
+    if (!isDrawing) return;
+    const pt = getCanvasPoint(e, pageIdx);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current) return;
-    const pt = getCanvasPoint(e);
-
-    if (activeTool === "eraser" && eraserMode === "whole") {
-      eraseWholeStrokeAt(pt.x, pt.y);
+    if (activeTool === "laser") {
+      setLaserTrail((prev) => [...prev.slice(-26), pt]);
       return;
     }
 
-    if (!currentStrokeRef.current) return;
-    currentStrokeRef.current.points.push(pt);
-
-    if (shapeHoldTimerRef.current) {
-      window.clearTimeout(shapeHoldTimerRef.current);
-    }
-    shapeHoldTimerRef.current = window.setTimeout(() => {
-      if (isDrawingRef.current && currentStrokeRef.current) {
-        const shape = detectShape(currentStrokeRef.current.points);
-        if (shape.isShape) {
-          currentStrokeRef.current.isShape = true;
-          currentStrokeRef.current.shapeType = shape.shapeType;
-          renderCanvas();
-          showToast(`Vorm herkend: ${shape.shapeType === "line" ? "Rechte lijn" : shape.shapeType === "circle" ? "Cirkel" : "Rechthoek"}`);
-        }
-      }
-    }, 420);
-
-    renderCanvas();
-  };
-
-  const handlePointerUp = () => {
-    if (shapeHoldTimerRef.current) {
-      window.clearTimeout(shapeHoldTimerRef.current);
-      shapeHoldTimerRef.current = null;
-    }
-
-    if (!isDrawingRef.current) return;
-    isDrawingRef.current = false;
-
-    const finished = currentStrokeRef.current;
-    currentStrokeRef.current = null;
-
-    if (!finished) return;
-
-    if (activeTool === "tape") {
-      const pts = finished.points;
-      if (pts.length >= 2) {
-        const minX = Math.min(...pts.map((p) => p.x));
-        const maxX = Math.max(...pts.map((p) => p.x));
-        const minY = Math.min(...pts.map((p) => p.y));
-        const maxY = Math.max(...pts.map((p) => p.y));
-        const newTape: TapeStrip = {
-          id: `tape-${Date.now()}`,
-          x: minX,
-          y: minY - 4,
-          width: Math.max(60, maxX - minX),
-          height: Math.max(26, maxY - minY + 8),
-          color: selectedTapeColor,
-          isRevealed: false,
-        };
-        setPages((prev) =>
-          prev.map((pg, idx) =>
-            idx === currentPageIndex ? { ...pg, tapes: [...pg.tapes, newTape] } : pg
-          )
-        );
-      }
-      renderCanvas();
+    if (activeTool === "eraser") {
+      const radius = eraserMode === "whole" ? 24 : eraserWidth;
+      setStrokesForActiveNote((prev) =>
+        prev.filter(
+          (s) =>
+            s.pageIndex !== pageIdx ||
+            !s.points.some((p) => Math.hypot(p.x - pt.x, p.y - pt.y) < radius)
+        )
+      );
       return;
     }
 
-    if (finished.tool === "laser") {
-      laserStrokesRef.current.push(finished);
-      renderCanvas();
-      window.setTimeout(() => {
-        laserStrokesRef.current = laserStrokesRef.current.filter((s) => s.id !== finished.id);
-        renderCanvas();
-      }, 1100);
-      return;
+    if (currentStroke && currentStroke.pageIndex === pageIdx) {
+      setCurrentStroke((prev) => (prev ? { ...prev, points: [...prev.points, pt] } : null));
     }
-
-    setPages((prev) =>
-      prev.map((pg, idx) =>
-        idx === currentPageIndex
-          ? {
-              ...pg,
-              strokes: [...pg.strokes, finished],
-              redoStack: [],
-            }
-          : pg
-      )
-    );
   };
 
+  const handleCanvasPointerUp = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    if (activeTool === "laser") {
+      setTimeout(() => setLaserTrail([]), 380);
+      return;
+    }
+    if (currentStroke && currentStroke.points.length > 1) {
+      const finished = currentStroke;
+      setStrokesForActiveNote((prev) => [...prev, finished]);
+      setRedoForActiveNote(() => []);
+    }
+    setCurrentStroke(null);
+  };
+
+  // ─── Undo / Redo ───
   const handleUndo = () => {
-    setPages((prev) =>
-      prev.map((pg, idx) => {
-        if (idx !== currentPageIndex || pg.strokes.length === 0) return pg;
-        const last = pg.strokes[pg.strokes.length - 1];
-        return {
-          ...pg,
-          strokes: pg.strokes.slice(0, -1),
-          redoStack: [last, ...pg.redoStack],
-        };
-      })
-    );
+    if (strokes.length === 0) return;
+    const last = strokes[strokes.length - 1];
+    setStrokesForActiveNote((prev) => prev.slice(0, -1));
+    setRedoForActiveNote((prev) => [...prev, last]);
   };
 
   const handleRedo = () => {
-    setPages((prev) =>
-      prev.map((pg, idx) => {
-        if (idx !== currentPageIndex || pg.redoStack.length === 0) return pg;
-        const [next, ...rest] = pg.redoStack;
-        return {
-          ...pg,
-          strokes: [...pg.strokes, next],
-          redoStack: rest,
-        };
-      })
-    );
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setRedoForActiveNote((prev) => prev.slice(0, -1));
+    setStrokesForActiveNote((prev) => [...prev, next]);
   };
 
-  const handleClearPage = () => {
-    setPages((prev) =>
-      prev.map((pg, idx) =>
-        idx === currentPageIndex ? { ...pg, strokes: [], redoStack: [], images: [], stickies: [], tapes: [] } : pg
-      )
-    );
-    showToast("Pagina gewist (Schoon blanco blad)");
+  // ─── Create New Note ───
+  const createNewNote = (template: PaperTemplate = "grid", paperColor: PaperColor = "#FFFFFF") => {
+    const subjId = NOTABILITY_SUBJECTS.some((s) => s.id === selectedLibraryFilter)
+      ? selectedLibraryFilter
+      : activeNote.subjectId;
+    const newNote: NoteDocument = {
+      id: `note-${Date.now()}`,
+      title: `Notitie ${notes.length + 1}`,
+      subjectId: subjId,
+      updatedAt: "Zojuist",
+      createdAt: "25 okt 2026",
+      favorite: false,
+      template,
+      paperColor,
+      spacing: "medium",
+      pages: [1],
+      bookmarkedPages: [],
+      typedContentByPage: { 0: "" },
+    };
+    setNotes((prev) => [newNote, ...prev]);
+    setActiveNoteId(newNote.id);
+    setActivePageIndex(0);
+    setShowNewNoteMenu(false);
+    setScreenMode("editor");
   };
 
-  // Add Sticky Note (Plaknotitie)
-  const handleAddStickyNote = (color: StickyNoteItem["color"] = "yellow") => {
+  // ─── Add Sticky Note ───
+  const addStickyNote = (
+    color: StickyNoteItem["color"] = "#FFF9C4",
+    pattern: StickyNoteItem["pattern"] = "lined"
+  ) => {
     const newSticky: StickyNoteItem = {
       id: `sticky-${Date.now()}`,
-      x: 280 + (currentPage.stickies.length * 28) % 200,
-      y: 120 + (currentPage.stickies.length * 28) % 180,
-      width: 240,
-      height: 175,
-      text: "",
+      pageIndex: activePageIndex,
+      x: 110 + (stickyNotes.length % 4) * 35,
+      y: 120 + (stickyNotes.length % 4) * 35,
+      width: 230,
+      height: 185,
       color,
+      pattern,
+      text: "",
     };
-    setPages((prev) =>
-      prev.map((pg, idx) =>
-        idx === currentPageIndex ? { ...pg, stickies: [...pg.stickies, newSticky] } : pg
-      )
-    );
-    showToast("Plaknotitie toegevoegd — versleep bij de bovenbalk");
+    setStickyNotesForActiveNote((prev) => [...prev, newSticky]);
+    setActivePopover(null);
   };
 
-  // Toggle reveal state of a tape strip
-  const handleToggleTape = (tapeId: string) => {
-    setPages((prev) =>
-      prev.map((pg, idx) =>
-        idx === currentPageIndex
-          ? {
-              ...pg,
-              tapes: pg.tapes.map((t) => (t.id === tapeId ? { ...t, isRevealed: !t.isRevealed } : t)),
-            }
-          : pg
-      )
-    );
-  };
-
-  // Delete tape strip
-  const handleDeleteTape = (tapeId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPages((prev) =>
-      prev.map((pg, idx) =>
-        idx === currentPageIndex ? { ...pg, tapes: pg.tapes.filter((t) => t.id !== tapeId) } : pg
-      )
-    );
-  };
-
-  // Drag & drop file over state
-  const [isDraggingFileOver, setIsDraggingFileOver] = useState<boolean>(false);
-  const [pressureSensitivity, setPressureSensitivity] = useState<boolean>(true);
-
-  // Upload or Drop Document / Image / Worksheet directly onto Notability Page
-  const handleFilesDrop = useCallback(
-    (fileList: FileList, dropX?: number, dropY?: number) => {
-      setIsDraggingFileOver(false);
-      const files = Array.from(fileList);
-      if (files.length === 0) return;
-
-      if (onUploadFileToZytron) {
-        onUploadFileToZytron(fileList);
-      }
-
-      files.forEach((file) => {
-        if (file.type.startsWith("image/")) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const dataUrl = String(reader.result || "");
-            const imgItem: UploadedDocImage = {
-              id: `doc-img-${Date.now()}-${Math.random()}`,
-              name: file.name,
-              dataUrl,
-              x: dropX ?? 48,
-              y: dropY ?? 90,
-              width: 640,
-              height: 460,
-            };
-            setPages((prev) =>
-              prev.map((pg, idx) =>
-                idx === currentPageIndex ? { ...pg, images: [...pg.images, imgItem] } : pg
-              )
-            );
-            showToast(`Afbeelding "${file.name}" op pagina geplaatst!`);
-          };
-          reader.readAsDataURL(file);
-        } else {
-          const reader = new FileReader();
-          reader.onload = () => {
-            setPages((prev) =>
-              prev.map((pg, idx) =>
-                idx === currentPageIndex
-                  ? {
-                      ...pg,
-                      typedText:
-                        (pg.typedText ? pg.typedText + "\n\n" : "") +
-                        `📄 [Geïmporteerd Document: ${file.name} (${Math.round(file.size / 1024)} KB)]\n` +
-                        `──────────────────────────────────────────────────\n`,
-                    }
-                  : pg
-              )
-            );
-            showToast(`Document "${file.name}" op je pagina geplaatst!`);
-          };
-          reader.readAsArrayBuffer(file);
-        }
-      });
-    },
-    [currentPageIndex, onUploadFileToZytron, showToast]
-  );
-
-  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ─── Upload Document / Image onto Active Page ───
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    handleFilesDrop(files);
+
+    onUploadFileToZytron(files);
+    showToast(`${files.length} bestand(en) op Notability-blad geplaatst (Gekoppeld: ${connectedCount})`);
+
+    Array.from(files).forEach((file, idx) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            setImagesForActiveNote((prev) => [
+              ...prev,
+              {
+                id: `img-${Date.now()}-${idx}`,
+                pageIndex: activePageIndex,
+                x: 65 + idx * 24,
+                y: 75 + idx * 24,
+                width: 520,
+                src: reader.result as string,
+                name: file.name,
+              },
+            ]);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const textContent =
+            typeof reader.result === "string"
+              ? reader.result.slice(0, 5000)
+              : `[Document geïmporteerd: ${file.name}]`;
+          updateActiveNote((n) => ({
+            ...n,
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            typedContentByPage: {
+              ...n.typedContentByPage,
+              [activePageIndex]:
+                (n.typedContentByPage[activePageIndex]
+                  ? n.typedContentByPage[activePageIndex] + "\n\n"
+                  : "") + textContent,
+            },
+          }));
+        };
+        reader.readAsText(file);
+      }
+    });
     e.target.value = "";
+    setActivePopover(null);
+    setScreenMode("editor");
   };
 
-  // Export current note as PNG download
-  const handleExportNote = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    try {
-      const dataUrl = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      const safeTitle = (noteTitle || "Notitie").replace(/[^a-zA-Z0-9_-]/g, "_");
-      a.download = `${safeTitle}_Notability.png`;
-      a.click();
-      showToast("Notitie geëxporteerd als PNG!");
-    } catch {
-      showToast("Exporteren voltooid");
-    }
-  };
+  // ─── Paper Background CSS Generator ───
+  const getPaperBackgroundStyle = (
+    template: PaperTemplate,
+    paperColor: PaperColor,
+    spacing: GridSpacing
+  ): React.CSSProperties => {
+    const isDark = paperColor === "#1C1C1E";
+    const lineColor = isDark ? "rgba(255,255,255,0.11)" : "#E2E8F0";
+    const dotColor = isDark ? "rgba(255,255,255,0.22)" : "#CBD5E1";
+    const step = spacing === "small" ? 20 : spacing === "large" ? 36 : 26;
 
-  // Add new page
-  const handleAddPage = () => {
-    const newPage: NotePageData = {
-      id: `page-${pages.length + 1}-${Date.now()}`,
-      strokes: [],
-      redoStack: [],
-      typedText: "",
-      tapes: [],
-      stickies: [],
-      images: [],
-    };
-    setPages((prev) => [...prev, newPage]);
-    setCurrentPageIndex(pages.length);
-    showToast(`Pagina ${pages.length + 1} toegevoegd`);
-  };
-
-  // Paper Background CSS
-  const getPaperStyles = (): React.CSSProperties => {
-    const bgColors: Record<PaperColorType, string> = {
-      white: "#FFFFFF",
-      cream: "#FBF8EC",
-      dark: "#1C1C1E",
-      blue: "#F2F7FF",
-    };
-    const lineColors: Record<PaperColorType, string> = {
-      white: "#E2E8F0",
-      cream: "#E6DEC3",
-      dark: "#2C2C2E",
-      blue: "#CFE2FF",
-    };
-
-    const bg = bgColors[paperColor];
-    const line = lineColors[paperColor];
-
-    if (paperGrid === "grid") {
+    if (template === "grid") {
       return {
-        backgroundColor: bg,
-        backgroundImage: `linear-gradient(to right, ${line} 1px, transparent 1px), linear-gradient(to bottom, ${line} 1px, transparent 1px)`,
-        backgroundSize: "24px 24px",
+        backgroundColor: paperColor,
+        backgroundImage: `linear-gradient(to right, ${lineColor} 1px, transparent 1px), linear-gradient(to bottom, ${lineColor} 1px, transparent 1px)`,
+        backgroundSize: `${step}px ${step}px`,
       };
     }
-    if (paperGrid === "lined") {
+    if (template === "lined") {
       return {
-        backgroundColor: bg,
-        backgroundImage: `linear-gradient(to bottom, ${line} 1px, transparent 1px)`,
-        backgroundSize: "100% 30px",
+        backgroundColor: paperColor,
+        backgroundImage: `linear-gradient(to bottom, transparent ${step - 1}px, ${lineColor} ${step - 1}px, ${lineColor} ${step}px)`,
+        backgroundSize: `100% ${step}px`,
       };
     }
-    if (paperGrid === "dotted") {
+    if (template === "dotted") {
       return {
-        backgroundColor: bg,
-        backgroundImage: `radial-gradient(${line} 1.4px, transparent 1.4px)`,
-        backgroundSize: "24px 24px",
+        backgroundColor: paperColor,
+        backgroundImage: `radial-gradient(${dotColor} 1.35px, transparent 1.35px)`,
+        backgroundSize: `${step}px ${step}px`,
       };
     }
     return {
-      backgroundColor: bg,
+      backgroundColor: paperColor,
     };
   };
 
-  const isDarkPaper = paperColor === "dark";
+  // ─── Filtered Notes for Library View ───
+  const filteredLibraryNotes = notes.filter((n) => {
+    const matchesSearch =
+      !librarySearchQuery.trim() ||
+      n.title.toLowerCase().includes(librarySearchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (selectedLibraryFilter === "all") return true;
+    if (selectedLibraryFilter === "recent") return true;
+    if (selectedLibraryFilter === "favorites") return n.favorite;
+    return n.subjectId === selectedLibraryFilter;
+  });
 
-  const stickyThemeMap: Record<
-    StickyNoteItem["color"],
-    { bg: string; border: string; headerText: string }
-  > = {
-    yellow: { bg: "#FEF9C3", border: "#FDE047", headerText: "#854D0E" },
-    blue: { bg: "#E0F2FE", border: "#7DD3FC", headerText: "#075985" },
-    green: { bg: "#DCFCE7", border: "#86EFAC", headerText: "#166534" },
-    grid: { bg: "#FFF7ED", border: "#FDBA74", headerText: "#9A3412" },
-  };
+  // ─── Study Flashcards Data (100% Dutch) ───
+  const flashcards = [
+    {
+      q: "Wat is de kettingregel bij differentiëren?",
+      a: "Als f(x) = g(h(x)), dan is f'(x) = g'(h(x)) · h'(x).",
+    },
+    {
+      q: "Wanneer heeft een functie f(x) een extreem (top)?",
+      a: "Als f'(x) = 0 en f'(x) van teken wisselt.",
+    },
+    {
+      q: "Wat geeft de tweede afgeleide f''(x) aan?",
+      a: "De kromming van de grafiek (buigpunten bij f''(x) = 0).",
+    },
+  ];
 
-  return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-[#E5E5EA] text-[#1C1C1E] select-none overflow-hidden font-sans antialiased">
-      {/* Hidden File Input for Uploading Worksheets / Photos / PDFs */}
-      <input
-        ref={docUploadInputRef}
-        type="file"
-        multiple
-        accept="image/*,.pdf,.doc,.docx,.txt"
-        onChange={handleDocumentUpload}
-        className="hidden"
-      />
+  // ==========================================================================
+  // VIEW A: FULL NOTABILITY iPad LIBRARY SCREEN (HOME SCREEN)
+  // ==========================================================================
+  if (screenMode === "library") {
+    const currentSubjectObj = NOTABILITY_SUBJECTS.find((s) => s.id === selectedLibraryFilter);
+    const headerTitle =
+      selectedLibraryFilter === "all"
+        ? "Alle notities"
+        : selectedLibraryFilter === "recent"
+          ? "Recent geopend"
+          : selectedLibraryFilter === "favorites"
+            ? "Favorieten"
+            : currentSubjectObj?.name || "Alle notities";
 
-      {/* =====================================================================
-          1. AUTHENTIC NOTABILITY iPadOS 26.5 FLOATING ISLANDS HEADER
-         ===================================================================== */}
-      <div className="fixed top-3 left-3 right-3 z-40 flex items-center justify-between pointer-events-none select-none gap-2">
-        {/* Island 1: Library Toggle + Subject Badge + Editable Note Title + Search */}
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.10),0_0_0_0.5px_rgba(0,0,0,0.05)] backdrop-blur-2xl">
-          <button
-            type="button"
-            onClick={() => setShowLibrarySidebar((v) => !v)}
-            onDoubleClick={onExitStealth}
-            className={`flex h-8 w-8 items-center justify-center rounded-full transition active:scale-95 ${
-              showLibrarySidebar
-                ? "bg-[#007AFF] text-white shadow-xs"
-                : "text-[#007AFF] hover:bg-[#007AFF]/10"
-            }`}
-            title="Vakken Bibliotheek • Dubbelklik op '<' om terug naar Zytron te gaan"
-          >
-            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
+    return (
+      <div className="fixed inset-0 z-[9999] flex flex-col bg-[#F2F2F7] text-[#1C1C1E] select-none overflow-hidden font-sans">
+        {/* Hidden file input for Import button */}
+        <input
+          ref={fileUploadInputRef}
+          type="file"
+          accept="image/*,.txt,.md,.csv,.json"
+          multiple
+          onChange={handleFileUpload}
+          className="hidden"
+        />
 
-          <div className="hidden sm:flex items-center gap-2 pl-1 pr-2 border-l border-black/[0.08]">
-            <span
-              className="h-2.5 w-2.5 rounded-full shrink-0 shadow-2xs"
-              style={{ backgroundColor: activeSubject.color }}
-              title={`Vak: ${activeSubject.name}`}
-            />
-            <input
-              type="text"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              placeholder={activeSubject.name}
-              className="w-28 md:w-40 bg-transparent text-xs font-bold text-[#1C1C1E] placeholder-[#3C3C43]/75 focus:outline-none focus:w-48 transition-all truncate"
-              title="Klik om notitietitel aan te passen"
-            />
+        {/* iPadOS 26.5 Top Status Bar */}
+        {showStatusBar && (
+          <div className="flex h-7 shrink-0 items-center justify-between bg-[#F2F2F7] px-5 text-[11.5px] font-semibold text-[#1C1C1E]/80 border-b border-black/[0.05]">
+            <div className="flex items-center gap-2.5">
+              <span>{clockText}</span>
+              <span className="text-[#8E8E93] font-medium">{dateText}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1 w-8 rounded-full bg-black/20" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-medium">100%</span>
+              <div className="flex h-3 w-6 items-center rounded-[4px] border border-black/40 p-0.5">
+                <div className="h-full w-full rounded-[2px] bg-[#34C759]" />
+              </div>
+            </div>
           </div>
+        )}
 
-          <button
-            type="button"
-            onClick={() => setShowSearchBar((v) => !v)}
-            className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-              showSearchBar ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Zoek in notitie"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Island 3: Floating Utilities Capsule (Undo, Redo, Zoom, More ···, Smart Notes ✨, Pages ❐) */}
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.10),0_0_0_0.5px_rgba(0,0,0,0.05)] backdrop-blur-2xl">
-          {/* Undo */}
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={currentPage.strokes.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/[0.05] active:scale-90 disabled:opacity-30 transition"
-            title="Ongedaan maken (Ctrl+Z)"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 14L4 9l5-5" />
-              <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
-            </svg>
-          </button>
-
-          {/* Redo */}
-          <button
-            type="button"
-            onClick={handleRedo}
-            disabled={currentPage.redoStack.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/[0.05] active:scale-90 disabled:opacity-30 transition"
-            title="Opnieuw (Ctrl+Shift+Z)"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 14l5-5-5-5" />
-              <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
-            </svg>
-          </button>
-
-          {/* Subtle Zoom Pill (Desktop/Tablet) */}
-          <div className="hidden lg:flex items-center gap-0.5 rounded-full bg-[#F2F2F7] px-1.5 py-0.5 mx-0.5">
-            <button
-              type="button"
-              onClick={() => setZoomLevel((z) => Math.max(0.75, Number((z - 0.1).toFixed(2))))}
-              className="h-6 w-5 flex items-center justify-center text-xs font-bold text-[#3C3C43] hover:text-black"
-              title="Uitzoomen"
-            >
-              −
-            </button>
-            <button
-              type="button"
-              onClick={() => setZoomLevel(1)}
-              className="px-1 font-mono text-[10px] font-bold text-[#3C3C43] hover:text-[#007AFF]"
-              title="Reset zoom naar 100%"
-            >
-              {Math.round(zoomLevel * 100)}%
-            </button>
-            <button
-              type="button"
-              onClick={() => setZoomLevel((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))}
-              className="h-6 w-5 flex items-center justify-center text-xs font-bold text-[#3C3C43] hover:text-black"
-              title="Inzoomen"
-            >
-              +
-            </button>
-          </div>
-
-          {/* More Options (··· in circle) */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setShowTemplateMenu((v) => !v);
-                setOpenPopoverTool(null);
-              }}
-              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-                showTemplateMenu ? "bg-[#007AFF]/15 text-[#007AFF]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-              }`}
-              title="Notitie-opties (Papier, Sjabloon & Export)"
-            >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px] font-bold">
-                ···
-              </div>
-            </button>
-
-            {/* Authentic Notability Paper & Template Popover */}
-            {showTemplateMenu && (
-              <div className="absolute right-0 top-11 z-50 w-76 rounded-3xl border border-black/10 bg-white/98 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
-                <div className="flex items-center justify-between border-b border-[#E5E5EA] pb-2.5 mb-3">
-                  <span className="text-xs font-bold text-[#1C1C1E]">Papier &amp; Notitie-opties</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowTemplateMenu(false)}
-                    className="text-xs font-bold text-[#007AFF]"
-                  >
-                    Gereed
-                  </button>
-                </div>
-
-                {/* Paper Template Type */}
-                <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8E8E93] mb-2">
-                  Papiersjabloon
-                </p>
-                <div className="grid grid-cols-4 gap-1.5 mb-4">
-                  {(
-                    [
-                      { id: "blank", label: "Blanco" },
-                      { id: "lined", label: "Gelijnd" },
-                      { id: "grid", label: "Ruitjes" },
-                      { id: "dotted", label: "Stippels" },
-                    ] as const
-                  ).map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setPaperGrid(t.id)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-[10.5px] font-medium transition ${
-                        paperGrid === t.id
-                          ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF] font-bold shadow-2xs"
-                          : "border-[#E5E5EA] text-[#3C3C43] hover:bg-[#F2F2F7]"
-                      }`}
-                    >
-                      <div className="h-6 w-6 rounded border border-[#C7C7CC] bg-white flex items-center justify-center text-[10px]">
-                        {t.id === "grid" ? "⊞" : t.id === "lined" ? "☰" : t.id === "dotted" ? "∷" : "□"}
-                      </div>
-                      <span>{t.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Paper Color */}
-                <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8E8E93] mb-2">
-                  Papierkleur
-                </p>
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                  {(
-                    [
-                      { id: "white", label: "Wit", bg: "#FFFFFF" },
-                      { id: "cream", label: "Crème", bg: "#FBF8EC" },
-                      { id: "blue", label: "Blauw", bg: "#F2F7FF" },
-                      { id: "dark", label: "Donker", bg: "#1C1C1E" },
-                    ] as const
-                  ).map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setPaperColor(c.id)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 text-[10px] font-medium transition ${
-                        paperColor === c.id ? "border-[#007AFF] ring-1 ring-[#007AFF] bg-[#007AFF]/5 font-bold" : "border-[#E5E5EA]"
-                      }`}
-                    >
-                      <span
-                        className="h-5 w-5 rounded-full border border-black/15 shadow-2xs"
-                        style={{ backgroundColor: c.bg }}
-                      />
-                      <span>{c.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Actions */}
-                <div className="divide-y divide-[#E5E5EA] overflow-hidden rounded-2xl border border-[#E5E5EA] bg-white mt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      docUploadInputRef.current?.click();
-                      setShowTemplateMenu(false);
-                    }}
-                    className="flex w-full items-center justify-between bg-white px-3.5 py-2.5 text-xs font-semibold text-[#007AFF] hover:bg-[#F2F2F7] transition"
-                  >
-                    <span>Document of Foto Invoegen</span>
-                    <span>📂</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleAddStickyNote("yellow");
-                      setShowTemplateMenu(false);
-                    }}
-                    className="flex w-full items-center justify-between bg-white px-3.5 py-2.5 text-xs font-medium text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                  >
-                    <span>Plaknotitie Toevoegen</span>
-                    <span>🟨</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleExportNote();
-                      setShowTemplateMenu(false);
-                    }}
-                    className="flex w-full items-center justify-between bg-white px-3.5 py-2.5 text-xs font-medium text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                  >
-                    <span>Exporteer als Afbeelding (PNG)</span>
-                    <span>📥</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClearPage();
-                      setShowTemplateMenu(false);
-                    }}
-                    className="flex w-full items-center justify-between bg-white px-3.5 py-2.5 text-xs font-semibold text-[#FF3B30] hover:bg-[#F2F2F7] transition"
-                  >
-                    <span>Pagina Wissen (Schoon Blad)</span>
-                    <span>⌫</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onExitStealth}
-                    className="flex w-full items-center justify-between bg-[#F2F2F7]/60 px-3.5 py-2.5 text-xs font-bold text-[#007AFF] hover:bg-[#F2F2F7] transition"
-                  >
-                    <span>Terug naar Zytron Share</span>
-                    <span>➔</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Smart Notes & Klasgenoten Split-Screen Toggle */}
-          <button
-            type="button"
-            onClick={() => {
-              setShowNotabilityAiDrawer((v) => !v);
-              if (!showNotabilityAiDrawer) setSmartNotesTab("notes");
-            }}
-            className={`relative flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-bold transition ${
-              showNotabilityAiDrawer
-                ? "bg-[#007AFF] text-white shadow-xs"
-                : "bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF]/18"
-            }`}
-            title="Smart Notes, Quiz & Klasgenoten (iPadOS Split-Screen)"
-          >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
-            </svg>
-            <span className="hidden sm:inline text-[11px]">Smart Notes</span>
-            {incomingNotes.length > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#34C759] px-1 text-[9px] font-black text-white shadow-2xs">
-                {incomingNotes.length}
-              </span>
-            )}
-          </button>
-
-          {/* Content / Page Manager (❐) */}
-          <button
-            type="button"
-            onClick={() => setShowPagesSidebar((v) => !v)}
-            className={`flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-bold transition ${
-              showPagesSidebar ? "bg-black/[0.08] text-[#1C1C1E]" : "text-[#3C3C43] hover:bg-black/[0.05]"
-            }`}
-            title="Paginabeheer & Miniaturen"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="8" y="2" width="13" height="16" rx="2" />
-              <path d="M16 18v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" />
-            </svg>
-            <span className="hidden md:inline font-mono text-[10.5px]">{currentPageIndex + 1}/{pages.length}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Note Replay Audio Playback Bar (When audio was recorded) */}
-      {hasRecordedAudio && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 rounded-full border border-black/10 bg-white/95 px-4 py-1.5 text-xs text-[#1C1C1E] shadow-lg backdrop-blur-xl">
-          <button
-            type="button"
-            onClick={() => setIsPlayingRecordedAudio((p) => !p)}
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-[#007AFF] text-white text-[10px] shadow-xs"
-          >
-            {isPlayingRecordedAudio ? "❚❚" : "▶"}
-          </button>
-          <span className="font-mono text-[11px] font-semibold text-[#3C3C43]">
-            {formatTimer(recordingSeconds)}
-          </span>
-          <div className="h-1.5 w-36 sm:w-48 rounded-full bg-[#E5E5EA] overflow-hidden">
-            <div className={`h-full bg-[#007AFF] rounded-full transition-all ${isPlayingRecordedAudio ? "w-full duration-1000" : "w-2/3"}`} />
-          </div>
-          <span className="hidden sm:inline text-[10.5px] font-semibold text-[#8E8E93]">
-            Audio Gesynchroniseerd
-          </span>
-          <button
-            type="button"
-            onClick={() => setHasRecordedAudio(false)}
-            className="text-xs text-[#8E8E93] hover:text-black ml-1"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* Discreet "Zoek in notitie" Popover Bar */}
-      {showSearchBar && (
-        <div className="fixed left-4 top-16 z-50 flex w-80 items-center gap-2 rounded-2xl border border-black/10 bg-white/98 px-3.5 py-2.5 shadow-xl backdrop-blur-2xl">
-          <svg className="h-4 w-4 text-[#8E8E93] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            value={searchOrBeamInput}
-            onChange={(e) => {
-              setSearchOrBeamInput(e.target.value);
-              setQuickText(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && searchOrBeamInput.trim()) {
-                onSendNote(searchOrBeamInput.trim());
-                setSearchOrBeamInput("");
-              }
-            }}
-            placeholder="Zoek in notitie (of druk Enter om te delen)…"
-            autoFocus
-            className="flex-1 bg-transparent text-xs text-[#1C1C1E] placeholder-[#8E8E93] focus:outline-none"
-          />
-          {searchOrBeamInput.trim() && (
-            <button
-              type="button"
-              onClick={() => {
-                onSendNote(searchOrBeamInput.trim());
-                setSearchOrBeamInput("");
-              }}
-              className="rounded-lg bg-[#007AFF] px-2.5 py-1 text-[10.5px] font-bold text-white shadow-2xs"
-            >
-              Stuur
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowSearchBar(false)}
-            className="text-xs text-[#8E8E93] hover:text-black"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* =====================================================================
-          2. ICONIC FREELY DRAGGABLE NOTABILITY 15 FLOATING PENCIL TOOLBOX
-         ===================================================================== */}
-      <div
-        style={
-          customToolboxPos
-            ? {
-                left: `${customToolboxPos.x}px`,
-                top: `${customToolboxPos.y}px`,
-                transform: "none",
-              }
-            : {
-                left: showNotabilityAiDrawer ? "calc((100vw - 440px) / 2)" : "50%",
-                top: "12px",
-                transform: "translateX(-50%)",
-              }
-        }
-        className="fixed z-40 transition-all select-none pointer-events-auto max-w-[94vw]"
-      >
-        <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-black/[0.08] bg-white/95 px-2.5 py-1.5 shadow-[0_10px_32px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
-          {/* Draggable Gripper Handle (⋮⋮) */}
-          <div
-            onPointerDown={(e) => {
-              isDraggingToolboxRef.current = true;
-              const currentX = customToolboxPos ? customToolboxPos.x : window.innerWidth / 2 - 220;
-              const currentY = customToolboxPos ? customToolboxPos.y : 12;
-              toolboxDragStartRef.current = {
-                mouseX: e.clientX,
-                mouseY: e.clientY,
-                boxX: currentX,
-                boxY: currentY,
-              };
-              (e.target as HTMLElement).setPointerCapture(e.pointerId);
-            }}
-            onPointerMove={(e) => {
-              if (!isDraggingToolboxRef.current) return;
-              const dx = e.clientX - toolboxDragStartRef.current.mouseX;
-              const dy = e.clientY - toolboxDragStartRef.current.mouseY;
-              setCustomToolboxPos({
-                x: Math.max(10, Math.min(window.innerWidth - 360, toolboxDragStartRef.current.boxX + dx)),
-                y: Math.max(10, Math.min(window.innerHeight - 80, toolboxDragStartRef.current.boxY + dy)),
-              });
-            }}
-            onPointerUp={() => {
-              isDraggingToolboxRef.current = false;
-            }}
-            onDoubleClick={() => {
-              setCustomToolboxPos(null);
-            }}
-            className="flex h-8 w-5 items-center justify-center text-[#C7C7CC] hover:text-[#8E8E93] cursor-grab active:cursor-grabbing"
-            title="Versleep werkbalk overal op het scherm (Dubbelklik om te centreren)"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
-              <circle cx="5" cy="4" r="1.2" />
-              <circle cx="5" cy="8" r="1.2" />
-              <circle cx="5" cy="12" r="1.2" />
-              <circle cx="10" cy="4" r="1.2" />
-              <circle cx="10" cy="8" r="1.2" />
-              <circle cx="10" cy="12" r="1.2" />
-            </svg>
-          </div>
-
-          {!isToolboxMinimized ? (
-            <>
-              {/* 1. FOUNTAIN PEN */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTool === "pen") {
-                      setOpenPopoverTool(openPopoverTool === "pen" ? null : "pen");
-                    } else {
-                      setActiveTool("pen");
-                      setOpenPopoverTool(null);
-                    }
-                  }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    activeTool === "pen"
-                      ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                      : "text-[#3C3C43] hover:bg-black/[0.04]"
-                  }`}
-                  title="Vulpen (Klik nogmaals voor dikte & kleuren)"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 19l7-7 3 3-7 7-3-3z" />
-                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                    <path d="M2 2l7.586 7.586" />
-                    <circle cx="11" cy="11" r="2" fill={penColor} />
+        {/* Main Split View: Left Subjects Sidebar + Right Notes Grid/List */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* LEFT SIDEBAR: Authentic Notability Library Sidebar */}
+          <aside className="flex w-72 shrink-0 flex-col border-r border-[#D1D1D6] bg-[#F2F2F7]">
+            {/* Top Brand & Settings */}
+            <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#007AFF] text-white shadow-xs">
+                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                   </svg>
-                  <span
-                    className="absolute bottom-1 right-1 h-2 w-2 rounded-full ring-1 ring-white"
-                    style={{ backgroundColor: penColor }}
-                  />
-                </button>
-
-                {openPopoverTool === "pen" && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-12 z-50 w-64 rounded-3xl border border-black/10 bg-white/98 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-[11px] font-bold text-[#8E8E93] uppercase">Vulpen Lijnstijl</span>
-                      <div className="flex gap-1">
-                        {(["solid", "dashed", "dotted"] as const).map((d) => (
-                          <button
-                            key={d}
-                            type="button"
-                            onClick={() => setPenDash(d)}
-                            className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
-                              penDash === d ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]" : "border-[#E5E5EA] text-[#64748b]"
-                            }`}
-                          >
-                            {d === "solid" ? "━━" : d === "dashed" ? "╌╌" : "┈┈"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mb-3.5 flex items-center gap-3 rounded-xl bg-[#F2F2F7] px-3 py-2">
-                      <span className="rounded-full" style={{ width: 4, height: 4, backgroundColor: penColor }} />
-                      <input
-                        type="range"
-                        min={1}
-                        max={14}
-                        step={0.5}
-                        value={penSize}
-                        onChange={(e) => setPenSize(Number(e.target.value))}
-                        className="h-1 flex-1 cursor-pointer accent-[#007AFF]"
-                      />
-                      <span className="rounded-full" style={{ width: 12, height: 12, backgroundColor: penColor }} />
-                    </div>
-                    <div className="grid grid-cols-5 gap-2">
-                      {PEN_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setPenColor(c)}
-                          className={`h-7 w-7 rounded-full border transition transform ${
-                            penColor === c ? "scale-110 ring-2 ring-[#007AFF] ring-offset-1 border-white" : "border-black/15 hover:scale-105"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-t border-[#E5E5EA] mt-3 pt-2.5">
-                      <span className="text-[11px] font-medium text-[#1C1C1E]">Drukgevoeligheid</span>
-                      <button
-                        type="button"
-                        onClick={() => setPressureSensitivity((p) => !p)}
-                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                          pressureSensitivity ? "bg-[#34C759]" : "bg-[#E5E5EA]"
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition duration-200 ease-in-out ${
-                            pressureSensitivity ? "translate-x-4" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Inline Color Swatches for Pen/Pencil */}
-              <div className="hidden md:flex items-center gap-1 px-1 border-r border-black/[0.07] mr-0.5">
-                {QUICK_INK_SWATCHES.map((swatch) => {
-                  const isActiveColor =
-                    (activeTool === "pen" && penColor === swatch) ||
-                    (activeTool === "pencil" && pencilColor === swatch);
-                  return (
-                    <button
-                      key={swatch}
-                      type="button"
-                      onClick={() => {
-                        if (activeTool === "pencil") {
-                          setPencilColor(swatch);
-                        } else {
-                          setActiveTool("pen");
-                          setPenColor(swatch);
-                        }
-                      }}
-                      className={`h-4.5 w-4.5 rounded-full border transition-transform ${
-                        isActiveColor
-                          ? "scale-115 ring-2 ring-[#007AFF] ring-offset-1 border-white"
-                          : "border-black/20 opacity-80 hover:opacity-100 hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: swatch }}
-                      title="Snelle inktkleur"
-                    />
-                  );
-                })}
-              </div>
-
-              {/* 2. PENCIL (With Popover!) */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTool === "pencil") {
-                      setOpenPopoverTool(openPopoverTool === "pencil" ? null : "pencil");
-                    } else {
-                      setActiveTool("pencil");
-                      setOpenPopoverTool(null);
-                    }
-                  }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    activeTool === "pencil"
-                      ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                      : "text-[#3C3C43] hover:bg-black/[0.04]"
-                  }`}
-                  title="Potlood (Schetsen)"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                    <path d="M15 5l4 4" />
-                  </svg>
-                  <span
-                    className="absolute bottom-1 right-1 h-2 w-2 rounded-full ring-1 ring-white"
-                    style={{ backgroundColor: pencilColor }}
-                  />
-                </button>
-
-                {openPopoverTool === "pencil" && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-12 z-50 w-60 rounded-3xl border border-black/10 bg-white/98 p-4 shadow-2xl backdrop-blur-2xl">
-                    <span className="block text-[11px] font-bold text-[#8E8E93] uppercase mb-2">Potlood Dikte &amp; Kleur</span>
-                    <div className="mb-3 flex items-center gap-3 rounded-xl bg-[#F2F2F7] px-3 py-2">
-                      <input
-                        type="range"
-                        min={1}
-                        max={12}
-                        step={0.5}
-                        value={pencilSize}
-                        onChange={(e) => setPencilSize(Number(e.target.value))}
-                        className="h-1 flex-1 cursor-pointer accent-[#007AFF]"
-                      />
-                    </div>
-                    <div className="grid grid-cols-5 gap-2">
-                      {PEN_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setPencilColor(c)}
-                          className={`h-6.5 w-6.5 rounded-full border ${
-                            pencilColor === c ? "ring-2 ring-[#007AFF] scale-110" : "border-black/15"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. HIGHLIGHTER */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTool === "highlighter") {
-                      setOpenPopoverTool(openPopoverTool === "highlighter" ? null : "highlighter");
-                    } else {
-                      setActiveTool("highlighter");
-                      setOpenPopoverTool(null);
-                    }
-                  }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    activeTool === "highlighter"
-                      ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                      : "text-[#3C3C43] hover:bg-black/[0.04]"
-                  }`}
-                  title="Markeerstift"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <path d="m9 11-6 6v3h3l6-6" />
-                    <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
-                  </svg>
-                  <span
-                    className="absolute bottom-1 right-1 h-2 w-2 rounded-full ring-1 ring-white"
-                    style={{ backgroundColor: highlighterColor }}
-                  />
-                </button>
-
-                {openPopoverTool === "highlighter" && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-12 z-50 w-56 rounded-3xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-2xl">
-                    <span className="block text-[11px] font-bold text-[#8E8E93] uppercase mb-2">Markeerstift Kleur</span>
-                    <div className="grid grid-cols-6 gap-1.5 mb-3">
-                      {HIGHLIGHTER_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setHighlighterColor(c)}
-                          className={`h-7 w-7 rounded-full border ${
-                            highlighterColor === c ? "ring-2 ring-[#007AFF] scale-110" : "border-black/10"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
-                    </div>
-                    <input
-                      type="range"
-                      min={10}
-                      max={36}
-                      value={highlighterSize}
-                      onChange={(e) => setHighlighterSize(Number(e.target.value))}
-                      className="w-full accent-[#007AFF]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* 4. ERASER */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTool === "eraser") {
-                      setOpenPopoverTool(openPopoverTool === "eraser" ? null : "eraser");
-                    } else {
-                      setActiveTool("eraser");
-                      setOpenPopoverTool(null);
-                    }
-                  }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    activeTool === "eraser"
-                      ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                      : "text-[#3C3C43] hover:bg-black/[0.04]"
-                  }`}
-                  title="Gum (Klik nogmaals voor hele lijn of pagina wissen)"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
-                    <path d="M22 21H7" />
-                    <path d="m5 11 9 9" />
-                  </svg>
-                </button>
-
-                {openPopoverTool === "eraser" && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-12 z-50 w-56 rounded-3xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-2xl">
-                    <span className="block text-[10.5px] font-bold text-[#8E8E93] uppercase mb-2">Gummodus</span>
-                    <div className="grid grid-cols-2 gap-1.5 mb-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setEraserMode("whole")}
-                        className={`rounded-xl py-1.5 text-[11px] font-bold border ${
-                          eraserMode === "whole" ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]" : "border-[#E5E5EA] text-[#3C3C43]"
-                        }`}
-                      >
-                        Hele lijn
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEraserMode("partial")}
-                        className={`rounded-xl py-1.5 text-[11px] font-bold border ${
-                          eraserMode === "partial" ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]" : "border-[#E5E5EA] text-[#3C3C43]"
-                        }`}
-                      >
-                        Pixelgum
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleClearPage();
-                        setOpenPopoverTool(null);
-                      }}
-                      className="w-full rounded-xl bg-[#FF3B30]/10 py-2 text-[11px] font-bold text-[#FF3B30] hover:bg-[#FF3B30]/20 transition"
-                    >
-                      🗑️ Wis hele pagina
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* 5. TEXT TOOL (Tt) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("text");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                  activeTool === "text"
-                    ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Tekst typen (Tt)"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 7V4h10v3" />
-                  <path d="M9 4v16" />
-                  <path d="M15 11v-2h6v2" />
-                  <path d="M18 9v11" />
-                </svg>
-              </button>
-
-              {/* 6. LASSO TOOL */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("lasso");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                  activeTool === "lasso"
-                    ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Lasso selectie"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeDasharray="2 2">
-                  <rect x="4" y="4" width="16" height="16" rx="3" />
-                </svg>
-              </button>
-
-              {/* 7. LASER POINTER */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("laser");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                  activeTool === "laser"
-                    ? "bg-rose-500/15 text-rose-600 shadow-2xs"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Laserpointer (Tijdelijke gloeiende aanwijzer)"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3" fill="currentColor" />
-                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" />
-                </svg>
-              </button>
-
-              {/* 8. NOTABILITY STUDY TAPE TOOL */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTool === "tape") {
-                      setOpenPopoverTool(openPopoverTool === "tape" ? null : "tape");
-                    } else {
-                      setActiveTool("tape");
-                      setOpenPopoverTool(null);
-                    }
-                  }}
-                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    activeTool === "tape"
-                      ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                      : "text-[#3C3C43] hover:bg-black/[0.04]"
-                  }`}
-                  title="Studie Tape (Antwoorden afdekken om actief te leren)"
-                >
-                  <div
-                    className="h-3 w-5 rounded-xs border border-dashed border-amber-700 shadow-2xs"
-                    style={{ backgroundColor: selectedTapeColor }}
-                  />
-                </button>
-
-                {openPopoverTool === "tape" && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-12 z-50 w-52 rounded-3xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-2xl">
-                    <span className="block text-[11px] font-bold text-[#8E8E93] uppercase mb-2">Studie Tape Kleur</span>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {TAPE_COLORS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setSelectedTapeColor(c)}
-                          className={`h-7 w-7 rounded-lg border ${
-                            selectedTapeColor === c ? "ring-2 ring-[#007AFF] scale-110" : "border-black/10"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 9. RULER */}
-              <button
-                type="button"
-                onClick={() => setShowRuler((v) => !v)}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                  showRuler
-                    ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Liniaal tonen/verbergen"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
-                  <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
-                  <path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2" />
-                </svg>
-              </button>
-
-              {/* Separator */}
-              <div className="mx-0.5 h-5 w-px bg-black/[0.08]" />
-
-              {/* 10. INSERT MENU (+ Media / Sticky / Page) */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setOpenPopoverTool(openPopoverTool === "insert" ? null : "insert")}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                    openPopoverTool === "insert"
-                      ? "bg-[#007AFF] text-white shadow-xs"
-                      : "text-[#007AFF] hover:bg-[#007AFF]/10"
-                  }`}
-                  title="Invoegen (Document, Foto, Plaknotitie)"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </button>
-
-                {openPopoverTool === "insert" && (
-                  <div className="absolute right-0 top-12 z-50 w-60 rounded-3xl border border-black/10 bg-white/98 p-2 shadow-2xl backdrop-blur-2xl text-xs">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        docUploadInputRef.current?.click();
-                        setOpenPopoverTool(null);
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                    >
-                      <span className="text-base">🖼️</span>
-                      <div className="text-left">
-                        <p className="font-bold">Foto of Werkblad</p>
-                        <p className="text-[10px] text-[#8E8E93]">Plaats afbeelding of PDF op blad</p>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleAddStickyNote("yellow");
-                        setOpenPopoverTool(null);
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                    >
-                      <span className="text-base">🟨</span>
-                      <div className="text-left">
-                        <p className="font-bold">Plaknotitie (Sticky)</p>
-                        <p className="text-[10px] text-[#8E8E93]">Versleepbaar geel kladblaadje</p>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleAddPage();
-                        setOpenPopoverTool(null);
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                    >
-                      <span className="text-base">📄</span>
-                      <div className="text-left">
-                        <p className="font-bold">Nieuwe Pagina</p>
-                        <p className="text-[10px] text-[#8E8E93]">Voeg extra blanco blad toe</p>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* 11. AUDIO RECORDER */}
-              {isRecordingAudio ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRecordingAudio(false);
-                    setHasRecordedAudio(true);
-                    showToast("Audio-opname opgeslagen bij notitie");
-                  }}
-                  className="flex items-center gap-1.5 rounded-full bg-rose-500 px-3 py-1 text-white shadow-sm hover:bg-rose-600 transition animate-pulse"
-                  title="Stop audio-opname"
-                >
-                  <span className="h-2 w-2 rounded-xs bg-white" />
-                  <span className="font-mono text-[11px] font-bold">
-                    {formatTimer(recordingSeconds)}
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRecordingAudio(true);
-                    setRecordingSeconds(0);
-                  }}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/[0.05] transition"
-                  title="Audio-opname starten (Note Replay)"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                    <line x1="12" y1="19" x2="12" y2="23" />
-                    <line x1="8" y1="23" x2="16" y2="23" />
-                  </svg>
-                </button>
-              )}
-
-              {/* 12. HAND TOOL (Pan / Scroll) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTool("hand");
-                  setOpenPopoverTool(null);
-                }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                  activeTool === "hand"
-                    ? "bg-[#007AFF]/14 text-[#007AFF] shadow-2xs"
-                    : "text-[#3C3C43] hover:bg-black/[0.04]"
-                }`}
-                title="Handje (Verschuiven / Scrollen)"
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
-                  <path d="M18 11V6a2 2 0 0 0-4 0v5" />
-                  <path d="M14 10V4a2 2 0 0 0-4 0v7" />
-                  <path d="M10 10.5V6a2 2 0 0 0-4 0v8" />
-                  <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
-                </svg>
-              </button>
-
-              {/* Minimize Toolbox Chevron */}
-              <button
-                type="button"
-                onClick={() => setIsToolboxMinimized(true)}
-                className="flex h-8 w-5 items-center justify-center text-[#8E8E93] hover:text-[#1C1C1E] transition"
-                title="Werkbalk inklappen"
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsToolboxMinimized(false)}
-              className="flex h-8 items-center gap-1.5 px-3 text-xs font-bold text-[#007AFF]"
-            >
-              <span>✎</span>
-              <span>Werkbalk</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* =====================================================================
-          3. MAIN WORKSPACE: LEFT SUBJECTS + PAPER CANVAS + RIGHT PANELS
-         ===================================================================== */}
-      <div className="relative flex flex-1 overflow-hidden">
-        {/* LEFT SIDEBAR: Authentic Notability Subjects & Dividers Library */}
-        {showLibrarySidebar && (
-          <aside className="z-30 flex w-72 shrink-0 flex-col border-r border-[#D1D1D6] bg-[#F2F2F7]/98 pt-16 backdrop-blur-2xl shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] px-4 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#007AFF] text-white text-xs font-black shadow-xs">
-                  ✎
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-[#1C1C1E] block leading-tight">Notability</span>
-                  <span className="text-[10px] text-[#8E8E93] font-medium">iCloud Gesynchroniseerd</span>
+                  <span className="text-[16px] font-extrabold tracking-tight text-[#1C1C1E]">
+                    Notability
+                  </span>
+                  <span className="ml-1.5 rounded-md bg-[#007AFF]/12 px-1.5 py-0.5 text-[9.5px] font-bold text-[#007AFF]">
+                    Plus
+                  </span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  handleClearPage();
-                  setNoteTitle("");
-                  setShowLibrarySidebar(false);
-                }}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white text-sm font-bold shadow-xs hover:bg-[#0062CC]"
-                title="Nieuwe lege notitie"
+                onClick={() => setScreenMode("editor")}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8E8E93] hover:bg-black/5 hover:text-[#1C1C1E]"
+                title="Sluit bibliotheek"
               >
-                +
+                <Settings className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-4">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs font-semibold text-[#1C1C1E] shadow-2xs">
-                  <span>📄 Alle notities</span>
-                  <span className="text-[#8E8E93] font-mono text-[11px]">18</span>
-                </div>
-                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-[#3C3C43] hover:bg-black/[0.04]">
-                  <span>⭐ Favorieten</span>
-                  <span className="text-[#8E8E93] font-mono text-[11px]">4</span>
-                </div>
+            {/* Smart Filters (All Notes, Recents, Favorites, Shared, Gallery) */}
+            <div className="px-3 py-1.5 space-y-0.5">
+              {[
+                { id: "all", label: "Alle notities", icon: FileText, count: notes.length, color: "#007AFF" },
+                { id: "recent", label: "Recent", icon: Clock, count: Math.min(notes.length, 10), color: "#FF9500" },
+                {
+                  id: "favorites",
+                  label: "Favorieten",
+                  icon: Star,
+                  count: notes.filter((n) => n.favorite).length,
+                  color: "#FFCC00",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                const active = selectedLibraryFilter === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedLibraryFilter(item.id)}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-[13px] font-semibold transition ${
+                      active
+                        ? "bg-[#007AFF] text-white shadow-xs"
+                        : "text-[#1C1C1E] hover:bg-black/[0.05]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon
+                        className="h-4 w-4"
+                        style={{ color: active ? "#FFFFFF" : item.color }}
+                      />
+                      <span>{item.label}</span>
+                    </div>
+                    <span
+                      className={`text-[11px] font-bold ${
+                        active ? "text-white/85" : "text-[#8E8E93]"
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Subjects & Dividers Header */}
+            <div className="mt-3 flex items-center justify-between px-4 pb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                Vakken &amp; Mappen
+              </span>
+              <button
+                type="button"
+                onClick={() => createNewNote("grid", "#FFFFFF")}
+                className="flex h-5 w-5 items-center justify-center rounded-md text-[#007AFF] hover:bg-[#007AFF]/10"
+                title="Nieuw vak of notitie"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Scrollable Dividers & Subjects List */}
+            <div className="flex-1 overflow-y-auto px-3 py-1 space-y-3">
+              {["Exacte Vakken", "Talen & Maatschappij"].map((divider) => {
+                const isCollapsed = !!collapsedDividers[divider];
+                const divSubjects = NOTABILITY_SUBJECTS.filter((s) => s.divider === divider);
+                return (
+                  <div key={divider}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCollapsedDividers((prev) => ({
+                          ...prev,
+                          [divider]: !prev[divider],
+                        }))
+                      }
+                      className="flex w-full items-center justify-between px-2 py-1 text-[11.5px] font-bold text-[#6C6C70] hover:text-[#1C1C1E]"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 transition-transform ${
+                            isCollapsed ? "-rotate-90" : ""
+                          }`}
+                        />
+                        <span>{divider}</span>
+                      </div>
+                      <span className="text-[10px] text-[#8E8E93]">{divSubjects.length}</span>
+                    </button>
+
+                    {!isCollapsed && (
+                      <div className="mt-0.5 space-y-0.5 pl-1">
+                        {divSubjects.map((sub) => {
+                          const active = selectedLibraryFilter === sub.id;
+                          const count = notes.filter((n) => n.subjectId === sub.id).length;
+                          return (
+                            <button
+                              key={sub.id}
+                              type="button"
+                              onClick={() => setSelectedLibraryFilter(sub.id)}
+                              className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-[13px] font-semibold transition ${
+                                active
+                                  ? "bg-white text-[#1C1C1E] shadow-xs ring-1 ring-black/[0.06]"
+                                  : "text-[#3C3C43] hover:bg-black/[0.04]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 truncate">
+                                <span
+                                  className="h-3 w-3 shrink-0 rounded-full"
+                                  style={{ backgroundColor: sub.color }}
+                                />
+                                <span className="truncate">{sub.name}</span>
+                              </div>
+                              <span className="text-[11px] font-semibold text-[#8E8E93]">
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Stealth Controls inside Library Sidebar */}
+            <div className="border-t border-[#D1D1D6] bg-[#E5E5EA]/70 p-3 space-y-1.5">
+              <div className="flex items-center justify-between px-1 text-[10.5px] font-semibold text-[#6C6C70]">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-[#34C759]" />
+                  iCloud &amp; P2P Actief ({incomingNotes.length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setScreenMode("editor")}
+                  className="font-bold text-[#007AFF] hover:underline"
+                >
+                  Open Editor →
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <a
+                  href="https://zytron-phi.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1 rounded-lg bg-[#007AFF] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-2xs hover:bg-[#0062CC]"
+                >
+                  <Globe className="h-3 w-3" />
+                  <span>Hoofd App</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={onToggleNotability}
+                  className="flex items-center justify-center gap-1 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#1C1C1E] shadow-2xs border border-black/10 hover:bg-black/5"
+                >
+                  <span>Zytron Share</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* RIGHT MAIN AREA: Subject Header + Search + Grid/List of Note Cards */}
+          <main className="flex flex-1 flex-col bg-white overflow-hidden">
+            {/* Top Library Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E5EA] px-6 py-4">
+              <div className="flex items-center gap-3">
+                {currentSubjectObj && (
+                  <span
+                    className="h-4 w-4 rounded-full shadow-2xs"
+                    style={{ backgroundColor: currentSubjectObj.color }}
+                  />
+                )}
+                <h1 className="text-xl font-extrabold tracking-tight text-[#1C1C1E]">
+                  {headerTitle}
+                </h1>
+                <span className="rounded-full bg-[#F2F2F7] px-2.5 py-0.5 text-xs font-bold text-[#8E8E93]">
+                  {filteredLibraryNotes.length}
+                </span>
               </div>
 
-              <div>
-                <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] mb-1.5">
-                  Mijn Vakken
-                </p>
-                <div className="space-y-1">
-                  {NOTABILITY_SUBJECTS.map((subj) => {
-                    const isSelected = subj.id === activeSubjectId;
+              {/* Search + View Toggle + Import + Blue "+ Nieuw" Button */}
+              <div className="flex items-center gap-2.5">
+                <div className="relative flex items-center">
+                  <Search className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-[#8E8E93]" />
+                  <input
+                    type="text"
+                    value={librarySearchQuery}
+                    onChange={(e) => setLibrarySearchQuery(e.target.value)}
+                    placeholder="Zoek in notities..."
+                    className="w-48 rounded-xl bg-[#F2F2F7] pl-8 pr-3 py-1.5 text-xs font-medium text-[#1C1C1E] placeholder-[#8E8E93] outline-none focus:ring-2 focus:ring-[#007AFF]/30 sm:w-60"
+                  />
+                </div>
+
+                {/* Grid / List View Switcher */}
+                <div className="flex items-center rounded-xl bg-[#F2F2F7] p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setLibraryViewMode("grid")}
+                    className={`rounded-lg p-1.5 transition ${
+                      libraryViewMode === "grid"
+                        ? "bg-white text-[#1C1C1E] shadow-2xs"
+                        : "text-[#8E8E93]"
+                    }`}
+                    title="Rasterweergave"
+                  >
+                    <Grid className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLibraryViewMode("list")}
+                    className={`rounded-lg p-1.5 transition ${
+                      libraryViewMode === "list"
+                        ? "bg-white text-[#1C1C1E] shadow-2xs"
+                        : "text-[#8E8E93]"
+                    }`}
+                    title="Lijstweergave"
+                  >
+                    <ListIcon className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Import Document / Photo Button */}
+                <button
+                  type="button"
+                  onClick={() => fileUploadInputRef.current?.click()}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F2F2F7] text-[#1C1C1E] hover:bg-[#E5E5EA]"
+                  title="Importeer PDF of Foto"
+                >
+                  <Download className="h-4 w-4" />
+                </button>
+
+                {/* Iconic Blue Notability "+ Nieuw" Split Pill Button */}
+                <div className="relative flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => createNewNote("grid", "#FFFFFF")}
+                    className="flex items-center gap-1.5 rounded-l-full bg-[#007AFF] pl-3.5 pr-2.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-[#0062CC]"
+                  >
+                    <Plus className="h-4 w-4 stroke-[2.5]" />
+                    <span>Nieuw</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewNoteMenu((v) => !v)}
+                    className="flex items-center justify-center rounded-r-full border-l border-white/25 bg-[#007AFF] px-2 py-1.5 text-white hover:bg-[#0062CC]"
+                    title="Kies sjabloon voor nieuwe notitie"
+                  >
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+
+                  {showNewNoteMenu && (
+                    <div className="absolute right-0 top-10 z-50 w-56 rounded-2xl border border-black/10 bg-white p-2 shadow-2xl">
+                      <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                        Nieuw met sjabloon
+                      </p>
+                      {[
+                        { id: "grid" as PaperTemplate, label: "Ruitjespapier (Wiskunde)" },
+                        { id: "lined" as PaperTemplate, label: "Gelijnd papier" },
+                        { id: "dotted" as PaperTemplate, label: "Stippelraster (Bullet)" },
+                        { id: "blank" as PaperTemplate, label: "Blanco vel" },
+                      ].map((tpl) => (
+                        <button
+                          key={tpl.id}
+                          type="button"
+                          onClick={() => createNewNote(tpl.id, "#FFFFFF")}
+                          className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                        >
+                          <span>{tpl.label}</span>
+                          <Plus className="h-3.5 w-3.5 text-[#007AFF]" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Notes Grid or List */}
+            <div className="flex-1 overflow-y-auto p-6 bg-[#F9F9FB]">
+              {libraryViewMode === "grid" ? (
+                <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+                  {/* Quick "+ Nieuwe Notitie" Card */}
+                  <button
+                    type="button"
+                    onClick={() => createNewNote("grid", "#FFFFFF")}
+                    className="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#C7C7CC] bg-white/60 p-6 text-center transition hover:border-[#007AFF] hover:bg-[#007AFF]/[0.03]"
+                    style={{ minHeight: 220 }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#007AFF]/10 text-[#007AFF] transition group-hover:scale-110 group-hover:bg-[#007AFF] group-hover:text-white">
+                      <Plus className="h-6 w-6" />
+                    </div>
+                    <span className="mt-3 text-xs font-bold text-[#007AFF]">
+                      + Nieuwe lege notitie
+                    </span>
+                    <span className="mt-0.5 text-[10.5px] text-[#8E8E93]">
+                      Direct openen in editor
+                    </span>
+                  </button>
+
+                  {filteredLibraryNotes.map((note) => {
+                    const subj =
+                      NOTABILITY_SUBJECTS.find((s) => s.id === note.subjectId) ||
+                      NOTABILITY_SUBJECTS[0];
+                    const isCurrent = note.id === activeNote.id;
+                    const noteStrokeCount = (strokesByNote[note.id] || []).length;
                     return (
-                      <button
-                        key={subj.id}
-                        type="button"
-                        onClick={() => handleSelectSubject(subj)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition ${
-                          isSelected
-                            ? "bg-[#007AFF] text-white shadow-xs"
-                            : "text-[#1C1C1E] hover:bg-black/[0.05]"
+                      <div
+                        key={note.id}
+                        onClick={() => {
+                          setActiveNoteId(note.id);
+                          setActivePageIndex(0);
+                          setScreenMode("editor");
+                        }}
+                        className={`group cursor-pointer flex flex-col overflow-hidden rounded-2xl border bg-white shadow-xs transition hover:-translate-y-0.5 hover:shadow-md ${
+                          isCurrent
+                            ? "border-[#007AFF] ring-2 ring-[#007AFF]/20"
+                            : "border-black/[0.08]"
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 truncate">
+                        {/* Miniature Paper Thumbnail Preview */}
+                        <div
+                          className="relative h-36 w-full border-b border-black/[0.06] p-3"
+                          style={getPaperBackgroundStyle(
+                            note.template,
+                            note.paperColor,
+                            "small"
+                          )}
+                        >
                           <span
-                            className="h-3 w-3 shrink-0 rounded-full border border-white/40 shadow-2xs"
+                            className="inline-block rounded-md px-2 py-0.5 text-[9.5px] font-bold text-white shadow-2xs"
+                            style={{ backgroundColor: subj.color }}
+                          >
+                            {subj.name}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotes((prev) =>
+                                prev.map((n) =>
+                                  n.id === note.id ? { ...n, favorite: !n.favorite } : n
+                                )
+                              );
+                            }}
+                            className="absolute right-2.5 top-2.5 rounded-full bg-white/85 p-1.5 shadow-2xs hover:bg-white"
+                          >
+                            <Star
+                              className={`h-3.5 w-3.5 ${
+                                note.favorite
+                                  ? "fill-[#FFCC00] text-[#FFCC00]"
+                                  : "text-[#8E8E93]"
+                              }`}
+                            />
+                          </button>
+
+                          {note.typedContentByPage[0] ? (
+                            <p className="mt-2 line-clamp-3 text-[10px] text-[#3C3C43]">
+                              {note.typedContentByPage[0]}
+                            </p>
+                          ) : (
+                            <p className="mt-6 text-center text-[10px] font-medium text-[#8E8E93]/70">
+                              {noteStrokeCount > 0
+                                ? `${noteStrokeCount} handgeschreven lijnen`
+                                : "Leeg blad"}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Card Footer */}
+                        <div className="flex flex-1 flex-col justify-between p-3.5">
+                          <p className="truncate text-[13px] font-bold text-[#1C1C1E]">
+                            {note.title}
+                          </p>
+                          <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#8E8E93]">
+                            <span>{note.updatedAt}</span>
+                            <span>{note.pages.length} pag.</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="divide-y divide-[#E5E5EA] rounded-2xl border border-[#E5E5EA] bg-white">
+                  {filteredLibraryNotes.map((note) => {
+                    const subj =
+                      NOTABILITY_SUBJECTS.find((s) => s.id === note.subjectId) ||
+                      NOTABILITY_SUBJECTS[0];
+                    return (
+                      <div
+                        key={note.id}
+                        onClick={() => {
+                          setActiveNoteId(note.id);
+                          setActivePageIndex(0);
+                          setScreenMode("editor");
+                        }}
+                        className="flex cursor-pointer items-center justify-between px-4 py-3.5 hover:bg-[#F2F2F7]/60"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="h-3 w-3 rounded-full"
                             style={{ backgroundColor: subj.color }}
                           />
-                          <span className="truncate">{subj.name}</span>
+                          <div>
+                            <p className="text-sm font-bold text-[#1C1C1E]">{note.title}</p>
+                            <p className="text-xs text-[#8E8E93]">
+                              {subj.name} • {note.pages.length} pagina&apos;s
+                            </p>
+                          </div>
                         </div>
-                        <span className={`font-mono text-[10px] ${isSelected ? "text-white/80" : "text-[#8E8E93]"}`}>
-                          3
+                        <span className="text-xs font-medium text-[#8E8E93]">
+                          {note.updatedAt}
                         </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================================================
+  // VIEW B: AUTHENTIC NOTABILITY 15/16 NOTE EDITOR VIEW
+  // ==========================================================================
+  const isDarkPaper = activeNote.paperColor === "#1C1C1E";
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#E5E5EA] text-[#1C1C1E] select-none overflow-hidden font-sans">
+      {/* Hidden File Input for Uploading Worksheets / Images */}
+      <input
+        ref={fileUploadInputRef}
+        type="file"
+        accept="image/*,.txt,.md,.csv,.json"
+        multiple
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
+      {/* 1. iPadOS 26.5 Top System Status Bar */}
+      {showStatusBar && (
+        <div className="flex h-6 shrink-0 items-center justify-between bg-[#F2F2F7]/95 px-5 text-[11px] font-semibold text-[#1C1C1E]/80 border-b border-black/[0.05]">
+          <div className="flex items-center gap-2.5">
+            <span>{clockText}</span>
+            <span className="text-[#8E8E93] font-medium">{dateText}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="h-1 w-7 rounded-full bg-black/20" />
+          </div>
+          <div className="flex items-center gap-2">
+            {incomingNotes.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRightDrawer("content");
+                  setContentTab("transcript");
+                }}
+                className="rounded-full bg-[#007AFF]/15 px-2 py-0.5 text-[10px] font-bold text-[#007AFF]"
+              >
+                {incomingNotes.length} nieuw
+              </button>
+            )}
+            <span className="text-[11px]">100%</span>
+            <div className="flex h-3 w-5.5 items-center rounded-[4px] border border-black/40 p-0.5">
+              <div className="h-full w-full rounded-[2px] bg-[#34C759]" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. AUTHENTIC NOTABILITY TOP NAVIGATION HEADER BAR */}
+      <header className="relative z-40 flex h-12 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-[#F9F9FB]/95 px-3 backdrop-blur-xl sm:px-4">
+        {/* LEFT CLUSTER: < Back to Library, Note Switcher, Undo, Redo */}
+        <div className="flex items-center gap-1">
+          {/* < Back to Full Notability Library */}
+          <button
+            type="button"
+            onClick={() => setScreenMode("library")}
+            className="flex items-center gap-0.5 rounded-xl px-2 py-1.5 text-[13px] font-semibold text-[#007AFF] hover:bg-[#007AFF]/10 transition"
+            title="Terug naar Notability Bibliotheek (Alle Vakken & Notities)"
+          >
+            <ChevronLeft className="h-5 w-5 stroke-[2.4]" />
+            <span className="hidden sm:inline">Bibliotheek</span>
+          </button>
+
+          {/* Note Switcher Icon (Two overlapping rectangles) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() =>
+                setActivePopover(activePopover === "noteSwitcher" ? null : "noteSwitcher")
+              }
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                activePopover === "noteSwitcher"
+                  ? "bg-[#007AFF]/15 text-[#007AFF]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+              }`}
+              title="Notitie-wisselaar (Recente notities)"
+            >
+              <Layers className="h-4 w-4" />
+            </button>
+
+            {/* Note Switcher Popover */}
+            {activePopover === "noteSwitcher" && (
+              <div className="absolute left-0 top-10 z-50 w-72 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl backdrop-blur-xl">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Recente Notities
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => createNewNote("grid", "#FFFFFF")}
+                    className="text-xs font-bold text-[#007AFF] hover:underline"
+                  >
+                    + Nieuwe notitie
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-60 overflow-y-auto">
+                  {notes.map((n) => {
+                    const subj =
+                      NOTABILITY_SUBJECTS.find((s) => s.id === n.subjectId) ||
+                      NOTABILITY_SUBJECTS[0];
+                    const isCur = n.id === activeNote.id;
+                    return (
+                      <button
+                        key={n.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveNoteId(n.id);
+                          setActivePageIndex(0);
+                          setActivePopover(null);
+                        }}
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs font-semibold transition ${
+                          isCur
+                            ? "bg-[#007AFF]/12 text-[#007AFF]"
+                            : "text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: subj.color }}
+                          />
+                          <span className="truncate">{n.title}</span>
+                        </div>
+                        <span className="text-[10px] text-[#8E8E93]">{n.updatedAt}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="border-t border-[#E5E5EA] p-3 space-y-2">
-              <a
-                href="https://zytron-phi.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E5E5EA] bg-white py-2 text-xs font-bold text-[#1C1C1E] shadow-2xs hover:bg-[#F9F9FB]"
-              >
-                <span>🌐 Open Zytron Hoofd App</span>
-              </a>
+          <div className="mx-1 h-4 w-px bg-black/10" />
+
+          {/* Undo & Redo */}
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={strokes.length === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] disabled:opacity-30 transition"
+            title="Ongedaan maken (Undo)"
+          >
+            <Undo2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleRedo}
+            disabled={redoStack.length === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#3C3C43] hover:bg-black/[0.06] disabled:opacity-30 transition"
+            title="Opnieuw uitvoeren (Redo)"
+          >
+            <Redo2 className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* CENTER: Editable Note Title + Subject Badge */}
+        <div className="flex min-w-0 items-center gap-2 px-2">
+          <span
+            className="hidden h-2.5 w-2.5 shrink-0 rounded-full sm:inline-block"
+            style={{ backgroundColor: activeSubject.color }}
+          />
+          <input
+            type="text"
+            value={activeNote.title}
+            onChange={(e) =>
+              updateActiveNote((n) => ({ ...n, title: e.target.value }))
+            }
+            className="w-36 sm:w-56 md:w-72 truncate rounded-lg bg-transparent px-1.5 py-0.5 text-center text-[13.5px] font-bold text-[#1C1C1E] outline-none focus:bg-white focus:ring-1 focus:ring-[#007AFF]"
+            aria-label="Notitietitel"
+          />
+        </div>
+
+        {/* RIGHT CLUSTER: Audio Mic, Share/Export, Learn AI, Options (•••), Content Manager (Pages) */}
+        <div className="flex items-center gap-1">
+          {/* 1. Audio Recording / Note Replay Button */}
+          <div className="flex items-center rounded-xl bg-black/[0.04] px-1 py-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setIsRecordingAudio((v) => !v);
+                setShowAudioBar(true);
+              }}
+              className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition ${
+                isRecordingAudio
+                  ? "bg-[#FF3B30] text-white shadow-xs"
+                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+              }`}
+              title="Audio opnemen (Notability Note Replay)"
+            >
+              {isRecordingAudio ? (
+                <Square className="h-3 w-3 fill-white" />
+              ) : (
+                <Mic className="h-4 w-4 text-[#007AFF]" />
+              )}
+              {(isRecordingAudio || audioSeconds > 0) && (
+                <span className="font-mono text-[11px]">{formatTimer(audioSeconds)}</span>
+              )}
+            </button>
+            {audioSeconds > 0 && (
               <button
                 type="button"
-                onClick={onExitStealth}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#007AFF] py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[#0062CC]"
+                onClick={() => setShowAudioBar((v) => !v)}
+                className="px-1 text-[#8E8E93] hover:text-[#1C1C1E]"
+                title="Toon/verberg audiobalk"
               >
-                <span>Terug naar Zytron Share</span>
+                <ChevronDown className="h-3.5 w-3.5" />
               </button>
-            </div>
-          </aside>
-        )}
-
-        {/* CENTER SCROLLABLE PAPER CANVAS AREA */}
-        <main
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "copy";
-            setIsDraggingFileOver(true);
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault();
-            if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-            setIsDraggingFileOver(false);
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDraggingFileOver(false);
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-              handleFilesDrop(e.dataTransfer.files, 60, 100);
-            }
-          }}
-          className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#E5E5EA] px-2 pt-20 pb-24 sm:px-6 sm:pt-22 md:px-10 flex justify-center"
-        >
-          {isDraggingFileOver && (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#007AFF]/15 border-4 border-dashed border-[#007AFF] backdrop-blur-xs pointer-events-none transition-all">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-2xl text-[#007AFF] mb-4 animate-bounce">
-                <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              </div>
-              <p className="text-xl font-bold text-[#1C1C1E]">Laat bestand los om op je blad te plaatsen</p>
-              <p className="text-sm font-medium text-[#3C3C43] mt-1">PDF&apos;s, werkbladen en foto&apos;s worden direct op je notitieblad gezet</p>
-            </div>
-          )}
-
-          {/* PAPER SHEET */}
-          <div
-            ref={paperContainerRef}
-            style={{
-              ...getPaperStyles(),
-              transform: `scale(${zoomLevel})`,
-              transformOrigin: "top center",
-            }}
-            onPointerMove={(e) => {
-              if (draggingStickyRef.current && paperContainerRef.current) {
-                const rect = paperContainerRef.current.getBoundingClientRect();
-                const newX = Math.max(8, Math.min(rect.width - 180, (e.clientX - rect.left) / zoomLevel - draggingStickyRef.current.offsetX));
-                const newY = Math.max(8, Math.min(rect.height - 120, (e.clientY - rect.top) / zoomLevel - draggingStickyRef.current.offsetY));
-                const targetId = draggingStickyRef.current.id;
-                setPages((prev) =>
-                  prev.map((pg, idx) =>
-                    idx === currentPageIndex
-                      ? {
-                          ...pg,
-                          stickies: pg.stickies.map((s) => (s.id === targetId ? { ...s, x: newX, y: newY } : s)),
-                        }
-                      : pg
-                  )
-                );
-              }
-              if (draggingImageRef.current && paperContainerRef.current) {
-                const rect = paperContainerRef.current.getBoundingClientRect();
-                const newX = Math.max(0, Math.min(rect.width - 120, (e.clientX - rect.left) / zoomLevel - draggingImageRef.current.offsetX));
-                const newY = Math.max(0, Math.min(rect.height - 120, (e.clientY - rect.top) / zoomLevel - draggingImageRef.current.offsetY));
-                const targetId = draggingImageRef.current.id;
-                setPages((prev) =>
-                  prev.map((pg, idx) =>
-                    idx === currentPageIndex
-                      ? {
-                          ...pg,
-                          images: pg.images.map((im) => (im.id === targetId ? { ...im, x: newX, y: newY } : im)),
-                        }
-                      : pg
-                  )
-                );
-              }
-            }}
-            onPointerUp={() => {
-              draggingStickyRef.current = null;
-              draggingImageRef.current = null;
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.dataTransfer.dropEffect = "copy";
-              setIsDraggingFileOver(true);
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsDraggingFileOver(false);
-              const files = e.dataTransfer.files;
-              if (files && files.length > 0) {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = Math.max(24, e.clientX - rect.left - 100);
-                const y = Math.max(60, e.clientY - rect.top - 50);
-                handleFilesDrop(files, x, y);
-              }
-            }}
-            className="relative w-full max-w-[880px] min-h-[1220px] rounded-[14px] shadow-[0_12px_45px_rgba(0,0,0,0.10),0_2px_8px_rgba(0,0,0,0.05)] border border-black/[0.07] transition-transform duration-150"
-          >
-            {/* Subtle Title Area (Only shown if user typed a title, otherwise 100% pure blank sheet) */}
-            {noteTitle.trim().length > 0 && (
-              <div className="flex items-center justify-between px-8 sm:px-14 pt-6 pb-2 border-b border-black/[0.05]">
-                <input
-                  type="text"
-                  value={noteTitle}
-                  onChange={(e) => setNoteTitle(e.target.value)}
-                  className={`w-full bg-transparent text-lg sm:text-xl font-bold tracking-tight focus:outline-none ${
-                    isDarkPaper ? "text-white" : "text-[#1C1C1E]"
-                  }`}
-                />
-                <span className="shrink-0 font-mono text-[10px] text-[#8E8E93] ml-4">
-                  p.{currentPageIndex + 1}
-                </span>
-              </div>
             )}
+          </div>
 
-            {/* Text Mode Helper Pill when Text tool is active */}
-            {activeTool === "text" && (
-              <div className="relative z-30 mx-8 sm:mx-14 mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#007AFF]/25 bg-[#007AFF]/5 px-3.5 py-2 text-xs text-[#007AFF]">
-                <span className="font-semibold">⌨️ Tekstmodus actief — Klik op het blad en begin direct met typen</span>
-                <div className="flex items-center gap-1.5">
+          {/* 2. Share / Export Menu Button */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setActivePopover(activePopover === "share" ? null : "share")}
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                activePopover === "share"
+                  ? "bg-[#007AFF]/15 text-[#007AFF]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+              }`}
+              title="Deel of Exporteer Notitie"
+            >
+              <Share className="h-4 w-4" />
+            </button>
+
+            {activePopover === "share" && (
+              <div className="absolute right-0 top-10 z-50 w-64 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl backdrop-blur-xl">
+                <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                  Deel &amp; Exporteer
+                </p>
+                <div className="space-y-1">
                   <button
                     type="button"
-                    onClick={() => handleAddStickyNote("yellow")}
-                    className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-[#1C1C1E] shadow-2xs border border-black/10 hover:bg-gray-50"
-                  >
-                    + Plaknotitie
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTool("pen")}
-                    className="rounded-lg bg-[#007AFF] px-2.5 py-1 text-[11px] font-bold text-white"
-                  >
-                    Terug naar Pen
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 1. Uploaded Documents / Worksheets Layer (Draggable & Resizable!) */}
-            {currentPage.images.map((img) => (
-              <div
-                key={img.id}
-                style={{ left: img.x, top: img.y, width: img.width }}
-                className="absolute z-15 rounded-xl border border-black/15 shadow-md overflow-hidden bg-white group"
-              >
-                {/* Top Drag & Resize Bar on Hover */}
-                <div
-                  onPointerDown={(e) => {
-                    if (!paperContainerRef.current) return;
-                    const rect = paperContainerRef.current.getBoundingClientRect();
-                    draggingImageRef.current = {
-                      id: img.id,
-                      offsetX: (e.clientX - rect.left) / zoomLevel - img.x,
-                      offsetY: (e.clientY - rect.top) / zoomLevel - img.y,
-                    };
-                    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                  }}
-                  className="flex items-center justify-between bg-black/75 px-3 py-1.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition cursor-move"
-                >
-                  <span className="truncate font-semibold max-w-[180px]">✥ {img.name}</span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPages((prev) =>
-                          prev.map((pg, idx) =>
-                            idx === currentPageIndex
-                              ? {
-                                  ...pg,
-                                  images: pg.images.map((i) =>
-                                    i.id === img.id ? { ...i, width: Math.max(200, i.width - 80) } : i
-                                  ),
-                                }
-                              : pg
-                          )
-                        )
-                      }
-                      className="rounded bg-white/20 px-1.5 py-0.5 font-bold hover:bg-white/30"
-                      title="Kleiner"
-                    >
-                      −
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPages((prev) =>
-                          prev.map((pg, idx) =>
-                            idx === currentPageIndex
-                              ? {
-                                  ...pg,
-                                  images: pg.images.map((i) =>
-                                    i.id === img.id ? { ...i, width: Math.min(820, i.width + 80) } : i
-                                  ),
-                                }
-                              : pg
-                          )
-                        )
-                      }
-                      className="rounded bg-white/20 px-1.5 py-0.5 font-bold hover:bg-white/30"
-                      title="Groter"
-                    >
-                      +
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPages((prev) =>
-                          prev.map((pg, idx) =>
-                            idx === currentPageIndex
-                              ? {
-                                  ...pg,
-                                  images: pg.images.map((i) =>
-                                    i.id === img.id ? { ...i, x: 24, y: 40, width: 820 } : i
-                                  ),
-                                }
-                              : pg
-                          )
-                        )
-                      }
-                      className="rounded bg-[#007AFF] px-2 py-0.5 font-bold"
-                      title="Volledige breedte"
-                    >
-                      Vol blad
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPages((prev) =>
-                          prev.map((pg, idx) =>
-                            idx === currentPageIndex
-                              ? { ...pg, images: pg.images.filter((i) => i.id !== img.id) }
-                              : pg
-                          )
-                        )
-                      }
-                      className="rounded bg-rose-500 px-2 py-0.5 font-bold"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-                <img
-                  src={img.dataUrl}
-                  alt={img.name}
-                  className="w-full h-auto object-contain pointer-events-none select-none"
-                />
-              </div>
-            ))}
-
-            {/* 2. Interactive Study Tape Strips */}
-            {currentPage.tapes.map((tape) => (
-              <div
-                key={tape.id}
-                onClick={() => handleToggleTape(tape.id)}
-                style={{
-                  left: tape.x,
-                  top: tape.y,
-                  width: tape.width,
-                  height: tape.height,
-                  backgroundColor: tape.isRevealed ? "transparent" : tape.color,
-                }}
-                className={`absolute z-25 cursor-pointer rounded-md transition-all duration-200 border-2 select-none group flex items-center justify-between px-2.5 ${
-                  tape.isRevealed
-                    ? "border-dashed border-black/30 bg-black/[0.03]"
-                    : "border-black/20 shadow-xs"
-                }`}
-                title="Tik om antwoord te onthullen of verbergen"
-              >
-                <span className="text-[9.5px] font-mono font-bold text-black/55 truncate">
-                  {tape.isRevealed ? "👀 ONTHULD (Tik om af te dekken)" : "▤ STUDIE TAPE (Tik om te tonen)"}
-                </span>
-                <button
-                  type="button"
-                  onClick={(e) => handleDeleteTape(tape.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-[10px] font-bold text-black/60 hover:text-black ml-1"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-
-            {/* 3. Editable Typed Note Text Layer */}
-            <div className="relative z-10 px-8 sm:px-16 pt-6">
-              <textarea
-                value={currentPage.typedText}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setPages((prev) =>
-                    prev.map((pg, idx) => (idx === currentPageIndex ? { ...pg, typedText: val } : pg))
-                  );
-                }}
-                placeholder={activeTool === "text" ? "Typ hier je aantekeningen of plak tekst…" : ""}
-                rows={16}
-                className={`w-full resize-none bg-transparent font-sans text-sm sm:text-[15.5px] leading-[30px] focus:outline-none ${
-                  isDarkPaper ? "text-gray-100 placeholder-gray-600" : "text-[#1C1C1E] placeholder-[#AEAEB2]"
-                } ${activeTool === "text" ? "pointer-events-auto" : "pointer-events-none"}`}
-              />
-
-              {/* Natural-looking Classmate Notes at the bottom of the page */}
-              {incomingNotes.length > 0 && (
-                <div className="mt-4 space-y-1.5 border-t border-black/[0.06] pt-3 pointer-events-auto">
-                  {incomingNotes.map((ans) => (
-                    <div
-                      key={ans.id}
-                      onClick={() => {
-                        navigator.clipboard.writeText(ans.text);
-                        showToast("Uitwerking gekopieerd naar klembord");
-                      }}
-                      className={`group flex items-baseline justify-between gap-3 rounded-lg px-2.5 py-1.5 cursor-pointer transition ${
-                        isDarkPaper ? "hover:bg-white/5 text-gray-200" : "hover:bg-black/[0.03] text-[#1C1C1E]"
-                      }`}
-                      title="Klik om te kopiëren"
-                    >
-                      <p className="font-mono text-[13.5px] leading-[24px]">
-                        <span className="font-semibold text-[#007AFF] mr-2">• Notitie ({ans.sender}):</span>
-                        <span>{ans.text}</span>
-                      </p>
-                      <span className="text-[10px] text-[#8E8E93] opacity-0 group-hover:opacity-100 transition shrink-0">
-                        {ans.time} • Kopieer
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 4. Draggable & Color-Customizable Sticky Notes (Plaknotities) */}
-            {currentPage.stickies.map((st) => {
-              const theme = stickyThemeMap[st.color] || stickyThemeMap.yellow;
-              return (
-                <div
-                  key={st.id}
-                  style={{
-                    left: st.x,
-                    top: st.y,
-                    width: st.width,
-                    minHeight: st.height,
-                    backgroundColor: theme.bg,
-                    borderColor: theme.border,
-                  }}
-                  className="absolute z-30 flex flex-col rounded-2xl border-2 p-3 shadow-[0_10px_28px_rgba(0,0,0,0.12)] transition-shadow hover:shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
-                >
-                  <div
-                    onPointerDown={(e) => {
-                      if (!paperContainerRef.current) return;
-                      const rect = paperContainerRef.current.getBoundingClientRect();
-                      draggingStickyRef.current = {
-                        id: st.id,
-                        offsetX: (e.clientX - rect.left) / zoomLevel - st.x,
-                        offsetY: (e.clientY - rect.top) / zoomLevel - st.y,
-                      };
-                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                    onClick={() => {
+                      window.print();
+                      setActivePopover(null);
                     }}
-                    style={{ borderColor: theme.border, color: theme.headerText }}
-                    className="flex items-center justify-between border-b pb-1.5 mb-2 cursor-move select-none"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                      <span>✥</span> Notitie
+                    <Printer className="h-4 w-4 text-[#007AFF]" />
+                    <span>Exporteer als PDF / Afdrukken</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const txt = activeNote.typedContentByPage[activePageIndex] || activeNote.title;
+                      onSendQuickNote(txt);
+                      setActivePopover(null);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                  >
+                    <Send className="h-4 w-4 text-[#34C759]" />
+                    <span>Stuur direct via P2P naar klasgenoot</span>
+                  </button>
+                  <a
+                    href="https://zytron-phi.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-between rounded-xl bg-[#007AFF]/10 px-3 py-2 text-left text-xs font-bold text-[#007AFF] hover:bg-[#007AFF]/20"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      <span>Open Zytron Hoofd App</span>
                     </span>
-                    <div className="flex items-center gap-1">
-                      {(["yellow", "blue", "green", "grid"] as const).map((col) => (
-                        <button
-                          key={col}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPages((prev) =>
-                              prev.map((pg, idx) =>
-                                idx === currentPageIndex
-                                  ? {
-                                      ...pg,
-                                      stickies: pg.stickies.map((s) => (s.id === st.id ? { ...s, color: col } : s)),
-                                    }
-                                  : pg
-                              )
-                            );
-                          }}
-                          className="h-3 w-3 rounded-full border border-black/20"
-                          style={{ backgroundColor: stickyThemeMap[col].bg }}
-                          title="Kleur wijzigen"
-                        />
-                      ))}
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={onToggleNotability}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E]"
+                  >
+                    <span>Terug naar Zytron Share Studio</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Notability Learn AI Button */}
+          <button
+            type="button"
+            onClick={() => setRightDrawer(rightDrawer === "learn" ? null : "learn")}
+            className={`relative flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold transition ${
+              rightDrawer === "learn"
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#007AFF] hover:bg-[#007AFF]/10"
+            }`}
+            title="Notability Learn (Samenvatting, Flashcards, Quiz & Chat)"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">Learn</span>
+            {incomingNotes.length > 0 && rightDrawer !== "learn" && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FF3B30] px-1 text-[9.5px] font-extrabold text-white">
+                {incomingNotes.length}
+              </span>
+            )}
+          </button>
+
+          {/* 4. Options Menu (•••) — Templates, View Settings, Info */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setActivePopover(activePopover === "options" ? null : "options")}
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                activePopover === "options"
+                  ? "bg-[#007AFF]/15 text-[#007AFF]"
+                  : "text-[#3C3C43] hover:bg-black/[0.06]"
+              }`}
+              title="Notitie-opties (Sjablonen, Papierkleur & Weergave)"
+            >
+              <MoreHorizontal className="h-4.5 w-4.5" />
+            </button>
+
+            {/* Authentic Notability ••• Options Popover */}
+            {activePopover === "options" && (
+              <div className="absolute right-0 top-10 z-50 w-80 rounded-2xl border border-black/10 bg-white/98 p-4 shadow-2xl backdrop-blur-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
+                  <span className="text-xs font-extrabold text-[#1C1C1E]">
+                    Notitie-opties &amp; Sjabloon
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActivePopover(null)}
+                    className="rounded-full p-1 text-[#8E8E93] hover:bg-black/5"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Paper Template Picker */}
+                <div>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Papiersjabloon
+                  </p>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {(
+                      [
+                        { id: "grid", label: "Ruitjes" },
+                        { id: "lined", label: "Lijntjes" },
+                        { id: "dotted", label: "Stippels" },
+                        { id: "blank", label: "Blanco" },
+                      ] as { id: PaperTemplate; label: string }[]
+                    ).map((t) => (
                       <button
+                        key={t.id}
                         type="button"
                         onClick={() =>
-                          setPages((prev) =>
-                            prev.map((pg, idx) =>
-                              idx === currentPageIndex
-                                ? { ...pg, stickies: pg.stickies.filter((s) => s.id !== st.id) }
-                                : pg
+                          updateActiveNote((n) => ({ ...n, template: t.id }))
+                        }
+                        className={`rounded-xl border py-2 text-[11px] font-bold transition ${
+                          activeNote.template === t.id
+                            ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]"
+                            : "border-black/10 text-[#3C3C43] hover:bg-black/5"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grid / Line Spacing */}
+                <div>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Lijnafstand
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(
+                      [
+                        { id: "small", label: "Klein" },
+                        { id: "medium", label: "Normaal" },
+                        { id: "large", label: "Groot" },
+                      ] as { id: GridSpacing; label: string }[]
+                    ).map((sp) => (
+                      <button
+                        key={sp.id}
+                        type="button"
+                        onClick={() =>
+                          updateActiveNote((n) => ({ ...n, spacing: sp.id }))
+                        }
+                        className={`rounded-xl border py-1.5 text-[11px] font-bold transition ${
+                          activeNote.spacing === sp.id
+                            ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]"
+                            : "border-black/10 text-[#3C3C43] hover:bg-black/5"
+                        }`}
+                      >
+                        {sp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Paper Color Swatches */}
+                <div>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Papierkleur
+                  </p>
+                  <div className="flex items-center justify-between gap-1.5">
+                    {PAPER_COLORS.map((p) => (
+                      <button
+                        key={p.color}
+                        type="button"
+                        onClick={() =>
+                          updateActiveNote((n) => ({ ...n, paperColor: p.color }))
+                        }
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition ${
+                          activeNote.paperColor === p.color
+                            ? "border-[#007AFF] scale-110 shadow-xs"
+                            : "border-black/15"
+                        }`}
+                        style={{ backgroundColor: p.color }}
+                        title={p.label}
+                      >
+                        {activeNote.paperColor === p.color && (
+                          <Check
+                            className={`h-4 w-4 ${
+                              p.color === "#1C1C1E" ? "text-white" : "text-[#007AFF]"
+                            }`}
+                          />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* View Settings: Seamless vs Single Page + Status Bar */}
+                <div className="space-y-2 border-t border-black/[0.06] pt-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Weergave-instellingen
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode("seamless")}
+                      className={`rounded-xl border py-1.5 text-[11px] font-bold ${
+                        viewMode === "seamless"
+                          ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]"
+                          : "border-black/10 text-[#3C3C43]"
+                      }`}
+                    >
+                      Naadloos (Verticaal)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode("single")}
+                      className={`rounded-xl border py-1.5 text-[11px] font-bold ${
+                        viewMode === "single"
+                          ? "border-[#007AFF] bg-[#007AFF]/10 text-[#007AFF]"
+                          : "border-black/10 text-[#3C3C43]"
+                      }`}
+                    >
+                      Enkele pagina
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowStatusBar((v) => !v)}
+                    className="flex w-full items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2 text-xs font-semibold text-[#1C1C1E]"
+                  >
+                    <span>iPadOS Statusbalk tonen</span>
+                    <span className="font-bold text-[#007AFF]">
+                      {showStatusBar ? "Aan" : "Uit"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 5. Content Manager (Pages / Bookmarks / Search / Transcript) Button */}
+          <button
+            type="button"
+            onClick={() => setRightDrawer(rightDrawer === "content" ? null : "content")}
+            className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold transition ${
+              rightDrawer === "content"
+                ? "bg-[#1C1C1E] text-white"
+                : "bg-black/[0.05] text-[#1C1C1E] hover:bg-black/10"
+            }`}
+            title="Pagina- & Inhoudsbeheer"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            <span className="font-mono text-[11px]">
+              {activePageIndex + 1}/{activeNote.pages.length}
+            </span>
+          </button>
+        </div>
+      </header>
+
+      {/* 3. OPTIONAL AUDIO TIMELINE / NOTE REPLAY BAR */}
+      {showAudioBar && (
+        <div className="z-30 flex h-10 shrink-0 items-center justify-between border-b border-[#D1D1D6] bg-white px-4 text-xs">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsPlayingAudio((v) => !v)}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white"
+            >
+              {isPlayingAudio ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            </button>
+            <span className="font-mono text-[11px] font-bold text-[#1C1C1E]">
+              {formatTimer(audioSeconds)}
+            </span>
+            <span className="text-[11px] text-[#8E8E93]">Notability Audio Replay</span>
+          </div>
+
+          {/* Simulated Waveform Bars */}
+          <div className="hidden flex-1 items-center justify-center gap-1 px-6 sm:flex">
+            {Array.from({ length: 36 }).map((_, i) => (
+              <span
+                key={i}
+                className={`w-1 rounded-full transition-all ${
+                  i < (audioSeconds % 36) ? "bg-[#007AFF]" : "bg-[#D1D1D6]"
+                }`}
+                style={{ height: `${8 + ((i * 7) % 16)}px` }}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAudioBar(false)}
+            className="rounded-lg p-1 text-[#8E8E93] hover:bg-black/5"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* 4. OPTIONAL TEXT FORMATTING RIBBON (When Text Tool 'T' is active) */}
+      {activeTool === "text" && (
+        <div className="z-30 flex h-10 shrink-0 items-center justify-center gap-2 border-b border-[#D1D1D6] bg-white/95 px-4 text-xs backdrop-blur-md">
+          <span className="text-[11px] font-bold text-[#8E8E93]">SF Pro Text</span>
+          <div className="h-4 w-px bg-black/10" />
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setFontSize((s) => Math.max(12, s - 2))}
+              className="rounded-lg px-2 py-0.5 font-bold hover:bg-black/5"
+            >
+              A−
+            </button>
+            <span className="font-mono text-[11px] font-bold">{fontSize}pt</span>
+            <button
+              type="button"
+              onClick={() => setFontSize((s) => Math.min(32, s + 2))}
+              className="rounded-lg px-2 py-0.5 font-bold hover:bg-black/5"
+            >
+              A+
+            </button>
+          </div>
+          <div className="h-4 w-px bg-black/10" />
+          <button
+            type="button"
+            onClick={() => setFontBold((v) => !v)}
+            className={`rounded-lg p-1.5 ${fontBold ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <Bold className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setFontItalic((v) => !v)}
+            className={`rounded-lg p-1.5 ${fontItalic ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <Italic className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setFontUnderline((v) => !v)}
+            className={`rounded-lg p-1.5 ${fontUnderline ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <Underline className="h-3.5 w-3.5" />
+          </button>
+          <div className="h-4 w-px bg-black/10" />
+          <button
+            type="button"
+            onClick={() => setTextAlign("left")}
+            className={`rounded-lg p-1.5 ${textAlign === "left" ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <AlignLeft className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setTextAlign("center")}
+            className={`rounded-lg p-1.5 ${textAlign === "center" ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <AlignCenter className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setTextAlign("right")}
+            className={`rounded-lg p-1.5 ${textAlign === "right" ? "bg-[#007AFF]/15 text-[#007AFF]" : "hover:bg-black/5"}`}
+          >
+            <AlignRight className="h-3.5 w-3.5" />
+          </button>
+          <div className="h-4 w-px bg-black/10" />
+          <button
+            type="button"
+            onClick={() =>
+              updateActiveNote((n) => ({
+                ...n,
+                typedContentByPage: {
+                  ...n.typedContentByPage,
+                  [activePageIndex]:
+                    (n.typedContentByPage[activePageIndex] || "") + "\n☐ ",
+                },
+              }))
+            }
+            className="flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-[#007AFF] hover:bg-[#007AFF]/10"
+          >
+            <CheckSquare className="h-3.5 w-3.5" />
+            <span>Checklist</span>
+          </button>
+        </div>
+      )}
+
+      {/* ====================================================================
+          5. MAIN WORKSPACE: FLOATING TOOLBOX + PAPER CANVAS + RIGHT DRAWER
+         ==================================================================== */}
+      <div className="relative flex flex-1 overflow-hidden">
+        {/* AUTHENTIC NOTABILITY 15 FLOATING TOOLBOX (PENCIL CASE) */}
+        <div
+          className={`z-30 flex items-center gap-1 rounded-[22px] border border-black/[0.09] bg-white/95 p-1.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] backdrop-blur-2xl transition-all ${
+            toolboxDock === "top"
+              ? "absolute left-1/2 top-3 -translate-x-1/2 flex-row"
+              : toolboxDock === "bottom"
+                ? "absolute bottom-4 left-1/2 -translate-x-1/2 flex-row"
+                : "absolute left-3 top-1/2 -translate-y-1/2 flex-col"
+          }`}
+        >
+          {/* Drag / Dock Position Handle */}
+          <button
+            type="button"
+            onClick={() =>
+              setToolboxDock((d) =>
+                d === "top" ? "left" : d === "left" ? "bottom" : "top"
+              )
+            }
+            className="flex h-8 w-5 items-center justify-center rounded-lg text-[#C7C7CC] hover:bg-black/5 hover:text-[#8E8E93]"
+            title="Verplaats Notability Toolbox (Boven / Links / Onder)"
+          >
+            <span className="text-[11px] font-bold leading-none">⋮⋮</span>
+          </button>
+
+          {/* 1. PEN TOOL (Realistic Apple Pencil Nib SVG) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (activeTool === "pen") {
+                  setActivePopover(activePopover === "pen" ? null : "pen");
+                } else {
+                  setActiveTool("pen");
+                  setActivePopover(null);
+                }
+              }}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+                activeTool === "pen"
+                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  : "hover:bg-black/[0.05]"
+              }`}
+              title="Pen (Tik nogmaals voor dikte, lijnstijl & kleur)"
+            >
+              <svg viewBox="0 0 28 36" className="h-7 w-6">
+                <path d="M9 34L10 14L14 4L18 14L19 34Z" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
+                <path d="M12.2 8.5L14 4L15.8 8.5Z" fill={penColor} />
+                <rect x="9.5" y="15" width="9" height="4" rx="1" fill={penColor} />
+              </svg>
+            </button>
+
+            {/* Pen Tray Popover */}
+            {activePopover === "pen" && (
+              <div className="absolute left-1/2 top-13 z-50 w-68 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3.5 shadow-2xl backdrop-blur-xl">
+                {/* Stroke Style: Solid / Dashed / Dotted */}
+                <div className="mb-3 grid grid-cols-3 gap-1.5 rounded-xl bg-[#F2F2F7] p-1">
+                  {(
+                    [
+                      { id: "solid", label: "Massief" },
+                      { id: "dashed", label: "Streepjes" },
+                      { id: "dotted", label: "Stippels" },
+                    ] as { id: PenStyle; label: string }[]
+                  ).map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setPenStyle(st.id)}
+                      className={`rounded-lg py-1 text-[10.5px] font-bold ${
+                        penStyle === st.id
+                          ? "bg-white text-[#007AFF] shadow-2xs"
+                          : "text-[#6C6C70]"
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 5 Stroke Weights */}
+                <div className="mb-3 flex items-center justify-between rounded-xl bg-[#F2F2F7] px-3 py-2">
+                  {[1.5, 2.5, 4, 6, 9].map((w) => (
+                    <button
+                      key={w}
+                      type="button"
+                      onClick={() => setPenWidth(w)}
+                      className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                        penWidth === w ? "bg-white ring-2 ring-[#007AFF] shadow-2xs" : ""
+                      }`}
+                    >
+                      <span
+                        className="rounded-full bg-[#1C1C1E]"
+                        style={{ width: w + 3, height: w + 3 }}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* 16 Color Swatches */}
+                <div className="grid grid-cols-8 gap-1.5">
+                  {NOTABILITY_INK_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => {
+                        setPenColor(c);
+                        setActivePopover(null);
+                      }}
+                      className={`h-6 w-6 rounded-full border transition-transform ${
+                        penColor === c ? "scale-115 ring-2 ring-[#007AFF]" : "border-black/15"
+                      }`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. PENCIL TOOL */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (activeTool === "pencil") {
+                  setActivePopover(activePopover === "pencil" ? null : "pencil");
+                } else {
+                  setActiveTool("pencil");
+                  setActivePopover(null);
+                }
+              }}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+                activeTool === "pencil"
+                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  : "hover:bg-black/[0.05]"
+              }`}
+              title="Potlood"
+            >
+              <svg viewBox="0 0 28 36" className="h-7 w-6">
+                <path d="M9.5 34L10.5 15L14 4.5L17.5 15L18.5 34Z" fill="#F9F9FB" stroke="#8E8E93" strokeWidth="1.3" />
+                <path d="M12.2 9.5L14 4.5L15.8 9.5Z" fill={pencilColor} />
+                <rect x="10" y="16" width="8" height="3" fill={pencilColor} opacity="0.65" />
+              </svg>
+            </button>
+
+            {activePopover === "pencil" && (
+              <div className="absolute left-1/2 top-13 z-50 w-60 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                  Potloodkleur
+                </p>
+                <div className="grid grid-cols-8 gap-1.5">
+                  {NOTABILITY_INK_COLORS.slice(0, 8).map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => {
+                        setPencilColor(c);
+                        setActivePopover(null);
+                      }}
+                      className={`h-6 w-6 rounded-full border ${
+                        pencilColor === c ? "ring-2 ring-[#007AFF]" : "border-black/15"
+                      }`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3. HIGHLIGHTER TOOL */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (activeTool === "highlighter") {
+                  setActivePopover(activePopover === "highlighter" ? null : "highlighter");
+                } else {
+                  setActiveTool("highlighter");
+                  setActivePopover(null);
+                }
+              }}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+                activeTool === "highlighter"
+                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  : "hover:bg-black/[0.05]"
+              }`}
+              title="Markeerstift"
+            >
+              <svg viewBox="0 0 28 36" className="h-7 w-6">
+                <path d="M7.5 34L8.5 14L19.5 14L20.5 34Z" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
+                <polygon points="9.5,14 11,5 18,7.5 18.5,14" fill={highlighterColor} opacity="0.88" />
+                <rect x="8.2" y="16" width="11.6" height="4.5" rx="1" fill={highlighterColor} />
+              </svg>
+            </button>
+
+            {activePopover === "highlighter" && (
+              <div className="absolute left-1/2 top-13 z-50 w-60 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                  Markeerkleur
+                </p>
+                <div className="flex items-center justify-between gap-1.5">
+                  {["#FFCC00", "#34C759", "#5AC8FA", "#FF2D55", "#AF52DE", "#FF9500"].map(
+                    (c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          setHighlighterColor(c);
+                          setActivePopover(null);
+                        }}
+                        className={`h-7 w-7 rounded-full border ${
+                          highlighterColor === c ? "ring-2 ring-[#007AFF] scale-110" : "border-black/10"
+                        }`}
+                        style={{ backgroundColor: c }}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 4. ERASER TOOL */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (activeTool === "eraser") {
+                  setActivePopover(activePopover === "eraser" ? null : "eraser");
+                } else {
+                  setActiveTool("eraser");
+                  setActivePopover(null);
+                }
+              }}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+                activeTool === "eraser"
+                  ? "bg-[#007AFF]/12 ring-1.5 ring-[#007AFF] -translate-y-0.5"
+                  : "hover:bg-black/[0.05]"
+              }`}
+              title="Gum (Hele lijn of Gedeeltelijk)"
+            >
+              <svg viewBox="0 0 28 36" className="h-7 w-6">
+                <rect x="8" y="13" width="12" height="21" rx="2" fill="#F2F2F7" stroke="#8E8E93" strokeWidth="1.3" />
+                <path d="M8 15V9C8 6.8 9.8 5 12 5H16C18.2 5 20 6.8 20 9V15Z" fill="#FF959E" stroke="#8E8E93" strokeWidth="1.3" />
+              </svg>
+            </button>
+
+            {activePopover === "eraser" && (
+              <div className="absolute left-1/2 top-13 z-50 w-56 -translate-x-1/2 rounded-2xl border border-black/10 bg-white/98 p-3 shadow-2xl space-y-2.5">
+                <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#F2F2F7] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setEraserMode("whole")}
+                    className={`rounded-lg py-1 text-[11px] font-bold ${
+                      eraserMode === "whole" ? "bg-white text-[#007AFF] shadow-2xs" : "text-[#6C6C70]"
+                    }`}
+                  >
+                    Hele lijn
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEraserMode("partial")}
+                    className={`rounded-lg py-1 text-[11px] font-bold ${
+                      eraserMode === "partial" ? "bg-white text-[#007AFF] shadow-2xs" : "text-[#6C6C70]"
+                    }`}
+                  >
+                    Gedeeltelijk
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStrokesForActiveNote((prev) =>
+                      prev.filter((s) => s.pageIndex !== activePageIndex)
+                    );
+                    setActivePopover(null);
+                  }}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#FF3B30]/10 py-2 text-xs font-bold text-[#FF3B30] hover:bg-[#FF3B30]/20"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Pagina inkt wissen</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="mx-0.5 h-5 w-px bg-black/10" />
+
+          {/* 5. LASSO TOOL */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTool("lasso");
+              setActivePopover(null);
+            }}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              activeTool === "lasso"
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Lasso Selectie"
+          >
+            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2">
+              <ellipse cx="12" cy="11" rx="8" ry="6" />
+              <path d="M8 16.5C8 19 6 20.5 4 20.5" strokeDasharray="none" />
+            </svg>
+          </button>
+
+          {/* 6. TEXT BOX TOOL (T) */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTool("text");
+              setActivePopover(null);
+            }}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl font-serif text-[15px] font-bold transition ${
+              activeTool === "text"
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Tekstvak (T)"
+          >
+            T
+          </button>
+
+          {/* 7. LASER POINTER */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTool("laser");
+              setActivePopover(null);
+            }}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              activeTool === "laser"
+                ? "bg-[#FF3B30] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Laser Pointer"
+          >
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-current">
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            </span>
+          </button>
+
+          {/* 8. STUDY TAPE (Studiestrook) */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTool("tape");
+              setActivePopover(null);
+            }}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              activeTool === "tape"
+                ? "bg-[#FF9500] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Studiestrook (Tape om antwoorden af te dekken en met 1 tik te onthullen)"
+          >
+            <span className="rounded border border-current px-1 py-0.5 text-[9px] font-extrabold">
+              TAPE
+            </span>
+          </button>
+
+          {/* 9. RULER (Liniaal) */}
+          <button
+            type="button"
+            onClick={() => setShowRuler((v) => !v)}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              showRuler
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Liniaal tonen/verbergen"
+          >
+            <Sliders className="h-4 w-4 rotate-45" />
+          </button>
+
+          {/* 10. ZOOM LOUPE (Magnifier) */}
+          <button
+            type="button"
+            onClick={() => setShowZoomLoupe((v) => !v)}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+              showZoomLoupe
+                ? "bg-[#007AFF] text-white shadow-xs"
+                : "text-[#3C3C43] hover:bg-black/[0.05]"
+            }`}
+            title="Zoom-loep venster"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </button>
+
+          <div className="mx-0.5 h-5 w-px bg-black/10" />
+
+          {/* 11. + INSERT MEDIA (Photos, PDF/Doc, Sticky Note, Formula) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setActivePopover(activePopover === "insert" ? null : "insert")}
+              className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                activePopover === "insert"
+                  ? "bg-[#007AFF] text-white shadow-xs"
+                  : "bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20"
+              }`}
+              title="Invoegen (+ Media, Document, Sticky Note)"
+            >
+              <Plus className="h-5 w-5 stroke-[2.4]" />
+            </button>
+
+            {activePopover === "insert" && (
+              <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-black/10 bg-white/98 p-2.5 shadow-2xl backdrop-blur-xl space-y-1">
+                <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                  Media &amp; Inhoud Invoegen
+                </p>
+                <button
+                  type="button"
+                  onClick={() => fileUploadInputRef.current?.click()}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                >
+                  <ImageIcon className="h-4 w-4 text-[#007AFF]" />
+                  <span>Foto of Werkblad uploaden</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addStickyNote("#FFF9C4", "lined")}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                >
+                  <FileText className="h-4 w-4 text-[#FF9500]" />
+                  <span>Sticky Note (Geel gelijnd)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addStickyNote("#E0F2FE", "grid")}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                >
+                  <Grid className="h-4 w-4 text-[#5AC8FA]" />
+                  <span>Sticky Note (Ruitjes)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateActiveNote((n) => ({
+                      ...n,
+                      typedContentByPage: {
+                        ...n.typedContentByPage,
+                        [activePageIndex]:
+                          (n.typedContentByPage[activePageIndex] || "") +
+                          "\nf(x) = ∫ (3x² − 4x + 1) dx = x³ − 2x² + x + C\n",
+                      },
+                    }));
+                    setActiveTool("text");
+                    setActivePopover(null);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-[#1C1C1E] hover:bg-[#F2F2F7]"
+                >
+                  <span className="flex h-4 w-4 items-center justify-center font-serif font-bold text-[#5856D6]">
+                    ∑
+                  </span>
+                  <span>Wiskunde Formule invoegen</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ==================================================================
+            6. SCROLLABLE PAPER CANVAS AREA (100% CLEAN BLANK SHEET BY DEFAULT)
+           ================================================================== */}
+        <div
+          className="relative flex-1 overflow-y-auto px-3 pt-16 pb-20 sm:px-8"
+          onPointerMove={(e) => {
+            if (!draggingObject) return;
+            if (draggingObject.type === "sticky") {
+              setStickyNotesForActiveNote((prev) =>
+                prev.map((st) =>
+                  st.id === draggingObject.id
+                    ? {
+                        ...st,
+                        x: Math.max(10, e.clientX - draggingObject.offsetX),
+                        y: Math.max(10, e.clientY - draggingObject.offsetY),
+                      }
+                    : st
+                )
+              );
+            } else if (draggingObject.type === "image") {
+              setImagesForActiveNote((prev) =>
+                prev.map((im) =>
+                  im.id === draggingObject.id
+                    ? {
+                        ...im,
+                        x: Math.max(10, e.clientX - draggingObject.offsetX),
+                        y: Math.max(10, e.clientY - draggingObject.offsetY),
+                      }
+                    : im
+                )
+              );
+            } else if (draggingObject.type === "ruler") {
+              setRulerPos((prev) => ({
+                ...prev,
+                x: e.clientX - draggingObject.offsetX,
+                y: e.clientY - draggingObject.offsetY,
+              }));
+            }
+          }}
+          onPointerUp={() => setDraggingObject(null)}
+        >
+          <div
+            className="mx-auto flex flex-col items-center gap-6 transition-transform origin-top"
+            style={{
+              maxWidth: 820,
+              transform: `scale(${zoomPercent / 100})`,
+            }}
+          >
+            {(viewMode === "single"
+              ? [activeNote.pages[activePageIndex] || 1]
+              : activeNote.pages
+            ).map((pageNum, idx) => {
+              const pageIdx = viewMode === "single" ? activePageIndex : idx;
+              const pageTypedText = activeNote.typedContentByPage[pageIdx] || "";
+              const pageStickies = stickyNotes.filter((s) => s.pageIndex === pageIdx);
+              const pageImages = uploadedImages.filter((im) => im.pageIndex === pageIdx);
+              const isBookmarked = activeNote.bookmarkedPages.includes(pageIdx);
+
+              return (
+                <div
+                  key={`page-${pageIdx}`}
+                  onClick={() => setActivePageIndex(pageIdx)}
+                  className={`relative w-full rounded-[6px] shadow-[0_8px_28px_rgba(0,0,0,0.12)] transition-shadow ${
+                    activePageIndex === pageIdx
+                      ? "ring-1 ring-[#007AFF]/45"
+                      : "ring-1 ring-black/10"
+                  }`}
+                  style={{
+                    minHeight: 1020,
+                    ...getPaperBackgroundStyle(
+                      activeNote.template,
+                      activeNote.paperColor,
+                      activeNote.spacing
+                    ),
+                  }}
+                >
+                  {/* Red Margin Line when Lined Paper is active */}
+                  {activeNote.template === "lined" && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-0 top-0 left-16 w-px bg-[#FF3B30]/35"
+                    />
+                  )}
+
+                  {/* Top-Right Page Bookmark Ribbon & Page Number */}
+                  <div className="absolute right-4 top-3 z-20 flex items-center gap-2">
+                    <span
+                      className={`font-mono text-[10.5px] font-semibold ${
+                        isDarkPaper ? "text-white/45" : "text-[#8E8E93]"
+                      }`}
+                    >
+                      Pagina {pageIdx + 1} van {activeNote.pages.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateActiveNote((n) => ({
+                          ...n,
+                          bookmarkedPages: n.bookmarkedPages.includes(pageIdx)
+                            ? n.bookmarkedPages.filter((p) => p !== pageIdx)
+                            : [...n.bookmarkedPages, pageIdx],
+                        }));
+                      }}
+                      className="rounded-md p-1 hover:bg-black/5"
+                      title="Bladwijzer op deze pagina"
+                    >
+                      <Bookmark
+                        className={`h-4 w-4 ${
+                          isBookmarked
+                            ? "fill-[#FF3B30] text-[#FF3B30]"
+                            : isDarkPaper
+                              ? "text-white/35"
+                              : "text-[#C7C7CC]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Page 1 Authentic Notability Date & Subject Header */}
+                  {pageIdx === 0 && (
+                    <div className="px-10 pt-7 pb-2">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold text-[#8E8E93]">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: activeSubject.color }}
+                        />
+                        <span>{activeSubject.name}</span>
+                        <span>•</span>
+                        <span>{activeNote.createdAt}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Uploaded Images / Worksheets Layer */}
+                  {pageImages.map((img) => (
+                    <div
+                      key={img.id}
+                      style={{ left: img.x, top: img.y, width: img.width }}
+                      className="group absolute z-10 rounded-lg border border-black/15 bg-white p-1.5 shadow-lg"
+                    >
+                      <div
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          setDraggingObject({
+                            type: "image",
+                            id: img.id,
+                            offsetX: e.clientX - img.x,
+                            offsetY: e.clientY - img.y,
+                          });
+                        }}
+                        className="flex cursor-move items-center justify-between border-b border-black/10 px-2 py-1 text-[10px] font-bold text-[#8E8E93]"
+                      >
+                        <span className="truncate max-w-[180px]">{img.name}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImagesForActiveNote((prev) =>
+                                prev.map((im) =>
+                                  im.id === img.id
+                                    ? { ...im, width: Math.max(200, im.width - 70) }
+                                    : im
+                                )
+                              )
+                            }
+                            className="rounded bg-[#F2F2F7] px-1.5 py-0.5 text-[#1C1C1E]"
+                          >
+                            −
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImagesForActiveNote((prev) =>
+                                prev.map((im) =>
+                                  im.id === img.id
+                                    ? { ...im, width: Math.min(740, im.width + 70) }
+                                    : im
+                                )
+                              )
+                            }
+                            className="rounded bg-[#F2F2F7] px-1.5 py-0.5 text-[#1C1C1E]"
+                          >
+                            +
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImagesForActiveNote((prev) =>
+                                prev.filter((im) => im.id !== img.id)
+                              )
+                            }
+                            className="rounded bg-[#FF3B30]/15 px-1.5 py-0.5 text-[#FF3B30]"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      <img
+                        src={img.src}
+                        alt={img.name}
+                        className="w-full rounded select-none pointer-events-none"
+                      />
+                    </div>
+                  ))}
+
+                  {/* Sticky Notes Layer */}
+                  {pageStickies.map((st) => (
+                    <div
+                      key={st.id}
+                      style={{
+                        left: st.x,
+                        top: st.y,
+                        width: st.width,
+                        height: st.height,
+                        backgroundColor: st.color,
+                      }}
+                      className="absolute z-20 flex flex-col rounded-xl border border-black/15 shadow-lg overflow-hidden"
+                    >
+                      <div
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          setDraggingObject({
+                            type: "sticky",
+                            id: st.id,
+                            offsetX: e.clientX - st.x,
+                            offsetY: e.clientY - st.y,
+                          });
+                        }}
+                        className="flex cursor-move items-center justify-between border-b border-black/10 bg-black/[0.04] px-2.5 py-1"
+                      >
+                        <div className="flex items-center gap-1">
+                          {(
+                            ["#FFF9C4", "#FFE4E6", "#E0F2FE", "#DCFCE7"] as StickyNoteItem["color"][]
+                          ).map((col) => (
+                            <button
+                              key={col}
+                              type="button"
+                              onClick={() =>
+                                setStickyNotesForActiveNote((prev) =>
+                                  prev.map((item) =>
+                                    item.id === st.id ? { ...item, color: col } : item
+                                  )
+                                )
+                              }
+                              className="h-3 w-3 rounded-full border border-black/20"
+                              style={{ backgroundColor: col }}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setStickyNotesForActiveNote((prev) =>
+                              prev.filter((item) => item.id !== st.id)
+                            )
+                          }
+                          className="text-xs font-bold text-black/45 hover:text-[#FF3B30]"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <textarea
+                        value={st.text}
+                        onChange={(e) =>
+                          setStickyNotesForActiveNote((prev) =>
+                            prev.map((item) =>
+                              item.id === st.id ? { ...item, text: e.target.value } : item
                             )
                           )
                         }
-                        className="ml-1 text-xs font-bold opacity-60 hover:opacity-100"
-                      >
-                        ✕
-                      </button>
+                        placeholder="Notitie..."
+                        className="flex-1 resize-none bg-transparent p-2.5 text-xs font-medium text-[#1C1C1E] outline-none"
+                      />
                     </div>
-                  </div>
+                  ))}
+
+                  {/* Typed Text Layer */}
                   <textarea
-                    value={st.text}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setPages((prev) =>
-                        prev.map((pg, idx) =>
-                          idx === currentPageIndex
-                            ? {
-                                ...pg,
-                                stickies: pg.stickies.map((s) => (s.id === st.id ? { ...s, text: v } : s)),
-                              }
-                            : pg
-                        )
-                      );
+                    value={pageTypedText}
+                    onChange={(e) =>
+                      updateActiveNote((n) => ({
+                        ...n,
+                        typedContentByPage: {
+                          ...n.typedContentByPage,
+                          [pageIdx]: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder={
+                      activeTool === "text"
+                        ? "Tik hier om te typen op het blad..."
+                        : ""
+                    }
+                    style={{
+                      fontSize: `${fontSize}px`,
+                      fontWeight: fontBold ? 700 : 400,
+                      fontStyle: fontItalic ? "italic" : "normal",
+                      textDecoration: fontUnderline ? "underline" : "none",
+                      textAlign,
+                      color: isDarkPaper ? "#F2F2F7" : "#1C1C1E",
+                      pointerEvents: activeTool === "text" ? "auto" : "none",
                     }}
-                    placeholder="Kladnotitie of formule…"
-                    className="flex-1 resize-none bg-transparent text-xs text-[#1C1C1E] placeholder-black/35 focus:outline-none leading-relaxed"
+                    className="relative z-10 min-h-[920px] w-full resize-none bg-transparent px-10 py-4 leading-[26px] outline-none"
+                  />
+
+                  {/* Interactive Ink & Highlighter & Study Tape Canvas */}
+                  <canvas
+                    ref={(el) => {
+                      canvasRefs.current[pageIdx] = el;
+                    }}
+                    width={820}
+                    height={1020}
+                    onPointerDown={(e) => handleCanvasPointerDown(e, pageIdx)}
+                    onPointerMove={(e) => handleCanvasPointerMove(e, pageIdx)}
+                    onPointerUp={handleCanvasPointerUp}
+                    onPointerCancel={handleCanvasPointerUp}
+                    style={{
+                      pointerEvents:
+                        activeTool === "text" || activeTool === "hand" ? "none" : "auto",
+                      touchAction:
+                        activeTool === "text" || activeTool === "hand" ? "auto" : "none",
+                    }}
+                    className="absolute inset-0 z-15 h-full w-full cursor-crosshair"
                   />
                 </div>
               );
             })}
 
-            {/* 5. Interactive Notability Ruler Overlay */}
-            {showRuler && (
-              <div
-                onPointerDown={(e) => {
-                  isDraggingRulerRef.current = true;
-                  rulerDragOffsetRef.current = {
-                    x: e.clientX - rulerPos.x,
-                    y: e.clientY - rulerPos.y,
-                  };
-                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
-                }}
-                onPointerMove={(e) => {
-                  if (!isDraggingRulerRef.current) return;
-                  setRulerPos({
-                    x: e.clientX - rulerDragOffsetRef.current.x,
-                    y: e.clientY - rulerDragOffsetRef.current.y,
-                  });
-                }}
-                onPointerUp={() => {
-                  isDraggingRulerRef.current = false;
-                }}
-                style={{ left: rulerPos.x, top: rulerPos.y }}
-                className="absolute z-30 h-14 w-[520px] cursor-move rounded-xl border border-black/20 bg-white/85 backdrop-blur-md shadow-xl flex flex-col justify-between px-4 py-1 select-none"
+            {/* "+ Pagina toevoegen" button at bottom of sheet */}
+            <button
+              type="button"
+              onClick={() => {
+                updateActiveNote((n) => ({
+                  ...n,
+                  pages: [...n.pages, n.pages.length + 1],
+                }));
+                setActivePageIndex(activeNote.pages.length);
+              }}
+              className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-2 text-xs font-bold text-[#007AFF] shadow-sm hover:bg-[#F2F2F7]"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Pagina toevoegen</span>
+            </button>
+          </div>
+
+          {/* Interactive Rotatable Notability Ruler */}
+          {showRuler && (
+            <div
+              onPointerDown={(e) =>
+                setDraggingObject({
+                  type: "ruler",
+                  id: "ruler",
+                  offsetX: e.clientX - rulerPos.x,
+                  offsetY: e.clientY - rulerPos.y,
+                })
+              }
+              style={{
+                left: rulerPos.x,
+                top: rulerPos.y,
+                transform: `rotate(${rulerPos.angle}deg)`,
+              }}
+              className="fixed z-40 flex h-14 w-[440px] cursor-move items-center justify-between rounded-xl border border-black/20 bg-white/80 px-4 shadow-xl backdrop-blur-md"
+            >
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRulerPos((r) => ({ ...r, angle: r.angle - 15 }))
+                  }
+                  className="rounded bg-black/10 px-2 py-0.5 text-[10px] font-bold"
+                >
+                  −15°
+                </button>
+                <span className="font-mono text-xs font-bold text-[#007AFF]">
+                  {rulerPos.angle}°
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRulerPos((r) => ({ ...r, angle: r.angle + 15 }))
+                  }
+                  className="rounded bg-black/10 px-2 py-0.5 text-[10px] font-bold"
+                >
+                  +15°
+                </button>
+              </div>
+              <div className="flex flex-1 justify-between px-4 font-mono text-[9px] text-[#8E8E93]">
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((cm) => (
+                  <span key={cm}>|{cm}</span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRuler(false)}
+                className="text-xs font-bold text-[#8E8E93] hover:text-[#FF3B30]"
               >
-                <div className="flex justify-between w-full border-b border-black/20 pb-0.5">
-                  {Array.from({ length: 21 }).map((_, idx) => (
-                    <div key={idx} className="flex flex-col items-center">
-                      <div className={`w-px bg-black/50 ${idx % 5 === 0 ? "h-2.5" : "h-1.5"}`} />
-                      {idx % 5 === 0 && (
-                        <span className="text-[8px] font-mono text-black/60">{idx}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-[#3C3C43]">
-                  <span>Notability Liniaal (0°) — Teken langs de rand voor een rechte lijn</span>
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Notability Zoom Loupe Window at bottom */}
+          {showZoomLoupe && (
+            <div className="fixed bottom-4 left-1/2 z-40 flex w-[92%] max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-2xl border-2 border-[#007AFF] bg-white shadow-2xl">
+              <div className="flex items-center justify-between bg-[#007AFF] px-3.5 py-1.5 text-xs font-bold text-white">
+                <span>Notability Zoom-loep (200% Precisie)</span>
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowRuler(false)}
-                    className="text-[#007AFF] hover:underline"
+                    onClick={() => setZoomPercent((z) => Math.max(75, z - 15))}
+                    className="rounded bg-white/20 px-2 py-0.5 text-[11px]"
                   >
-                    Verberg
+                    −
+                  </button>
+                  <span className="font-mono text-[11px]">{zoomPercent}%</span>
+                  <button
+                    type="button"
+                    onClick={() => setZoomPercent((z) => Math.min(175, z + 15))}
+                    className="rounded bg-white/20 px-2 py-0.5 text-[11px]"
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowZoomLoupe(false)}
+                    className="ml-2 rounded bg-white/20 px-1.5 py-0.5"
+                  >
+                    ✕
                   </button>
                 </div>
               </div>
-            )}
+              <div
+                className="h-28 w-full p-3"
+                style={getPaperBackgroundStyle(activeNote.template, activeNote.paperColor, "large")}
+              >
+                <input
+                  type="text"
+                  value={activeNote.typedContentByPage[activePageIndex] || ""}
+                  onChange={(e) =>
+                    updateActiveNote((n) => ({
+                      ...n,
+                      typedContentByPage: {
+                        ...n.typedContentByPage,
+                        [activePageIndex]: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="Schrijf of typ met grote precisie..."
+                  className="h-full w-full bg-transparent text-lg font-medium text-[#1C1C1E] outline-none"
+                />
+              </div>
+            </div>
+          )}
+        </div>
 
-            {/* 6. Full-Page Interactive 60FPS Ink Drawing Canvas */}
-            <canvas
-              ref={canvasRef}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              style={{
-                touchAction: activeTool === "hand" || activeTool === "text" ? "auto" : "none",
-              }}
-              className={`absolute inset-0 z-20 h-full w-full ${
-                activeTool === "text"
-                  ? "pointer-events-none"
-                  : activeTool === "hand"
-                    ? "cursor-grab"
-                    : "cursor-crosshair"
-              }`}
-            />
-          </div>
-
-          {/* =====================================================================
-              BOTTOM FLOATING PAGE & QUICK-ACTION PILL (Effortless Multi-Page UX)
-             ===================================================================== */}
-          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/95 px-3 py-1.5 text-xs shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-2xl">
-            <button
-              type="button"
-              disabled={currentPageIndex === 0}
-              onClick={() => setCurrentPageIndex((i) => Math.max(0, i - 1))}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/5 disabled:opacity-30"
-              title="Vorige pagina"
-            >
-              ‹
-            </button>
-            <span className="px-1.5 font-mono text-[11px] font-bold text-[#1C1C1E]">
-              Pagina {currentPageIndex + 1} / {pages.length}
-            </span>
-            <button
-              type="button"
-              disabled={currentPageIndex >= pages.length - 1}
-              onClick={() => setCurrentPageIndex((i) => Math.min(pages.length - 1, i + 1))}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-[#3C3C43] hover:bg-black/5 disabled:opacity-30"
-              title="Volgende pagina"
-            >
-              ›
-            </button>
-
-            <span className="h-4 w-px bg-black/10 mx-1" />
-
-            <button
-              type="button"
-              onClick={handleAddPage}
-              className="rounded-full bg-[#007AFF]/10 px-2.5 py-1 text-[11px] font-bold text-[#007AFF] hover:bg-[#007AFF]/20 transition"
-            >
-              + Pagina
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleAddStickyNote("yellow")}
-              className="hidden sm:inline-flex rounded-full bg-amber-400/20 px-2.5 py-1 text-[11px] font-bold text-amber-900 hover:bg-amber-400/30 transition"
-            >
-              + Plaknotitie
-            </button>
-
-            <button
-              type="button"
-              onClick={() => docUploadInputRef.current?.click()}
-              className="hidden sm:inline-flex rounded-full bg-black/[0.05] px-2.5 py-1 text-[11px] font-semibold text-[#1C1C1E] hover:bg-black/[0.09] transition"
-            >
-              📂 Document
-            </button>
-
-            {connectedCount > 0 && (
-              <>
-                <span className="h-4 w-px bg-black/10 mx-1" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowNotabilityAiDrawer(true);
-                    setSmartNotesTab("chat");
-                  }}
-                  className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10.5px] font-bold text-emerald-700"
-                  title="Klasgenoten verbonden op radar"
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>{connectedCount} online</span>
-                </button>
-              </>
-            )}
-          </div>
-        </main>
-
-        {/* RIGHT DRAWER 1: Authentic Notability Smart Notes & Quiz Split Screen */}
-        {showNotabilityAiDrawer && (
-          <>
-            <div className="hidden sm:flex z-30 w-2.5 shrink-0 items-center justify-center bg-[#E5E5EA]/70 hover:bg-[#D1D1D6] cursor-col-resize select-none transition-colors border-l border-[#D1D1D6]">
-              <div className="h-9 w-1 rounded-full bg-[#8E8E93]/70" />
+        {/* ==================================================================
+            7. RIGHT DRAWER A: NOTABILITY LEARN PANEL (Samenvatting, Flashcards, Quiz, Chat)
+           ================================================================== */}
+        {rightDrawer === "learn" && (
+          <aside className="z-30 flex w-84 shrink-0 flex-col border-l border-[#D1D1D6] bg-[#F9F9FB]">
+            <div className="flex items-center justify-between border-b border-[#E5E5EA] px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-[#007AFF]" />
+                <span className="text-sm font-extrabold text-[#1C1C1E]">Notability Learn</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRightDrawer(null)}
+                className="rounded-lg p-1 text-[#8E8E93] hover:bg-black/5"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            <aside className="z-30 flex w-full max-w-[460px] sm:w-[420px] md:w-[460px] shrink-0 flex-col border-l border-[#D1D1D6] bg-white pt-16 shadow-2xl transition-all">
-              {/* Segmented Tab Switcher inside Sidecar Header */}
-              <div className="flex items-center justify-between border-b border-[#E5E5EA] px-4 pb-3">
-                <div className="flex flex-1 items-center gap-1 rounded-xl bg-[#F2F2F7] p-1">
-                  <button
-                    type="button"
-                    onClick={() => setSmartNotesTab("notes")}
-                    className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
-                      smartNotesTab === "notes"
-                        ? "bg-white text-[#1C1C1E] shadow-2xs"
-                        : "text-[#8E8E93] hover:text-[#1C1C1E]"
-                    }`}
-                  >
-                    ✨ Samenvatting
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSmartNotesTab("quiz")}
-                    className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
-                      smartNotesTab === "quiz"
-                        ? "bg-white text-[#1C1C1E] shadow-2xs"
-                        : "text-[#8E8E93] hover:text-[#1C1C1E]"
-                    }`}
-                  >
-                    📝 Quiz ({quizQuestionIndex + 1}/{NOTABILITY_QUIZ_QUESTIONS.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSmartNotesTab("chat")}
-                    className={`relative flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
-                      smartNotesTab === "chat"
-                        ? "bg-white text-[#1C1C1E] shadow-2xs"
-                        : "text-[#8E8E93] hover:text-[#1C1C1E]"
-                    }`}
-                  >
-                    💬 Klas ({incomingNotes.length})
-                  </button>
-                </div>
-
+            {/* 4 Real Notability Learn Tabs */}
+            <div className="grid grid-cols-4 gap-1 border-b border-[#E5E5EA] bg-[#F2F2F7] p-1.5 text-[11px] font-bold">
+              {[
+                { id: "summary", label: "Samenvat." },
+                { id: "flashcards", label: "Kaarten" },
+                { id: "quiz", label: "Quiz" },
+                { id: "chat", label: `Chat (${incomingNotes.length})` },
+              ].map((tb) => (
                 <button
+                  key={tb.id}
                   type="button"
-                  onClick={() => setShowNotabilityAiDrawer(false)}
-                  className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-[#8E8E93] hover:bg-black/5 hover:text-[#1C1C1E] transition"
-                  title="Sluit paneel"
+                  onClick={() => setLearnTab(tb.id as typeof learnTab)}
+                  className={`rounded-lg py-1.5 transition ${
+                    learnTab === tb.id
+                      ? "bg-white text-[#007AFF] shadow-2xs"
+                      : "text-[#6C6C70]"
+                  }`}
                 >
-                  ✕
+                  {tb.label}
                 </button>
-              </div>
+              ))}
+            </div>
 
-              {/* Content Tab 1: Smart Notes (100% Clean & Dynamic Dutch Summary) */}
-              {smartNotesTab === "notes" && (
-                <div className="flex-1 overflow-y-auto p-6 text-[#1C1C1E] font-sans custom-scrollbar flex flex-col justify-between">
-                  <div className="space-y-5">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white"
-                        style={{ backgroundColor: activeSubject.color }}
-                      >
-                        {activeSubject.name}
-                      </span>
-                      <span className="font-mono text-[11px] text-[#8E8E93]">
-                        Pagina {currentPageIndex + 1} van {pages.length}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h2 className="text-2xl font-bold tracking-tight text-[#1C1C1E] mb-2">
-                        {noteTitle.trim() || "Slimme Samenvatting"}
-                      </h2>
-                      <p className="text-sm leading-relaxed text-[#3C3C43] rounded-2xl bg-[#F2F2F7]/70 p-4 border border-black/[0.04]">
-                        {currentPage.typedText.trim()
-                          ? currentPage.typedText
-                          : "Je werkt momenteel op een schoon blanco notitieblad. Schrijf met de vulpen, typ aantekeningen met het Tt-gereedschap of sleep een werkblad/foto op je pagina."}
-                      </p>
-                    </div>
-
-                    {/* Live Notitie Statistieken & Overzicht */}
-                    <div className="space-y-2.5">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">
-                        Inhoud op deze pagina
-                      </h3>
-                      <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="rounded-2xl border border-[#E5E5EA] bg-[#F9F9FB] p-3">
-                          <p className="text-lg font-black text-[#007AFF]">{currentPage.strokes.length}</p>
-                          <p className="text-[10.5px] font-semibold text-[#8E8E93]">Inktlijnen</p>
-                        </div>
-                        <div className="rounded-2xl border border-[#E5E5EA] bg-[#F9F9FB] p-3">
-                          <p className="text-lg font-black text-[#5856D6]">{currentPage.stickies.length}</p>
-                          <p className="text-[10.5px] font-semibold text-[#8E8E93]">Plaknotities</p>
-                        </div>
-                        <div className="rounded-2xl border border-[#E5E5EA] bg-[#F9F9FB] p-3">
-                          <p className="text-lg font-black text-[#34C759]">{currentPage.images.length}</p>
-                          <p className="text-[10.5px] font-semibold text-[#8E8E93]">Documenten</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Snelkoppelingen */}
-                    <div className="space-y-2 pt-2">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">
-                        Snelle Studie-acties
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => handleAddStickyNote("yellow")}
-                        className="flex w-full items-center justify-between rounded-2xl border border-[#E5E5EA] bg-white px-4 py-3 text-xs font-bold text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                      >
-                        <span>🟨 Plaknotitie op blad plaatsen</span>
-                        <span className="text-[#007AFF]">+</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => docUploadInputRef.current?.click()}
-                        className="flex w-full items-center justify-between rounded-2xl border border-[#E5E5EA] bg-white px-4 py-3 text-xs font-bold text-[#1C1C1E] hover:bg-[#F2F2F7] transition"
-                      >
-                        <span>📂 Werkblad of Screenshot toevoegen</span>
-                        <span className="text-[#007AFF]">+</span>
-                      </button>
-                    </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {learnTab === "summary" && (
+                <>
+                  <div className="rounded-2xl border border-black/[0.07] bg-white p-3.5 shadow-2xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#007AFF]">
+                      Kernbegrippen • {activeSubject.name}
+                    </span>
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#3C3C43]">
+                      Automatische AI-analyse van <strong>{activeNote.title}</strong>. Gebruik de
+                      Studiestrook (Tape) om formules af te dekken tijdens het oefenen.
+                    </p>
                   </div>
 
-                  {/* Bottom Action Bar */}
-                  <div className="pt-4 border-t border-[#E5E5EA] mt-4 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#8E8E93]">
-                      ✦ Notability AI Gereed
+                  {/* Incoming P2P Answers disguised as AI Smart Notes */}
+                  <div className="space-y-2">
+                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                      Binnengekomen Studie-notities ({incomingNotes.length})
+                    </p>
+                    {incomingNotes.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-[#C7C7CC] bg-white/60 p-4 text-center text-xs text-[#8E8E93]">
+                        Nog geen berichten ontvangen. Zodra iemand iets stuurt via Zytron Share,
+                        verschijnt het direct hier.
+                      </div>
+                    ) : (
+                      incomingNotes.map((msg) => (
+                        <div
+                          key={msg.id}
+                          className="rounded-2xl border border-[#007AFF]/25 bg-white p-3 shadow-2xs space-y-2"
+                        >
+                          <div className="flex items-center justify-between text-[10.5px] font-bold text-[#007AFF]">
+                            <span>Bron: {msg.sender}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateActiveNote((n) => ({
+                                  ...n,
+                                  typedContentByPage: {
+                                    ...n.typedContentByPage,
+                                    [activePageIndex]:
+                                      (n.typedContentByPage[activePageIndex]
+                                        ? n.typedContentByPage[activePageIndex] + "\n"
+                                        : "") + msg.text,
+                                  },
+                                }))
+                              }
+                              className="rounded-md bg-[#007AFF]/10 px-2 py-0.5 text-[10px] hover:bg-[#007AFF]/20"
+                            >
+                              + Plak op blad
+                            </button>
+                          </div>
+                          <p className="text-xs text-[#1C1C1E] whitespace-pre-wrap">{msg.text}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+
+              {learnTab === "flashcards" && (
+                <div className="space-y-3">
+                  <div
+                    onClick={() => setFlashcardFlipped((f) => !f)}
+                    className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm transition hover:border-[#007AFF]"
+                  >
+                    <span className="mb-2 rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#007AFF]">
+                      {flashcardFlipped ? "Antwoord" : `Kaart ${flashcardIndex + 1} van ${flashcards.length}`}
                     </span>
+                    <p className="text-sm font-bold text-[#1C1C1E]">
+                      {flashcardFlipped
+                        ? flashcards[flashcardIndex].a
+                        : flashcards[flashcardIndex].q}
+                    </p>
+                    <span className="mt-4 text-[10.5px] text-[#8E8E93]">
+                      Tik om kaart om te draaien
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <button
                       type="button"
-                      onClick={() => setSmartNotesTab("quiz")}
-                      className="flex items-center gap-1.5 rounded-full bg-[#007AFF] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#0062CC] transition active:scale-95"
+                      onClick={() => {
+                        setFlashcardFlipped(false);
+                        setFlashcardIndex((i) => (i - 1 + flashcards.length) % flashcards.length);
+                      }}
+                      className="rounded-xl bg-white px-3 py-1.5 text-xs font-bold shadow-2xs"
                     >
-                      <span>Start Oefenquiz</span>
-                      <span>›</span>
+                      ← Vorige
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFlashcardFlipped(false);
+                        setFlashcardIndex((i) => (i + 1) % flashcards.length);
+                      }}
+                      className="rounded-xl bg-[#007AFF] px-3 py-1.5 text-xs font-bold text-white shadow-2xs"
+                    >
+                      Volgende →
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Content Tab 2: Quiz Flashcards */}
-              {smartNotesTab === "quiz" && (() => {
-                const totalQuestions = NOTABILITY_QUIZ_QUESTIONS.length;
-                const safeIndex = Math.min(Math.max(0, quizQuestionIndex), totalQuestions - 1);
-                const currentQ = NOTABILITY_QUIZ_QUESTIONS[safeIndex] || NOTABILITY_QUIZ_QUESTIONS[0];
-                const currentAnswer = quizAnswers[safeIndex];
-                const progressPct = Math.round(((safeIndex + 1) / totalQuestions) * 100);
-
-                return (
-                  <div className="flex-1 overflow-y-auto p-6 text-sm text-[#1C1C1E] space-y-5 font-sans custom-scrollbar flex flex-col justify-between">
-                    <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="font-bold text-sm text-[#007AFF] tracking-tight">
-                          Vraag {safeIndex + 1} van {totalQuestions}
-                        </span>
-                        <span className="font-mono text-xs text-[#8E8E93]">{progressPct}%</span>
-                      </div>
-
-                      <div className="h-1.5 w-full rounded-full bg-[#E5E5EA] overflow-hidden mb-6">
-                        <div
-                          className="h-full bg-[#007AFF] rounded-full transition-all duration-300"
-                          style={{ width: `${progressPct}%` }}
-                        />
-                      </div>
-
-                      <h3 className="text-base sm:text-lg font-bold text-[#1C1C1E] leading-snug mb-5">
-                        {currentQ.question}
-                      </h3>
-
-                      <div className="space-y-3">
-                        {currentQ.options.map((optText, optIdx) => {
-                          const isSelected = currentAnswer === optIdx;
-                          const isCorrectOption = optIdx === currentQ.correctIndex;
-                          const hasAnswered = currentAnswer !== undefined;
-
-                          return (
-                            <button
-                              key={optIdx}
-                              type="button"
-                              onClick={() => {
-                                setQuizAnswers((prev) => ({
-                                  ...prev,
-                                  [safeIndex]: optIdx,
-                                }));
-                              }}
-                              className={`w-full rounded-2xl border p-4 text-left text-sm font-medium leading-snug transition-all relative flex items-center justify-between shadow-2xs bg-white ${
-                                hasAnswered
-                                  ? isCorrectOption
-                                    ? "border-2 border-[#34C759] bg-[#34C759]/5 text-[#1C1C1E] font-bold"
-                                    : isSelected
-                                      ? "border-2 border-[#FF3B30] bg-[#FF3B30]/5 text-[#1C1C1E] font-bold"
-                                      : "border-[#E5E5EA] text-[#1C1C1E]"
-                                  : "border-[#E5E5EA] hover:bg-[#F2F2F7] text-[#1C1C1E] active:scale-[0.99]"
-                              }`}
-                            >
-                              <span className="pr-8">{optText}</span>
-                              {hasAnswered && isCorrectOption && (
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#34C759] text-white text-xs font-bold shadow-xs">
-                                  ✓
-                                </span>
-                              )}
-                              {hasAnswered && isSelected && !isCorrectOption && (
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FF3B30] text-white text-xs font-bold shadow-xs">
-                                  ✕
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="flex items-center gap-4 mt-6 text-[#8E8E93]">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuizFeedback((prev) => ({
-                              ...prev,
-                              [safeIndex]: prev[safeIndex] === "up" ? null : "up",
-                            }))
-                          }
-                          className={`hover:text-[#1C1C1E] transition ${
-                            quizFeedback[safeIndex] === "up" ? "text-[#007AFF]" : ""
-                          }`}
-                          title="Nuttige vraag"
-                        >
-                          👍
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuizFeedback((prev) => ({
-                              ...prev,
-                              [safeIndex]: prev[safeIndex] === "down" ? null : "down",
-                            }))
-                          }
-                          className={`hover:text-[#1C1C1E] transition ${
-                            quizFeedback[safeIndex] === "down" ? "text-[#FF3B30]" : ""
-                          }`}
-                          title="Verbetering nodig"
-                        >
-                          👎
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-[#E5E5EA] text-sm font-bold text-[#007AFF]">
+              {learnTab === "quiz" && (
+                <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-2xs space-y-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#007AFF]">
+                    Oefenvraag • {activeSubject.name}
+                  </span>
+                  <p className="text-xs font-bold text-[#1C1C1E]">
+                    Wat is de afgeleide van f(x) = 3x² − 5x + 2?
+                  </p>
+                  <div className="space-y-1.5">
+                    {["f'(x) = 6x − 5", "f'(x) = 3x − 5", "f'(x) = 6x² − 5"].map((opt, idx) => (
                       <button
+                        key={opt}
                         type="button"
-                        disabled={safeIndex === 0}
-                        onClick={() => setQuizQuestionIndex((i) => Math.max(0, i - 1))}
-                        className={`flex items-center gap-1 transition ${
-                          safeIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:opacity-75"
+                        onClick={() => setSelectedQuizAnswer(idx)}
+                        className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-xs font-semibold transition ${
+                          selectedQuizAnswer === idx
+                            ? idx === 0
+                              ? "border-[#34C759] bg-[#34C759]/10 text-[#1C1C1E]"
+                              : "border-[#FF3B30] bg-[#FF3B30]/10 text-[#1C1C1E]"
+                            : "border-black/10 hover:bg-[#F2F2F7]"
                         }`}
                       >
-                        <span>←</span> Vorige
+                        <span>{opt}</span>
+                        {selectedQuizAnswer === idx && (
+                          <span className="font-bold">{idx === 0 ? "✓ Juist" : "✕"}</span>
+                        )}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setQuizQuestionIndex((i) => (i + 1) % totalQuestions)}
-                        className="flex items-center gap-1 rounded-xl bg-[#007AFF] px-4 py-2 text-xs text-white hover:bg-[#0062CC] transition"
-                      >
-                        Volgende <span>→</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Content Tab 3: Klasgenoten Stealth Chat */}
-              {smartNotesTab === "chat" && (
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col justify-between">
-                  <div className="space-y-2.5">
-                    {incomingNotes.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-56 text-center text-[#8E8E93] px-4">
-                        <span className="text-3xl mb-2">📐</span>
-                        <p className="text-xs font-bold text-[#1C1C1E]">Geen gedeelde klasnotities</p>
-                        <p className="text-[11px] mt-1 leading-relaxed">
-                          Typ hieronder een formule, antwoord of notitie om direct met verbonden klasgenoten te delen.
-                        </p>
-                      </div>
-                    ) : (
-                      incomingNotes.map((note) => (
-                        <div
-                          key={note.id}
-                          onClick={() => {
-                            navigator.clipboard.writeText(note.text);
-                            showToast("Gekopieerd naar klembord");
-                          }}
-                          className="cursor-pointer rounded-2xl border border-indigo-100 bg-indigo-50/60 p-3 text-xs text-[#1C1C1E] hover:bg-indigo-50 transition"
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-[#007AFF] text-[11px] flex items-center gap-1">
-                              <span>●</span> {note.sender}
-                            </span>
-                            <span className="font-mono text-[10px] text-[#8E8E93]">{note.time} • Tik om te kopiëren</span>
-                          </div>
-                          <p className="font-mono text-xs leading-relaxed text-[#1C1C1E]">{note.text}</p>
-                        </div>
-                      ))
-                    )}
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Bottom Prompt / Query Bar */}
-              <div className="border-t border-[#E5E5EA] p-3 bg-white">
-                <div className="flex items-center gap-2 rounded-2xl border border-[#D1D1D6] bg-[#F2F2F7]/60 px-3.5 py-2 focus-within:border-[#007AFF] focus-within:bg-white transition">
-                  <span className="text-sm">✨</span>
-                  <input
-                    type="text"
-                    value={aiChatInput}
-                    onChange={(e) => setAiChatInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && aiChatInput.trim()) {
-                        onSendNote(aiChatInput.trim());
-                        setAiChatInput("");
-                      }
-                    }}
-                    placeholder={
-                      smartNotesTab === "chat"
-                        ? "Deel direct een antwoord of formule met de klas…"
-                        : "Stuur een notitie of vraag naar verbonden toestellen…"
-                    }
-                    className="flex-1 bg-transparent text-xs text-[#1C1C1E] placeholder-[#8E8E93] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (aiChatInput.trim()) {
-                        onSendNote(aiChatInput.trim());
-                        setAiChatInput("");
-                      }
-                    }}
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-[#007AFF] text-white text-xs font-bold hover:bg-[#0062CC] transition"
-                  >
-                    ↑
-                  </button>
+              {learnTab === "chat" && (
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-[11px] font-medium text-[#6C6C70]">
+                    Stel een vraag aan je notitie of stuur direct een bericht naar verbonden toestellen:
+                  </p>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={stealthInputText}
+                      onChange={(e) => setStealthInputText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && stealthInputText.trim()) {
+                          onSendQuickNote(stealthInputText.trim());
+                          setStealthInputText("");
+                        }
+                      }}
+                      placeholder="Vraag aan Notability Learn..."
+                      className="flex-1 rounded-xl border border-black/15 bg-white px-3 py-2 text-xs outline-none focus:border-[#007AFF]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!stealthInputText.trim()) return;
+                        onSendQuickNote(stealthInputText.trim());
+                        setStealthInputText("");
+                      }}
+                      className="rounded-xl bg-[#007AFF] px-3 py-2 text-xs font-bold text-white"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </aside>
-          </>
+              )}
+            </div>
+          </aside>
         )}
 
-        {/* RIGHT DRAWER 2: Authentic Notability Page Manager (Thumbnails) */}
-        {showPagesSidebar && (
-          <aside className="z-30 flex w-60 shrink-0 flex-col border-l border-[#D1D1D6] bg-[#F2F2F7]/98 pt-16 backdrop-blur-2xl shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E5E5EA] px-4 pb-3">
-              <span className="text-xs font-bold text-[#1C1C1E]">Pagina&apos;s ({pages.length})</span>
+        {/* ==================================================================
+            8. RIGHT DRAWER B: AUTHENTIC NOTABILITY CONTENT MANAGER (Pages, Bookmarks, Search, Transcript)
+           ================================================================== */}
+        {rightDrawer === "content" && (
+          <aside className="z-30 flex w-72 shrink-0 flex-col border-l border-[#D1D1D6] bg-[#F2F2F7]">
+            {/* 4 Icon Tabs at Top of Content Manager */}
+            <div className="flex items-center justify-between border-b border-[#D1D1D6] bg-white px-3 py-2">
+              <div className="flex items-center gap-1">
+                {[
+                  { id: "pages", icon: Grid, title: "Pagina's" },
+                  { id: "bookmarks", icon: Bookmark, title: "Bladwijzers" },
+                  { id: "search", icon: Search, title: "Zoeken" },
+                  { id: "transcript", icon: MessageSquare, title: "Transcript & P2P" },
+                ].map((t) => {
+                  const Icon = t.icon;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setContentTab(t.id as typeof contentTab)}
+                      className={`rounded-lg p-1.5 transition ${
+                        contentTab === t.id
+                          ? "bg-[#007AFF]/15 text-[#007AFF]"
+                          : "text-[#8E8E93] hover:bg-black/5"
+                      }`}
+                      title={t.title}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  );
+                })}
+              </div>
               <button
                 type="button"
-                onClick={handleAddPage}
-                className="rounded-xl bg-[#007AFF] px-3 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-[#0062CC]"
+                onClick={() => setRightDrawer(null)}
+                className="rounded-lg p-1 text-[#8E8E93] hover:bg-black/5"
               >
-                + Pagina
+                <X className="h-4 w-4" />
               </button>
             </div>
+
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {pages.map((pg, idx) => {
-                const active = idx === currentPageIndex;
-                return (
-                  <div
-                    key={pg.id}
-                    onClick={() => setCurrentPageIndex(idx)}
-                    className={`cursor-pointer rounded-2xl border-2 p-2.5 transition ${
-                      active
-                        ? "border-[#007AFF] bg-white shadow-md"
-                        : "border-transparent bg-white/60 hover:bg-white"
-                    }`}
-                  >
-                    <div
-                      className="h-28 w-full rounded-xl border border-black/10 p-2.5 overflow-hidden text-[8px] text-[#3C3C43] leading-tight"
-                      style={getPaperStyles()}
+              {contentTab === "pages" && (
+                <>
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                      Pagina&apos;s ({activeNote.pages.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateActiveNote((n) => ({
+                          ...n,
+                          pages: [...n.pages, n.pages.length + 1],
+                        }))
+                      }
+                      className="text-xs font-bold text-[#007AFF]"
                     >
-                      <p className="font-bold truncate">{noteTitle || "Blanco blad"}</p>
-                      <p className="mt-1 line-clamp-5 text-[#8E8E93]">{pg.typedText || "Lege pagina"}</p>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between px-1">
-                      <span className="text-[11px] font-bold text-[#1C1C1E]">Pagina {idx + 1}</span>
-                      <span className="font-mono text-[10px] text-[#8E8E93]">{pg.strokes.length} lijnen</span>
-                    </div>
+                      + Nieuwe pagina
+                    </button>
                   </div>
-                );
-              })}
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {activeNote.pages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setActivePageIndex(idx)}
+                        className={`cursor-pointer rounded-xl border bg-white p-2 transition ${
+                          activePageIndex === idx
+                            ? "border-[#007AFF] ring-2 ring-[#007AFF]/25"
+                            : "border-black/10"
+                        }`}
+                      >
+                        <div
+                          className="h-28 w-full rounded border border-black/[0.06]"
+                          style={getPaperBackgroundStyle(
+                            activeNote.template,
+                            activeNote.paperColor,
+                            "small"
+                          )}
+                        />
+                        <div className="mt-1.5 flex items-center justify-between text-[11px] font-bold">
+                          <span>Pag. {idx + 1}</span>
+                          {activeNote.pages.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateActiveNote((n) => ({
+                                  ...n,
+                                  pages: n.pages.filter((__, pIdx) => pIdx !== idx),
+                                }));
+                                setActivePageIndex(0);
+                              }}
+                              className="text-[#8E8E93] hover:text-[#FF3B30]"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {contentTab === "bookmarks" && (
+                <div className="space-y-2">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Bladwijzers ({activeNote.bookmarkedPages.length})
+                  </p>
+                  {activeNote.bookmarkedPages.length === 0 ? (
+                    <p className="text-xs text-[#8E8E93]">
+                      Tik rechtsboven op een pagina op het lintje om een bladwijzer toe te voegen.
+                    </p>
+                  ) : (
+                    activeNote.bookmarkedPages.map((pIdx) => (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => setActivePageIndex(pIdx)}
+                        className="flex w-full items-center justify-between rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#1C1C1E] shadow-2xs"
+                      >
+                        <span>Pagina {pIdx + 1}</span>
+                        <Bookmark className="h-3.5 w-3.5 fill-[#FF3B30] text-[#FF3B30]" />
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {contentTab === "search" && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={searchInNoteQuery}
+                    onChange={(e) => setSearchInNoteQuery(e.target.value)}
+                    placeholder="Zoek woord in deze notitie..."
+                    className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-xs outline-none focus:border-[#007AFF]"
+                  />
+                  {searchInNoteQuery.trim() &&
+                    Object.entries(activeNote.typedContentByPage).map(([pIdx, txt]) =>
+                      txt.toLowerCase().includes(searchInNoteQuery.toLowerCase()) ? (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => setActivePageIndex(Number(pIdx))}
+                          className="w-full rounded-xl bg-white p-2.5 text-left text-xs shadow-2xs"
+                        >
+                          <span className="font-bold text-[#007AFF]">
+                            Pagina {Number(pIdx) + 1}
+                          </span>
+                          <p className="line-clamp-2 text-[11px] text-[#3C3C43]">{txt}</p>
+                        </button>
+                      ) : null
+                    )}
+                </div>
+              )}
+
+              {contentTab === "transcript" && (
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                    Live Transcript &amp; Ontvangen ({incomingNotes.length})
+                  </p>
+                  {incomingNotes.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className="rounded-xl bg-white p-2.5 text-xs shadow-2xs space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#007AFF]">{msg.sender}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateActiveNote((n) => ({
+                              ...n,
+                              typedContentByPage: {
+                                ...n.typedContentByPage,
+                                [activePageIndex]:
+                                  (n.typedContentByPage[activePageIndex] || "") +
+                                  "\n" +
+                                  msg.text,
+                              },
+                            }))
+                          }
+                          className="rounded bg-[#007AFF]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#007AFF]"
+                        >
+                          + Op blad
+                        </button>
+                      </div>
+                      <p className="text-[#1C1C1E] whitespace-pre-wrap">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </aside>
         )}
